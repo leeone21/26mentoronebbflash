@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기능해부학 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  /* 플래시카드 */
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+  .answer-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  .answer-table th { background:rgba(197,150,58,.15); color:var(--gold-light); padding:7px 10px; text-align:left; font-size:11px; font-weight:700; border-bottom:1px solid rgba(197,150,58,.2); }
+  .answer-table td { padding:7px 10px; border-bottom:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.85); vertical-align:top; line-height:1.6; }
+  .answer-table tr:last-child td { border-bottom:none; }
+
+  /* 빈칸 채우기 */
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #B83232; color: var(--white);
+    font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    margin-left: 4px; vertical-align: middle;
+  }
+  .tab.tab-wrong.active .wrong-badge { background: rgba(255,255,255,.3); }
+
+  .wrong-note-card {
+    background: var(--white); border-radius: var(--card-radius);
+    padding: 40px 36px; text-align: center;
+    margin-bottom: 20px;
+  }
+  .wrong-note-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 16px; }
+  .wrong-note-count { font-size: 28px; font-weight: 900; color: #B83232; margin-bottom: 12px; }
+  .wrong-note-desc { font-size: 13px; color: var(--gray); line-height: 1.7; margin-bottom: 28px; }
+  .wrong-note-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-clear-wrong {
+    padding: 13px 20px; border-radius: 12px;
+    border: 1px solid rgba(184,50,50,.3); background: transparent;
+    color: #E07070; font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .btn-clear-wrong:hover { background: rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">MENTOR<span>ONE</span></div>
+    <div class="header-title">기능해부학 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <!-- 플래시카드 모드 -->
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <!-- 빈칸 채우기 모드 -->
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <!-- 오답노트 패널 -->
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+// =============================================
+// 키워드 타입 정의
+// muscle   : 근육 이름
+// motion   : 관절 동작 (굴곡, 신전, 외전...)
+// ligament : 인대 이름
+// concept  : 해부학 개념/용어 (면, 방향, 수축유형...)
+// exercise : 운동 이름
+// =============================================
+
+const ALL_CARDS = [
+  // ── PART 1 ──────────────────────────────
+  { part:'PART 1 · 기초 해부학', category:'PART 1',
+    q:'해부학적 자세란?',
+    keywords:['정면','앞','앞'], type:['concept','concept','concept'],
+    wrongs:['측면','뒤','위'],
+    answerText:'똑바로 서서 눈은 {정면}, 팔은 몸통 옆, 손바닥은 {앞}을 향하고, 발은 모아 {앞}을 향한 자세',
+    a:'똑바로 서서 눈은 정면, 팔은 몸통 옆, 손바닥은 앞을 향하고, 발은 모아 앞을 향한 자세' },
+
+  { part:'PART 1 · 신체 면', category:'PART 1',
+    q:'시상면(Sagittal)이란?',
+    keywords:['좌우','굴곡','신전'], type:['concept','motion','motion'],
+    wrongs:['상하','외전','내회전'],
+    answerText:'신체를 {좌우}로 나누는 면 → {굴곡}·{신전} 운동',
+    a:'신체를 좌우로 나누는 면 → 굴곡·신전 운동' },
+
+  { part:'PART 1 · 신체 면', category:'PART 1',
+    q:'관상면(Frontal/Coronal)이란?',
+    keywords:['앞뒤','외전','내전'], type:['concept','motion','motion'],
+    wrongs:['좌우','굴곡','외회전'],
+    answerText:'신체를 {앞뒤}로 나누는 면 → {외전}·{내전} 운동',
+    a:'신체를 앞뒤로 나누는 면 → 외전·내전 운동' },
+
+  { part:'PART 1 · 신체 면', category:'PART 1',
+    q:'횡단면(Transverse)이란?',
+    keywords:['상하','내회전','외회전'], type:['concept','motion','motion'],
+    wrongs:['앞뒤','굴곡','외전'],
+    answerText:'신체를 {상하}로 나누는 면 → {내회전}·{외회전} 운동',
+    a:'신체를 상하로 나누는 면 → 내회전·외회전 운동' },
+
+  { part:'PART 1 · 방향 용어', category:'PART 1',
+    q:'Medial / Lateral의 의미는?',
+    keywords:['내측(Medial)','외측(Lateral)'], type:['concept','concept'],
+    wrongs:['근위(Proximal)','원위(Distal)','전방(Anterior)'],
+    answerText:'{내측(Medial)} = 몸 중심에 가까운 / {외측(Lateral)} = 몸 중심에서 먼',
+    a:'내측(Medial) = 몸 중심에 가까운 / 외측(Lateral) = 몸 중심에서 먼' },
+
+  { part:'PART 1 · 방향 용어', category:'PART 1',
+    q:'Proximal / Distal의 의미는?',
+    keywords:['근위(Proximal)','원위(Distal)'], type:['concept','concept'],
+    wrongs:['내측(Medial)','외측(Lateral)','후방(Posterior)'],
+    answerText:'{근위(Proximal)} = 몸통에 가까운 / {원위(Distal)} = 몸통에서 먼 (사지 기준)',
+    a:'근위(Proximal) = 몸통에 가까운 / 원위(Distal) = 몸통에서 먼' },
+
+  { part:'PART 1 · 관절운동', category:'PART 1',
+    q:'굴곡(Flexion)과 신전(Extension)의 차이는?',
+    keywords:['감소','증가'], type:['concept','concept'],
+    wrongs:['고정','회전','분리'],
+    answerText:'굴곡 = 관절 각도 {감소} / 신전 = 관절 각도 {증가}',
+    a:'굴곡 = 관절 각도 감소 / 신전 = 관절 각도 증가' },
+
+  { part:'PART 1 · 관절운동', category:'PART 1',
+    q:'외전(Abduction)과 내전(Adduction)의 차이는?',
+    keywords:['멀어짐','가까워짐'], type:['concept','concept'],
+    wrongs:['회전함','굽혀짐','펴짐'],
+    answerText:'외전 = 몸 중심에서 {멀어짐} / 내전 = 몸 중심으로 {가까워짐}',
+    a:'외전 = 몸 중심에서 멀어짐 / 내전 = 몸 중심으로 가까워짐' },
+
+  { part:'PART 1 · 관절운동', category:'PART 1',
+    q:'배측굴곡(Dorsiflexion)과 족저굴곡(Plantarflexion)이란?',
+    keywords:['발등','발바닥'], type:['concept','concept'],
+    wrongs:['발가락','발뒤꿈치','복사뼈'],
+    answerText:'배측굴곡 = {발등} 쪽 굽힘 / 족저굴곡 = {발바닥} 쪽 굽힘',
+    a:'배측굴곡 = 발등 쪽 굽힘 / 족저굴곡 = 발바닥 쪽 굽힘' },
+
+  { part:'PART 1 · 관절 종류', category:'PART 1',
+    q:'경첩관절(Hinge joint)의 예시 3가지는?',
+    keywords:['무릎','팔꿈치','발목'], type:['joint','joint','joint'],
+    wrongs:['견관절(어깨관절)','고관절(엉덩관절)','손목','척추'],
+    answerText:'{무릎} / {팔꿈치} / {발목}',
+    a:'무릎 / 팔꿈치 / 발목' },
+
+  { part:'PART 1 · 관절 종류', category:'PART 1',
+    q:'구상관절(Ball & Socket joint)의 예시는?',
+    keywords:['견관절(어깨관절)','고관절(엉덩관절)'], type:['joint','joint'],
+    wrongs:['무릎','발목','팔꿈치','손목'],
+    answerText:'{견관절(어깨관절)} / {고관절(엉덩관절)}',
+    a:'견관절(어깨관절) / 고관절(엉덩관절)' },
+
+  { part:'PART 1 · 결합조직', category:'PART 1',
+    q:'건(Tendon)과 인대(Ligament)의 차이는?',
+    keywords:['근육','뼈'], type:['concept','concept'],
+    wrongs:['연골','피부','신경'],
+    answerText:'건 = {근육}과 {뼈}를 연결 / 인대 = 뼈와 뼈를 연결',
+    a:'건 = 근육과 뼈를 연결 / 인대 = 뼈와 뼈를 연결' },
+
+  { part:'PART 1 · 무릎인대', category:'PART 1',
+    q:'무릎 인대 4가지는?',
+    keywords:['전방십자인대(ACL)','후방십자인대(PCL)','내측부인대(MCL)','외측부인대(LCL)'],
+    type:['ligament','ligament','ligament','ligament'],
+    wrongs:['전거비인대(ATFL)','종비인대(CFL)','슬개인대','장경인대'],
+    answerText:'{전방십자인대(ACL)} / {후방십자인대(PCL)} / {내측부인대(MCL)} / {외측부인대(LCL)}',
+    a:'전방십자인대(ACL) / 후방십자인대(PCL) / 내측부인대(MCL) / 외측부인대(LCL)' },
+
+  { part:'PART 1 · 발목인대', category:'PART 1',
+    q:'발목 외측인대 3가지는?',
+    keywords:['전거비인대(ATFL)','후거비인대(PTFL)','종비인대(CFL)'],
+    type:['ligament','ligament','ligament'],
+    wrongs:['내측부인대(MCL)','전방십자인대(ACL)','족저근막','스프링인대'],
+    answerText:'{전거비인대(ATFL)} / {후거비인대(PTFL)} / {종비인대(CFL)}',
+    a:'전거비인대(ATFL) / 후거비인대(PTFL) / 종비인대(CFL)' },
+
+  { part:'PART 1 · 근육 수축', category:'PART 1',
+    q:'근육 수축 유형 4가지는?',
+    keywords:['단축성','신장성','등척성','등속성'],
+    type:['concept','concept','concept','concept'],
+    wrongs:['탄성','수동성','폭발성'],
+    answerText:'{단축성} / {신장성} / {등척성} / {등속성}',
+    a:'단축성 / 신장성 / 등척성 / 등속성' },
+
+  { part:'PART 1 · 근육 수축', category:'PART 1',
+    q:'신장성(Eccentric) 수축의 특징은?',
+    keywords:['길어지면서','DOMS'], type:['concept','concept'],
+    wrongs:['수축하면서','고정된 채','빠르게','지연성근육통','EPOC'],
+    answerText:'근육이 {길어지면서} 힘을 냄 (내릴 때) → {DOMS} 유발',
+    a:'근육이 길어지면서 힘을 냄 → DOMS 유발' },
+
+  { part:'PART 1 · 근육 역할', category:'PART 1',
+    q:'주동근 / 길항근 / 협력근이란?',
+    keywords:['주동근','길항근','협력근'], type:['concept','concept','concept'],
+    wrongs:['보조근','중간근','고정근'],
+    answerText:'{주동근} = 동작 직접 수행 / {길항근} = 반대 동작으로 조절 / {협력근} = 보조·안정화',
+    a:'주동근 = 동작 직접 수행 / 길항근 = 반대 동작으로 조절 / 협력근 = 보조·안정화' },
+
+  // ── PART 2 ──────────────────────────────
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'복근 4가지는?',
+    keywords:['복직근','외복사근','내복사근','복횡근'], type:['muscle','muscle','muscle','muscle'],
+    wrongs:['요방형근','장요근','횡격막','전거근'],
+    answerText:'{복직근} / {외복사근} / {내복사근} / {복횡근}',
+    a:'복직근 / 외복사근 / 내복사근 / 복횡근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'회전근개(Rotator Cuff) 4가지는?',
+    keywords:['극상근','극하근','소원근','견갑하근'], type:['muscle','muscle','muscle','muscle'],
+    wrongs:['대원근','삼각근','상완이두근','능형근'],
+    answerText:'{극상근} / {극하근} / {소원근} / {견갑하근}',
+    a:'극상근 / 극하근 / 소원근 / 견갑하근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'대퇴사두근 4가지는?',
+    keywords:['대퇴직근','외측광근','내측광근','중간광근'], type:['muscle','muscle','muscle','muscle'],
+    wrongs:['반건양근','대퇴이두근','봉공근','대내전근'],
+    answerText:'{대퇴직근} / {외측광근} / {내측광근} / {중간광근}',
+    a:'대퇴직근 / 외측광근 / 내측광근 / 중간광근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'햄스트링 3가지는?',
+    keywords:['대퇴이두근','반건양근','반막양근'], type:['muscle','muscle','muscle'],
+    wrongs:['대퇴직근','외측광근','봉공근','대내전근'],
+    answerText:'{대퇴이두근} / {반건양근} / {반막양근}',
+    a:'대퇴이두근 / 반건양근 / 반막양근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'내전근군 5가지는?',
+    keywords:['대내전근','장내전근','단내전근','박근','치골근'], type:['muscle','muscle','muscle','muscle','muscle'],
+    wrongs:['반건양근','봉공근','대퇴직근','장요근'],
+    answerText:'{대내전근} / {장내전근} / {단내전근} / {박근} / {치골근}',
+    a:'대내전근 / 장내전근 / 단내전근 / 박근 / 치골근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'척추기립근 3가지는?',
+    keywords:['장늑근','최장근','극근'], type:['muscle','muscle','muscle'],
+    wrongs:['요방형근','반극근','다열근','회선근'],
+    answerText:'{장늑근} / {최장근} / {극근}',
+    a:'장늑근 / 최장근 / 극근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'둔근 3가지는?',
+    keywords:['대둔근','중둔근','소둔근'], type:['muscle','muscle','muscle'],
+    wrongs:['이상근','대퇴방형근','대퇴이두근','장요근'],
+    answerText:'{대둔근} / {중둔근} / {소둔근}',
+    a:'대둔근 / 중둔근 / 소둔근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'종아리 2가지 근육은?',
+    keywords:['비복근','가자미근'], type:['muscle','muscle'],
+    wrongs:['전경골근','장비골근','후경골근','장지굴근'],
+    answerText:'{비복근} / {가자미근}',
+    a:'비복근 / 가자미근' },
+
+  { part:'PART 2 · 근육 묶음', category:'PART 2',
+    q:'거위발(Pes Anserinus) 부착 근육 3가지는?',
+    keywords:['봉공근','박근','반건양근'], type:['muscle','muscle','muscle'],
+    wrongs:['반막양근','대퇴이두근','대내전근','치골근'],
+    answerText:'{봉공근} / {박근} / {반건양근}',
+    a:'봉공근 / 박근 / 반건양근' },
+
+  { part:'PART 2 · 이관절 근육', category:'PART 2',
+    q:'대퇴직근이 관여하는 동작은?',
+    keywords:['고관절(엉덩관절) 굴곡','슬관절(무릎관절) 신전'], type:['motion','motion'],
+    wrongs:['고관절(엉덩관절) 신전','슬관절(무릎관절) 굴곡','고관절(엉덩관절) 외전'],
+    answerText:'{고관절(엉덩관절) 굴곡} + {슬관절(무릎관절) 신전}',
+    a:'고관절(엉덩관절) 굴곡 + 슬관절(무릎관절) 신전' },
+
+  { part:'PART 2 · 이관절 근육', category:'PART 2',
+    q:'비복근이 관여하는 동작은?',
+    keywords:['슬관절(무릎관절) 굴곡','족저굴곡'], type:['motion','motion'],
+    wrongs:['슬관절(무릎관절) 신전','배측굴곡','고관절(엉덩관절) 굴곡'],
+    answerText:'{슬관절(무릎관절) 굴곡} + 족관절(발목관절) {족저굴곡}',
+    a:'슬관절(무릎관절) 굴곡 + 족관절(발목관절) 족저굴곡' },
+
+  { part:'PART 2 · 이관절 근육', category:'PART 2',
+    q:'상완이두근(장두)이 관여하는 동작 3가지는?',
+    keywords:['견관절(어깨관절) 굴곡','주관절(팔꿈치관절) 굴곡','회외'], type:['motion','motion','motion'],
+    wrongs:['견관절(어깨관절) 신전','주관절(팔꿈치관절) 신전','회내'],
+    answerText:'{견관절(어깨관절) 굴곡} + {주관절(팔꿈치관절) 굴곡} + 전완 {회외}',
+    a:'견관절(어깨관절) 굴곡 + 주관절(팔꿈치관절) 굴곡 + 전완 회외' },
+
+  { part:'PART 2 · 주요 기능', category:'PART 2',
+    q:'복횡근의 주요 기능은?',
+    keywords:['복압','척추 안정화','심부'], type:['concept','concept','concept'],
+    wrongs:['체간 굴곡','체간 회전','표층'],
+    answerText:'{복압} 형성 + {척추 안정화} / 복부 가장 깊은 {심부} 근육',
+    a:'복압 형성 + 척추 안정화 / 복부 가장 깊은 심부 근육' },
+
+  { part:'PART 2 · 주요 기능', category:'PART 2',
+    q:'회전근개의 주요 기능은?',
+    keywords:['견관절(어깨관절) 안정화','관절와'], type:['concept','concept'],
+    wrongs:['견관절(어깨관절) 외전','견봉','견갑골 후인'],
+    answerText:'{견관절(어깨관절) 안정화} + 상완골두를 {관절와}에 고정',
+    a:'견관절(어깨관절) 안정화 + 상완골두를 관절와에 고정' },
+
+  { part:'PART 2 · 주요 기능', category:'PART 2',
+    q:'장요근의 주요 기능은?',
+    keywords:['고관절(엉덩관절) 굴곡','요추 안정화'], type:['motion','concept'],
+    wrongs:['고관절(엉덩관절) 신전','요추 굴곡','고관절(엉덩관절) 외전'],
+    answerText:'{고관절(엉덩관절) 굴곡} + {요추 안정화} / 가장 강력한 고관절(엉덩관절) 굴곡근',
+    a:'고관절(엉덩관절) 굴곡 + 요추 안정화' },
+
+  // ── PART 3 ──────────────────────────────
+  { part:'PART 3 · 견갑골', category:'PART 3',
+    q:'견갑골 거상(올림)의 주동근은?',
+    keywords:['상부 승모근','견갑거근'], type:['muscle','muscle'],
+    wrongs:['하부 승모근','전거근','능형근'],
+    answerText:'{상부 승모근} / {견갑거근}',
+    a:'상부 승모근 / 견갑거근' },
+
+  { part:'PART 3 · 견갑골', category:'PART 3',
+    q:'견갑골 하강(내림)의 주동근은?',
+    keywords:['하부 승모근','소흉근'], type:['muscle','muscle'],
+    wrongs:['상부 승모근','견갑거근','능형근'],
+    answerText:'{하부 승모근} / {소흉근}',
+    a:'하부 승모근 / 소흉근' },
+
+  { part:'PART 3 · 견갑골', category:'PART 3',
+    q:'견갑골 전인(앞으로 내밈)의 주동근은?',
+    keywords:['전거근','소흉근'], type:['muscle','muscle'],
+    wrongs:['중부 승모근','능형근','후면삼각근'],
+    answerText:'{전거근} / {소흉근}',
+    a:'전거근 / 소흉근' },
+
+  { part:'PART 3 · 견갑골', category:'PART 3',
+    q:'견갑골 후인(뒤로 당김)의 주동근은?',
+    keywords:['중부 승모근','능형근'], type:['muscle','muscle'],
+    wrongs:['전거근','소흉근','상부 승모근'],
+    answerText:'{중부 승모근} / {능형근}',
+    a:'중부 승모근 / 능형근' },
+
+  { part:'PART 3 · 견갑골', category:'PART 3',
+    q:'견갑골 상방회전의 주동근은?',
+    keywords:['상부 승모근','하부 승모근','전거근'], type:['muscle','muscle','muscle'],
+    wrongs:['중부 승모근','능형근','소흉근'],
+    answerText:'{상부 승모근} / {하부 승모근} / {전거근}',
+    a:'상부 승모근 / 하부 승모근 / 전거근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 굴곡의 주동근은?',
+    keywords:['전면삼각근','대흉근(쇄골부)','상완이두근'], type:['muscle','muscle','muscle'],
+    wrongs:['후면삼각근','광배근','대흉근(흉골부)'],
+    answerText:'{전면삼각근} / {대흉근(쇄골부)} / {상완이두근}',
+    a:'전면삼각근 / 대흉근(쇄골부) / 상완이두근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 신전의 주동근은?',
+    keywords:['광배근','대원근','후면삼각근'], type:['muscle','muscle','muscle'],
+    wrongs:['전면삼각근','소원근','대흉근(쇄골부)'],
+    answerText:'{광배근} / {대원근} / {후면삼각근}',
+    a:'광배근 / 대원근 / 후면삼각근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 외전의 주동근은?',
+    keywords:['측면삼각근','극상근'], type:['muscle','muscle'],
+    wrongs:['전면삼각근','대흉근','광배근'],
+    answerText:'{측면삼각근} / {극상근}',
+    a:'측면삼각근 / 극상근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 내회전의 주동근은?',
+    keywords:['견갑하근','대흉근','광배근','대원근'], type:['muscle','muscle','muscle','muscle'],
+    wrongs:['극하근','소원근','후면삼각근'],
+    answerText:'{견갑하근} / {대흉근} / {광배근} / {대원근}',
+    a:'견갑하근 / 대흉근 / 광배근 / 대원근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 외회전의 주동근은?',
+    keywords:['극하근','소원근','후면삼각근'], type:['muscle','muscle','muscle'],
+    wrongs:['견갑하근','광배근','대원근'],
+    answerText:'{극하근} / {소원근} / {후면삼각근}',
+    a:'극하근 / 소원근 / 후면삼각근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 수평벌림의 주동근은?',
+    keywords:['후면삼각근','극하근','소원근'], type:['muscle','muscle','muscle'],
+    wrongs:['전면삼각근','대흉근','극상근'],
+    answerText:'{후면삼각근} / {극하근} / {소원근}',
+    a:'후면삼각근 / 극하근 / 소원근' },
+
+  { part:'PART 3 · 견관절(어깨관절)', category:'PART 3',
+    q:'견관절(어깨관절) 수평내전의 주동근은?',
+    keywords:['대흉근','전면삼각근'], type:['muscle','muscle'],
+    wrongs:['후면삼각근','극하근','광배근'],
+    answerText:'{대흉근} / {전면삼각근}',
+    a:'대흉근 / 전면삼각근' },
+
+  { part:'PART 3 · 주관절(팔꿈치관절)', category:'PART 3',
+    q:'팔꿈치 굴곡의 주동근 3가지는?',
+    keywords:['상완이두근','상완근','상완요골근'], type:['muscle','muscle','muscle'],
+    wrongs:['상완삼두근','원회내근','주근'],
+    answerText:'{상완이두근} / {상완근} / {상완요골근}',
+    a:'상완이두근 / 상완근 / 상완요골근' },
+
+  { part:'PART 3 · 주관절(팔꿈치관절)', category:'PART 3',
+    q:'팔꿈치 신전의 주동근은?',
+    keywords:['상완삼두근'], type:['muscle'],
+    wrongs:['상완이두근','상완근','상완요골근'],
+    answerText:'{상완삼두근}',
+    a:'상완삼두근' },
+
+  { part:'PART 3 · 고관절(엉덩관절)', category:'PART 3',
+    q:'고관절(엉덩관절) 굴곡의 주동근은?',
+    keywords:['장요근','대퇴직근','봉공근'], type:['muscle','muscle','muscle'],
+    wrongs:['대둔근','반건양근','대퇴이두근'],
+    answerText:'{장요근} / {대퇴직근} / {봉공근}',
+    a:'장요근 / 대퇴직근 / 봉공근' },
+
+  { part:'PART 3 · 고관절(엉덩관절)', category:'PART 3',
+    q:'고관절(엉덩관절) 신전의 주동근은?',
+    keywords:['대둔근','햄스트링'], type:['muscle','muscle'],
+    wrongs:['장요근','대퇴직근','중둔근'],
+    answerText:'{대둔근} / {햄스트링}',
+    a:'대둔근 / 햄스트링' },
+
+  { part:'PART 3 · 고관절(엉덩관절)', category:'PART 3',
+    q:'고관절(엉덩관절) 외전의 주동근은?',
+    keywords:['중둔근','소둔근'], type:['muscle','muscle'],
+    wrongs:['대내전근','장내전근','대둔근'],
+    answerText:'{중둔근} / {소둔근}',
+    a:'중둔근 / 소둔근' },
+
+  { part:'PART 3 · 고관절(엉덩관절)', category:'PART 3',
+    q:'고관절(엉덩관절) 내전의 주동근은?',
+    keywords:['대내전근','장내전근','단내전근','박근'], type:['muscle','muscle','muscle','muscle'],
+    wrongs:['중둔근','소둔근','봉공근','대둔근'],
+    answerText:'{대내전근} / {장내전근} / {단내전근} / {박근}',
+    a:'대내전근 / 장내전근 / 단내전근 / 박근' },
+
+  { part:'PART 3 · 고관절(엉덩관절)', category:'PART 3',
+    q:'고관절(엉덩관절) 외회전 심층근 6가지는?',
+    keywords:['이상근','내폐쇄근','외폐쇄근','상쌍자근','하쌍자근','대퇴방형근'],
+    type:['muscle','muscle','muscle','muscle','muscle','muscle'],
+    wrongs:['중둔근','소둔근','대둔근','장요근'],
+    answerText:'{이상근} / {내폐쇄근} / {외폐쇄근} / {상쌍자근} / {하쌍자근} / {대퇴방형근}',
+    a:'이상근 / 내폐쇄근 / 외폐쇄근 / 상쌍자근 / 하쌍자근 / 대퇴방형근' },
+
+  { part:'PART 3 · 슬관절(무릎관절)', category:'PART 3',
+    q:'무릎 굴곡의 주동근은?',
+    keywords:['햄스트링','비복근'], type:['muscle','muscle'],
+    wrongs:['대퇴사두근','전경골근','봉공근'],
+    answerText:'{햄스트링} / {비복근}',
+    a:'햄스트링 / 비복근' },
+
+  { part:'PART 3 · 슬관절(무릎관절)', category:'PART 3',
+    q:'무릎 신전의 주동근은?',
+    keywords:['대퇴사두근'], type:['muscle'],
+    wrongs:['햄스트링','비복근','봉공근'],
+    answerText:'{대퇴사두근}',
+    a:'대퇴사두근' },
+
+  { part:'PART 3 · 족관절(발목관절)', category:'PART 3',
+    q:'발목 배측굴곡의 주동근은?',
+    keywords:['전경골근','장지신근','장무지신근'], type:['muscle','muscle','muscle'],
+    wrongs:['비복근','가자미근','장비골근'],
+    answerText:'{전경골근} / {장지신근} / {장무지신근}',
+    a:'전경골근 / 장지신근 / 장무지신근' },
+
+  { part:'PART 3 · 족관절(발목관절)', category:'PART 3',
+    q:'발목 족저굴곡의 주동근은?',
+    keywords:['비복근','가자미근'], type:['muscle','muscle'],
+    wrongs:['전경골근','장무지신근','장비골근'],
+    answerText:'{비복근} / {가자미근}',
+    a:'비복근 / 가자미근' },
+
+  // ── PART 4 ──────────────────────────────
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'대흉근 쇄골부(윗가슴) 발달 운동은?',
+    keywords:['인클라인 벤치프레스','인클라인 덤벨프레스','인클라인 체스트플라이'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['플랫 벤치프레스','디클라인 벤치프레스','체스트플라이'],
+    answerText:'{인클라인 벤치프레스} / {인클라인 덤벨프레스} / {인클라인 체스트플라이}',
+    a:'인클라인 벤치프레스 / 인클라인 덤벨프레스 / 인클라인 체스트플라이' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'대흉근 흉골부(가슴) 발달 운동은?',
+    keywords:['플랫 벤치프레스','푸시업','체스트플라이'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['인클라인 벤치프레스','딥스','케이블 크로스오버'],
+    answerText:'{플랫 벤치프레스} / {푸시업} / {체스트플라이}',
+    a:'플랫 벤치프레스 / 푸시업 / 체스트플라이' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'광배근 발달 운동은?',
+    keywords:['풀업','랫풀다운','시티드 케이블 로우','벤트오버 바벨 로우'],
+    type:['exercise','exercise','exercise','exercise'],
+    wrongs:['숄더프레스','리버스 플라이','업라이트 로우'],
+    answerText:'{풀업} / {랫풀다운} / {시티드 케이블 로우} / {벤트오버 바벨 로우}',
+    a:'풀업 / 랫풀다운 / 시티드 케이블 로우 / 벤트오버 바벨 로우' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'삼각근 발달 운동은?',
+    keywords:['숄더프레스','사이드 레터럴 레이즈','프론트 레이즈','리어 델트 플라이'],
+    type:['exercise','exercise','exercise','exercise'],
+    wrongs:['업라이트 로우','인클라인 벤치프레스','페이스풀'],
+    answerText:'{숄더프레스} / {사이드 레터럴 레이즈} / {프론트 레이즈} / {리어 델트 플라이}',
+    a:'숄더프레스 / 사이드 레터럴 레이즈 / 프론트 레이즈 / 리어 델트 플라이' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'상완이두근 발달 운동은?',
+    keywords:['바벨컬','덤벨컬','해머컬'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['트라이셉스 푸시다운','트라이셉스 킥백','딥스'],
+    answerText:'{바벨컬} / {덤벨컬} / {해머컬}',
+    a:'바벨컬 / 덤벨컬 / 해머컬' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'상완삼두근 발달 운동은?',
+    keywords:['트라이셉스 푸시다운','오버헤드 트라이셉스 익스텐션','딥스'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['바벨컬','해머컬','바벨로우'],
+    answerText:'{트라이셉스 푸시다운} / {오버헤드 트라이셉스 익스텐션} / {딥스}',
+    a:'트라이셉스 푸시다운 / 오버헤드 트라이셉스 익스텐션 / 딥스' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'척추기립근 발달 운동은?',
+    keywords:['백 익스텐션','루마니안 데드리프트','굿모닝'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['스티프 데드리프트','힙 쓰러스트','케이블 풀스루'],
+    answerText:'{백 익스텐션} / {루마니안 데드리프트} / {굿모닝}',
+    a:'백 익스텐션 / 루마니안 데드리프트 / 굿모닝' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'대퇴사두근 발달 운동은?',
+    keywords:['스쿼트','레그프레스','레그익스텐션','런지'],
+    type:['exercise','exercise','exercise','exercise'],
+    wrongs:['레그컬','루마니안 데드리프트','힙 쓰러스트'],
+    answerText:'{스쿼트} / {레그프레스} / {레그익스텐션} / {런지}',
+    a:'스쿼트 / 레그프레스 / 레그익스텐션 / 런지' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'햄스트링 발달 운동은?',
+    keywords:['레그컬','루마니안 데드리프트','스티프 데드리프트'],
+    type:['exercise','exercise','exercise'],
+    wrongs:['레그익스텐션','스쿼트','레그프레스'],
+    answerText:'{레그컬} / {루마니안 데드리프트} / {스티프 데드리프트}',
+    a:'레그컬 / 루마니안 데드리프트 / 스티프 데드리프트' },
+
+  { part:'PART 4 · 발달 운동', category:'PART 4',
+    q:'비복근 vs 가자미근 발달 운동의 차이는?',
+    keywords:['스탠딩 카프레이즈','씨티드 카프레이즈'],
+    type:['exercise','exercise'],
+    wrongs:['토 프레스','도나키 카프레이즈','레그프레스 카프레이즈'],
+    answerText:'비복근 → {스탠딩 카프레이즈} (무릎 폄)\n가자미근 → {씨티드 카프레이즈} (무릎 굽힘)',
+    a:'비복근 → 스탠딩 카프레이즈 / 가자미근 → 씨티드 카프레이즈' },
+];
+
+// =============================================
+// 타입별 키워드 풀 (사전 빌드)
+// =============================================
+const TYPE_POOL = {};
+ALL_CARDS.forEach(card => {
+  card.keywords.forEach((kw, i) => {
+    const t = card.type[i];
+    if (!TYPE_POOL[t]) TYPE_POOL[t] = new Set();
+    TYPE_POOL[t].add(kw);
+  });
+});
+// Set → Array
+Object.keys(TYPE_POOL).forEach(t => { TYPE_POOL[t] = [...TYPE_POOL[t]]; });
+
+// =============================================
+// 상태
+// =============================================
+let currentCards = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answeredSet = new Set();
+let wrongSet = new Set();
+let currentCategory = 'ALL';
+let currentMode = 'flash';
+
+let blankKeywords = [];
+let blankFilled = [];
+let blankResults = [];   // 'correct' | 'wrong' per slot
+let blankCurrentIdx = 0;
+let blankCardCorrect = true;
+
+const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4'];
+const CATEGORY_LABELS = { ALL:'전체', 'PART 1':'PART 1 · 기초', 'PART 2':'PART 2 · 근육', 'PART 3':'PART 3 · 주동근', 'PART 4':'PART 4 · 운동' };
+
+const LS_KEY = 'mentorone_wrong_anatomy';
+
+// =============================================
+// localStorage 오답노트 함수
+// =============================================
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+  catch { return []; }
+}
+
+function lsSave(cards) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {}
+}
+
+// 오답 추가 (q 기준 중복 방지)
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) {
+    list.push(card);
+    lsSave(list);
+  }
+  buildTabs(); // 뱃지 갱신
+}
+
+// 오답 제거 (정답 처리 시)
+function lsRemoveWrong(q) {
+  const list = lsLoad().filter(c => c.q !== q);
+  lsSave(list);
+  buildTabs();
+}
+
+// 오답노트 전체 초기화
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+// =============================================
+// 초기화
+// =============================================
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+
+  // 일반 카테고리 탭
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+
+  // 오답노트 탭
+  const wrongCount = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wrongCount > 0 ? `<span class="wrong-badge">${wrongCount}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  // 오답노트 패널 숨기기
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0
+    ? `누적 오답 ${count}문제`
+    : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q);
+  currentCards = currentCards.filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState();
+  renderCard();
+}
+
+function resetState() {
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answeredSet = new Set();
+  wrongSet = new Set();
+  updateScoreBadges();
+}
+
+// =============================================
+// 렌더링
+// =============================================
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) {
+      correctCount++;
+      // 오답노트에 있던 카드면 제거
+      lsRemoveWrong(card.q);
+    } else {
+      wrongCount++;
+      wrongSet.add(currentIndex);
+      lsAddWrong(card);
+    }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  blankKeywords = card.keywords.slice();
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0;
+  blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens();
+  renderChoices();
+}
+
+function renderTokens() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = card.answerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      span.className = 'token';
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+
+  const correct = blankKeywords[blankCurrentIdx];
+
+  // 1순위: card.wrongs 직접 지정 풀 (정답·현재 빈칸 정답 제외)
+  const seen = new Set([correct]);
+  const wrongs = [];
+
+  if (card.wrongs && card.wrongs.length > 0) {
+    const pool = shuffle([...card.wrongs]).filter(k => !seen.has(k));
+    for (const k of pool) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+
+  // 부족하면 현재 카드의 다른 keywords로 보충
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle(card.keywords.filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    // 정답 버튼 강조
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) {
+      correctCount++;
+      lsRemoveWrong(card.q);
+    } else {
+      wrongCount++;
+      wrongSet.add(currentIndex);
+      lsAddWrong(card);
+    }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+// =============================================
+// 네비게이션
+// =============================================
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// =============================================
+// UI
+// =============================================
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+init();
+</script>
+</body>
+</html>
