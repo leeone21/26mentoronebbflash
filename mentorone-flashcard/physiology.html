@@ -712,6 +712,7 @@ let currentCards = [], currentIndex = 0, correctCount = 0, wrongCount = 0;
 let answeredSet = new Set(), wrongSet = new Set();
 let currentCategory = 'ALL', currentMode = 'flash';
 let blankKeywords = [], blankFilled = [], blankResults = [], blankCurrentIdx = 0, blankCardCorrect = true;
+let currentAnswerText = '';
 
 function init() { buildTabs(); loadCategory('ALL'); }
 
@@ -816,7 +817,16 @@ function markCard(isCorrect) {
 
 function renderBlank() {
   const card = currentCards[currentIndex];
-  blankKeywords = card.keywords.slice();
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
   blankFilled = new Array(blankKeywords.length).fill(false);
   blankResults = new Array(blankKeywords.length).fill(null);
   blankCurrentIdx = 0; blankCardCorrect = true;
@@ -827,10 +837,9 @@ function renderBlank() {
 }
 
 function renderTokens() {
-  const card = currentCards[currentIndex];
   const container = document.getElementById('answerTokens');
   container.innerHTML = '';
-  const parts = card.answerText.split(/(\{[^}]+\})/);
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
   let kwIdx = 0;
   parts.forEach(part => {
     if (part.startsWith('{') && part.endsWith('}')) {
@@ -870,15 +879,21 @@ function renderChoices() {
   const correct = blankKeywords[blankCurrentIdx];
   const seen = new Set([correct]);
   const wrongs = [];
-  if (card.wrongs && card.wrongs.length > 0) {
-    const pool = shuffle([...card.wrongs]).filter(k => !seen.has(k));
-    for (const k of pool) {
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
       if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
       if (wrongs.length === 3) break;
     }
   }
   if (wrongs.length < 3) {
-    const cardOthers = shuffle(card.keywords.filter(k => !seen.has(k)));
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
     for (const k of cardOthers) {
       if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
       if (wrongs.length === 3) break;

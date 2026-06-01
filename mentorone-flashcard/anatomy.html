@@ -767,6 +767,7 @@ let blankFilled = [];
 let blankResults = [];   // 'correct' | 'wrong' per slot
 let blankCurrentIdx = 0;
 let blankCardCorrect = true;
+let currentAnswerText = '';
 
 const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4'];
 const CATEGORY_LABELS = { ALL:'전체', 'PART 1':'PART 1 · 기초', 'PART 2':'PART 2 · 근육', 'PART 3':'PART 3 · 주동근', 'PART 4':'PART 4 · 운동' };
@@ -941,7 +942,16 @@ function markCard(isCorrect) {
 
 function renderBlank() {
   const card = currentCards[currentIndex];
-  blankKeywords = card.keywords.slice();
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
   blankFilled = new Array(blankKeywords.length).fill(false);
   blankResults = new Array(blankKeywords.length).fill(null);
   blankCurrentIdx = 0;
@@ -954,10 +964,9 @@ function renderBlank() {
 }
 
 function renderTokens() {
-  const card = currentCards[currentIndex];
   const container = document.getElementById('answerTokens');
   container.innerHTML = '';
-  const parts = card.answerText.split(/(\{[^}]+\})/);
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
   let kwIdx = 0;
 
   parts.forEach(part => {
@@ -999,13 +1008,21 @@ function renderChoices() {
 
   const correct = blankKeywords[blankCurrentIdx];
 
-  // 1순위: card.wrongs 직접 지정 풀 (정답·현재 빈칸 정답 제외)
   const seen = new Set([correct]);
   const wrongs = [];
 
-  if (card.wrongs && card.wrongs.length > 0) {
-    const pool = shuffle([...card.wrongs]).filter(k => !seen.has(k));
-    for (const k of pool) {
+  // pool 카드: 선택 안 된 pool 항목을 1순위 오답으로
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+
+  // card.wrongs로 보충
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
       if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
       if (wrongs.length === 3) break;
     }
@@ -1013,7 +1030,7 @@ function renderChoices() {
 
   // 부족하면 현재 카드의 다른 keywords로 보충
   if (wrongs.length < 3) {
-    const cardOthers = shuffle(card.keywords.filter(k => !seen.has(k)));
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
     for (const k of cardOthers) {
       if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
       if (wrongs.length === 3) break;

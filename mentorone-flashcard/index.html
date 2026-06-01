@@ -390,16 +390,15 @@
       </div>
     </a>
 
-    <a class="subject-card training" href="training.html">
+    <a class="subject-card training" href="training.html" style="opacity:1;cursor:pointer;">
       <span class="subject-icon">🏋️</span>
       <div class="subject-tag">Part 03</div>
       <div class="subject-name">트레이닝방법론</div>
       <div class="subject-desc">트레이닝 원리·처방<br>체력 요소와 측정</div>
       <div class="subject-meta">
-        <span class="subject-count" id="count-training">준비중</span>
+        <span class="subject-count" id="count-training">-- 문제</span>
         <span class="subject-arrow">→</span>
       </div>
-      <div><span class="coming-badge">COMING SOON</span></div>
     </a>
 
     <a class="subject-card nutrition" href="nutrition.html">
@@ -439,6 +438,7 @@ const WRONG_NOTE_KEYS = {
 const TOTAL_COUNTS = {
   anatomy: 60,
   physio: 44,
+  training: 65,
 };
 
 function loadWrongCount(key) {
@@ -451,6 +451,7 @@ function updateUI() {
   // 완성된 과목 카드 수 표시
   document.getElementById('count-anatomy').textContent = `${TOTAL_COUNTS.anatomy}문제`;
   document.getElementById('count-physio').textContent = `${TOTAL_COUNTS.physio}문제`;
+  document.getElementById('count-training').textContent = `${TOTAL_COUNTS.training}문제`;
 
   // 전체 오답 수 합산
   const total = Object.values(WRONG_NOTE_KEYS).reduce((sum, key) => {

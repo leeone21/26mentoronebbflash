@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>트레이닝방법론 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">트레이닝방법론 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // ── PART 1 · 트레이닝 원리 ──────────────────────────────
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'트레이닝의 5대 원리는?',
+    pool:['과부하 원리','점진성 원리','특이성 원리','가역성 원리','개별성 원리'],
+    pickCount:3,
+    wrongs:['반복성 원리','다양성 원리','균형성 원리'],
+    a:'과부하 원리 / 점진성 원리 / 특이성 원리 / 가역성 원리 / 개별성 원리' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'과부하 원리란?',
+    keywords:['평소보다 높은 자극','적응','향상'],
+    wrongs:['안전한 자극','낮은 강도','유지'],
+    answerText:'신체가 {평소보다 높은 자극}을 받아야 {적응}이 일어나고 체력이 {향상}됨',
+    a:'신체가 평소보다 높은 자극을 받아야 적응이 일어나고 체력이 향상됨' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'점진성 원리란?',
+    keywords:['강도','훈련량','서서히 증가'],
+    wrongs:['갑자기 증가','유지','감소'],
+    answerText:'트레이닝의 {강도}와 {훈련량}을 {서서히 증가}시켜야 함',
+    a:'트레이닝의 강도와 훈련량을 서서히 증가시켜야 함' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'특이성 원리란?',
+    keywords:['훈련 방식','체력 요소','향상'],
+    wrongs:['모든 방식','전신','저하'],
+    answerText:'특정 {훈련 방식}으로 운동하면 그에 맞는 특정 {체력 요소}만 {향상}됨',
+    a:'특정 훈련 방식으로 운동하면 그에 맞는 특정 체력 요소만 향상됨' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'가역성 원리란?',
+    keywords:['훈련 중단','체력','감소'],
+    wrongs:['훈련 지속','체력','증가'],
+    answerText:'{훈련 중단} 시 적응된 {체력}이 다시 {감소}함',
+    a:'훈련 중단 시 적응된 체력이 다시 감소함' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'개별성 원리란?',
+    keywords:['개인차','체력 수준','프로그램'],
+    wrongs:['동일한 처방','집단','표준화'],
+    answerText:'사람마다 {개인차}가 있으므로 {체력 수준}에 맞춘 개인화된 {프로그램}이 필요함',
+    a:'사람마다 개인차가 있으므로 체력 수준에 맞춘 개인화된 프로그램이 필요함' },
+
+  // ── PART 2 · 트레이닝 변인 ──────────────────────────────
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'트레이닝 4대 변인(FITT)은?',
+    keywords:['빈도(Frequency)','강도(Intensity)','시간(Time)','유형(Type)'],
+    wrongs:['목표(Goal)','회복(Recovery)','영양(Nutrition)'],
+    answerText:'{빈도(Frequency)} / {강도(Intensity)} / {시간(Time)} / {유형(Type)}',
+    a:'빈도(Frequency) / 강도(Intensity) / 시간(Time) / 유형(Type)' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'운동 강도를 나타내는 지표 3가지는?',
+    keywords:['1RM 비율','최대심박수(%HRmax)','RPE(자각도)'],
+    wrongs:['체중','VO2max','운동 시간'],
+    answerText:'{1RM 비율} / {최대심박수(%HRmax)} / {RPE(자각도)}',
+    a:'1RM 비율 / 최대심박수(%HRmax) / RPE(자각도)' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'1RM이란?',
+    keywords:['1회','최대 무게'],
+    wrongs:['10회','최소 무게'],
+    answerText:'한 동작을 정확한 자세로 {1회}만 들 수 있는 {최대 무게}',
+    a:'한 동작을 정확한 자세로 1회만 들 수 있는 최대 무게' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'세트(Set)와 반복(Rep)의 차이는?',
+    keywords:['반복(Rep)','세트(Set)','묶음'],
+    wrongs:['1회 최대','무게','휴식'],
+    answerText:'{반복(Rep)} = 동작 1회 / {세트(Set)} = 반복의 {묶음}',
+    a:'반복(Rep) = 동작 1회 / 세트(Set) = 반복의 묶음' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'근비대 목적의 권장 반복 범위는?',
+    keywords:['6~12회','1RM의 67~85%'],
+    wrongs:['1~5회','15회 이상','1RM의 50% 이하'],
+    answerText:'{6~12회} / {1RM의 67~85%}',
+    a:'6~12회 / 1RM의 67~85%' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'근력 향상 목적의 권장 반복 범위는?',
+    keywords:['1~5회','1RM의 85% 이상'],
+    wrongs:['6~12회','15회 이상','1RM의 50% 이하'],
+    answerText:'{1~5회} / {1RM의 85% 이상}',
+    a:'1~5회 / 1RM의 85% 이상' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'근지구력 향상 목적의 권장 반복 범위는?',
+    keywords:['15회 이상','1RM의 67% 이하'],
+    wrongs:['1~5회','6~12회','1RM의 85% 이상'],
+    answerText:'{15회 이상} / {1RM의 67% 이하}',
+    a:'15회 이상 / 1RM의 67% 이하' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'세트 간 휴식시간: 근력 vs 근비대 vs 근지구력은?',
+    keywords:['3~5분(근력)','60~90초(근비대)','30초 이하(근지구력)'],
+    wrongs:['1분(근력)','5분(근비대)','2~3분(근지구력)'],
+    answerText:'{3~5분(근력)} / {60~90초(근비대)} / {30초 이하(근지구력)}',
+    a:'3~5분(근력) / 60~90초(근비대) / 30초 이하(근지구력)' },
+
+  // ── PART 3 · 저항 트레이닝 방법 ──────────────────────────────
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'피라미드 세트법이란?',
+    keywords:['무게 증가','반복수 감소'],
+    wrongs:['무게 감소','반복수 증가'],
+    answerText:'세트마다 {무게 증가} → {반복수 감소} (예: 12→10→8→6회)',
+    a:'세트마다 무게 증가 → 반복수 감소 (예: 12→10→8→6회)' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'역피라미드(디센딩) 세트법이란?',
+    keywords:['무게 감소','반복수 증가'],
+    wrongs:['무게 증가','반복수 감소'],
+    answerText:'세트마다 {무게 감소} → {반복수 증가} (예: 6→8→10→12회)',
+    a:'세트마다 무게 감소 → 반복수 증가 (예: 6→8→10→12회)' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'슈퍼세트(Superset)란?',
+    keywords:['두 운동','휴식 없이','연속'],
+    wrongs:['한 운동','긴 휴식','분리'],
+    answerText:'{두 운동}을 {휴식 없이} {연속}으로 실시 (길항근 또는 주동근 조합)',
+    a:'두 운동을 휴식 없이 연속으로 실시 (길항근 또는 주동근 조합)' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'드롭 세트(Drop Set)란?',
+    keywords:['한 세트 완료','무게 즉시 감소','추가 반복'],
+    wrongs:['세트 전 준비','무게 증가','휴식 후 재개'],
+    answerText:'{한 세트 완료} 직후 {무게 즉시 감소} 후 {추가 반복} 실시',
+    a:'한 세트 완료 직후 무게 즉시 감소 후 추가 반복 실시' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'컴파운드 세트란?',
+    keywords:['같은 근육','두 가지 운동','연속'],
+    wrongs:['다른 근육','한 가지 운동','휴식'],
+    answerText:'{같은 근육}을 자극하는 {두 가지 운동}을 {연속}으로 실시',
+    a:'같은 근육을 자극하는 두 가지 운동을 연속으로 실시' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'트라이세트(Tri-set)란?',
+    keywords:['같은 근육','세 가지 운동','연속'],
+    wrongs:['다른 근육','두 가지 운동','휴식'],
+    answerText:'{같은 근육}을 자극하는 {세 가지 운동}을 {연속}으로 실시',
+    a:'같은 근육을 자극하는 세 가지 운동을 연속으로 실시' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'자이언트 세트(Giant Set)란?',
+    keywords:['같은 근육','4가지 이상','연속'],
+    wrongs:['다른 근육','2가지','긴 휴식'],
+    answerText:'{같은 근육}을 자극하는 {4가지 이상} 운동을 {연속}으로 실시',
+    a:'같은 근육을 자극하는 4가지 이상 운동을 연속으로 실시' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'치팅(Cheating)이란?',
+    keywords:['반동','보조 근육','한계 이상'],
+    wrongs:['완벽한 자세','주동근만','제한된 범위'],
+    answerText:'{반동}이나 {보조 근육}을 이용해 {한계 이상}의 자극을 주는 기법',
+    a:'반동이나 보조 근육을 이용해 한계 이상의 자극을 주는 기법' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'강제 반복(Forced Rep)이란?',
+    keywords:['보조자','한계 이후','추가 반복'],
+    wrongs:['혼자','한계 전','감소'],
+    answerText:'{보조자}의 도움으로 {한계 이후}에도 {추가 반복} 실시',
+    a:'보조자의 도움으로 한계 이후에도 추가 반복 실시' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'피크 컨트랙션(Peak Contraction)이란?',
+    keywords:['최대 수축','1~2초 유지','근육 자극'],
+    wrongs:['최소 수축','즉시 이완','관절 자극'],
+    answerText:'운동 동작의 {최대 수축} 지점에서 {1~2초 유지}하여 {근육 자극} 극대화',
+    a:'운동 동작의 최대 수축 지점에서 1~2초 유지하여 근육 자극 극대화' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'번스(Burns)란?',
+    keywords:['가동 범위 절반','짧은 동작','펌핑'],
+    wrongs:['전체 가동 범위','긴 동작','근력'],
+    answerText:'세트 마지막에 {가동 범위 절반}의 {짧은 동작}을 반복해 {펌핑} 극대화',
+    a:'세트 마지막에 가동 범위 절반의 짧은 동작을 반복해 펌핑 극대화' },
+
+  // ── PART 4 · 수준별 트레이닝 원리 ──────────────────────────────
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'초보자 트레이닝의 4대 원리는?',
+    pool:['점진적 과부하','전신 운동','복합 관절 운동','충분한 휴식'],
+    pickCount:3,
+    wrongs:['분할 훈련','고강도','단관절 운동'],
+    a:'점진적 과부하 / 전신 운동 / 복합 관절 운동 / 충분한 휴식' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'중급자 트레이닝의 5대 원리는?',
+    pool:['슈퍼세트','피라미드','컴파운드 세트','분할 훈련','플러싱'],
+    pickCount:3,
+    wrongs:['치팅','번스','강제 반복'],
+    a:'슈퍼세트 / 피라미드 / 컴파운드 세트 / 분할 훈련 / 플러싱' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'상급자 트레이닝의 5대 원리는?',
+    pool:['치팅','트라이 세트','자이언트 세트','피크 컨트랙션','퀄리티 원리'],
+    pickCount:3,
+    wrongs:['피라미드','슈퍼세트','점진적 과부하'],
+    a:'치팅 / 트라이 세트 / 자이언트 세트 / 피크 컨트랙션 / 퀄리티 원리' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'분할 훈련(Split Training)이란?',
+    keywords:['신체 부위','나누어','요일별'],
+    wrongs:['전신','합쳐서','매일 같은'],
+    answerText:'훈련할 {신체 부위}를 {나누어} {요일별}로 다르게 운동하는 방법',
+    a:'훈련할 신체 부위를 나누어 요일별로 다르게 운동하는 방법' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'플러싱(Flushing)이란?',
+    keywords:['한 근육','집중 자극','혈류 증가'],
+    wrongs:['전신 운동','분산 자극','혈류 감소'],
+    answerText:'{한 근육}을 여러 운동으로 {집중 자극}하여 {혈류 증가}시키는 기법',
+    a:'한 근육을 여러 운동으로 집중 자극하여 혈류 증가시키는 기법' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'퀄리티 원리란?',
+    keywords:['세트 수 유지','휴식 시간 단축','강도 유지'],
+    wrongs:['세트 수 감소','휴식 시간 증가','강도 저하'],
+    answerText:'{세트 수 유지}하면서 {휴식 시간 단축}하여 {강도 유지} 훈련의 질 향상',
+    a:'세트 수 유지하면서 휴식 시간 단축하여 강도 유지 훈련의 질 향상' },
+
+  // ── PART 5 · 유산소 트레이닝 ──────────────────────────────
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'최대심박수(HRmax) 공식은?',
+    keywords:['220','나이'],
+    wrongs:['200','체중'],
+    answerText:'HRmax = {220} - {나이}',
+    a:'HRmax = 220 - 나이' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'카보넨(Karvonen) 공식이란?',
+    keywords:['목표심박수','안정시 심박수','여유심박수'],
+    wrongs:['최대심박수','최소심박수','운동 후 심박수'],
+    answerText:'목표심박수 = ({목표심박수} - {안정시 심박수}) × 강도% + {여유심박수}',
+    a:'목표심박수 = (HRmax - 안정시 심박수) × 강도% + 안정시 심박수' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'HIIT(고강도 인터벌 트레이닝)의 특징은?',
+    keywords:['고강도 운동','짧은 휴식','반복'],
+    wrongs:['저강도 운동','긴 휴식','단발성'],
+    answerText:'{고강도 운동}과 {짧은 휴식}을 교대로 {반복}하는 트레이닝',
+    a:'고강도 운동과 짧은 휴식을 교대로 반복하는 트레이닝' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'LISS(저강도 지속 유산소)의 특징은?',
+    keywords:['낮은 강도','긴 시간','일정한 페이스'],
+    wrongs:['높은 강도','짧은 시간','변동적 페이스'],
+    answerText:'{낮은 강도}로 {긴 시간} 동안 {일정한 페이스}를 유지하는 유산소 운동',
+    a:'낮은 강도로 긴 시간 동안 일정한 페이스를 유지하는 유산소 운동' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'유산소 운동의 권장 강도 범위는?',
+    keywords:['최대심박수의 60~80%','중강도'],
+    wrongs:['최대심박수의 90% 이상','최대심박수의 40% 이하'],
+    answerText:'{최대심박수의 60~80%} 수준의 {중강도}',
+    a:'최대심박수의 60~80% 수준의 중강도' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'지방 연소 최적 강도는?',
+    keywords:['최대심박수의 60~70%','지방 산화율 최대'],
+    wrongs:['최대심박수의 90%','최대심박수의 40%'],
+    answerText:'{최대심박수의 60~70%} → {지방 산화율 최대}',
+    a:'최대심박수의 60~70% → 지방 산화율 최대' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'인터벌 트레이닝의 구성 요소는?',
+    keywords:['운동 강도','운동 시간','휴식 시간'],
+    wrongs:['영양 섭취','수면 시간','보충제'],
+    answerText:'{운동 강도} / {운동 시간} / {휴식 시간}의 조합으로 구성',
+    a:'운동 강도 / 운동 시간 / 휴식 시간의 조합으로 구성' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'서킷 트레이닝(Circuit Training)이란?',
+    keywords:['여러 운동 스테이션','순환','최소 휴식'],
+    wrongs:['한 운동','반복','긴 휴식'],
+    answerText:'{여러 운동 스테이션}을 {순환}하며 {최소 휴식}으로 실시하는 트레이닝',
+    a:'여러 운동 스테이션을 순환하며 최소 휴식으로 실시하는 트레이닝' },
+
+  // ── PART 6 · 포즈 지도 ──────────────────────────────
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'프런트 더블 바이셉스(Front Double Biceps) 포즈의 핵심은?',
+    keywords:['두 팔 굽혀 올림','이두근 수축','정면'],
+    wrongs:['팔 펴기','삼두근','측면'],
+    answerText:'정면에서 {두 팔 굽혀 올림} → {이두근 수축} 극대화, {정면} 방향 제시',
+    a:'정면에서 두 팔 굽혀 올림 → 이두근 수축 극대화, 정면 방향 제시' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'프런트 랫 스프레드(Front Lat Spread)의 핵심은?',
+    keywords:['광배근 펼침','허리 짧게','정면'],
+    wrongs:['광배근 오므림','허리 길게','측면'],
+    answerText:'{광배근 펼침} 극대화, {허리 짧게} 눌러 V자 강조, {정면} 방향',
+    a:'광배근 펼침 극대화, 허리 짧게 눌러 V자 강조, 정면 방향' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'사이드 체스트(Side Chest) 포즈의 핵심은?',
+    keywords:['측면','대흉근 수축','팔 굽힘'],
+    wrongs:['정면','광배근','팔 펴기'],
+    answerText:'{측면} 방향, {대흉근 수축} 극대화, {팔 굽힘}으로 가슴 두께 강조',
+    a:'측면 방향, 대흉근 수축 극대화, 팔 굽힘으로 가슴 두께 강조' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'백 더블 바이셉스(Back Double Biceps) 포즈의 핵심은?',
+    keywords:['후면','이두근','광배근 동시 강조'],
+    wrongs:['전면','삼두근','대흉근'],
+    answerText:'{후면}에서 {이두근}과 {광배근 동시 강조}',
+    a:'후면에서 이두근과 광배근 동시 강조' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'백 랫 스프레드(Back Lat Spread)의 핵심은?',
+    keywords:['후면','광배근 최대 펼침','V라인'],
+    wrongs:['전면','광배근 오므림','X라인'],
+    answerText:'{후면}에서 {광배근 최대 펼침}으로 {V라인} 강조',
+    a:'후면에서 광배근 최대 펼침으로 V라인 강조' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'사이드 트라이셉스(Side Triceps) 포즈의 핵심은?',
+    keywords:['측면','삼두근 수축','팔 펴기'],
+    wrongs:['정면','이두근','팔 굽히기'],
+    answerText:'{측면} 방향에서 {삼두근 수축}을 위해 {팔 펴기}',
+    a:'측면 방향에서 삼두근 수축을 위해 팔 펴기' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'어브도미널 앤 사이 (Abdominal & Thigh) 포즈의 핵심은?',
+    keywords:['복근 수축','대퇴근 수축','정면'],
+    wrongs:['복근 이완','대퇴근 이완','측면'],
+    answerText:'{복근 수축}과 {대퇴근 수축}을 동시에, {정면} 방향',
+    a:'복근 수축과 대퇴근 수축을 동시에, 정면 방향' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'모스트 머스큘러(Most Muscular) 포즈의 핵심은?',
+    keywords:['전신 근육 수축','승모근 강조','전면 압박'],
+    wrongs:['근육 이완','삼각근 강조','후면'],
+    answerText:'{전신 근육 수축}으로 {승모근 강조}하며 {전면 압박} 자세',
+    a:'전신 근육 수축으로 승모근 강조하며 전면 압박 자세' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'포즈 지도 시 주의사항 3가지는?',
+    keywords:['호흡 조절','근육 수축 유지','표정 관리'],
+    wrongs:['빠른 전환','근육 이완','무표정'],
+    answerText:'{호흡 조절} / {근육 수축 유지} / {표정 관리}',
+    a:'호흡 조절 / 근육 수축 유지 / 표정 관리' },
+
+  { part:'PART 6 · 포즈 지도', category:'PART 6',
+    q:'포징(Posing) 연습의 효과는?',
+    keywords:['근육 발달','신체 인식','무대 적응'],
+    wrongs:['근육 감소','신체 무감각','무대 공포'],
+    answerText:'{근육 발달} 촉진 / {신체 인식} 향상 / {무대 적응}력 증가',
+    a:'근육 발달 촉진 / 신체 인식 향상 / 무대 적응력 증가' },
+
+  // ── 추가 PART 2 심화 ──────────────────────────────
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'웜업(Warm-up)의 목적은?',
+    keywords:['체온 상승','관절 가동성 증가','부상 예방'],
+    wrongs:['체온 감소','관절 가동성 감소','피로 유발'],
+    answerText:'{체온 상승} / {관절 가동성 증가} / {부상 예방}',
+    a:'체온 상승 / 관절 가동성 증가 / 부상 예방' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'쿨다운(Cool-down)의 목적은?',
+    keywords:['심박수 감소','근육 피로 해소','유연성 유지'],
+    wrongs:['심박수 증가','근육 피로 증가','유연성 감소'],
+    answerText:'{심박수 감소} / {근육 피로 해소} / {유연성 유지}',
+    a:'심박수 감소 / 근육 피로 해소 / 유연성 유지' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'복합 운동(Compound Exercise)과 단관절 운동(Isolation)의 차이는?',
+    keywords:['복합 운동(다관절)','단관절 운동(고립)'],
+    wrongs:['단관절 운동(다관절)','복합 운동(고립)'],
+    answerText:'{복합 운동(다관절)} = 여러 근육 동시 사용 / {단관절 운동(고립)} = 특정 근육 집중',
+    a:'복합 운동(다관절) = 여러 근육 동시 사용 / 단관절 운동(고립) = 특정 근육 집중' },
+
+  { part:'PART 2 · 트레이닝 변인', category:'PART 2',
+    q:'과훈련 증후군(Overtraining Syndrome)의 증상은?',
+    keywords:['수행 능력 저하','만성 피로','면역력 저하'],
+    wrongs:['수행 능력 향상','에너지 증가','면역력 향상'],
+    answerText:'{수행 능력 저하} / {만성 피로} / {면역력 저하}',
+    a:'수행 능력 저하 / 만성 피로 / 면역력 저하' },
+
+  // ── 추가 PART 1 심화 ──────────────────────────────
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'초과회복(Supercompensation)이란?',
+    keywords:['운동 후 회복','운동 전보다 높은 수준','적절한 휴식'],
+    wrongs:['운동 중 회복','운동 전보다 낮은 수준','휴식 없음'],
+    answerText:'{운동 후 회복} 과정에서 {운동 전보다 높은 수준}으로 향상. {적절한 휴식}이 필수',
+    a:'운동 후 회복 과정에서 운동 전보다 높은 수준으로 향상. 적절한 휴식이 필수' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'주기화(Periodization)란?',
+    keywords:['훈련 사이클','강도와 양 변화','피크 성과'],
+    wrongs:['무작위 훈련','고정된 강도','평균 성과'],
+    answerText:'체계적 {훈련 사이클}로 {강도와 양 변화}를 통해 {피크 성과}를 이끌어내는 계획',
+    a:'체계적 훈련 사이클로 강도와 양 변화를 통해 피크 성과를 이끌어내는 계획' },
+
+  { part:'PART 1 · 트레이닝 원리', category:'PART 1',
+    q:'선형 주기화 vs 비선형(파동) 주기화의 차이는?',
+    keywords:['선형(점진적 증가)','비선형(주기적 변화)'],
+    wrongs:['선형(주기적 감소)','비선형(고정)'],
+    answerText:'{선형(점진적 증가)} = 매크로사이클에 걸쳐 강도 상승 / {비선형(주기적 변화)} = 세션마다 강도 변동',
+    a:'선형(점진적 증가) = 매크로사이클에 걸쳐 강도 상승 / 비선형(주기적 변화) = 세션마다 강도 변동' },
+
+  // ── 추가 PART 3 심화 ──────────────────────────────
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'네거티브 트레이닝(Negative Training)이란?',
+    keywords:['신장성 수축','무게 천천히 내리기','DOMS 유발'],
+    wrongs:['단축성 수축','무게 빠르게 올리기','근육 이완'],
+    answerText:'{신장성 수축} 단계에 집중, {무게 천천히 내리기}로 {DOMS 유발} 및 근섬유 손상 극대화',
+    a:'신장성 수축 단계에 집중, 무게 천천히 내리기로 DOMS 유발 및 근섬유 손상 극대화' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'프리-익조스천(Pre-exhaustion)이란?',
+    keywords:['복합 운동 전','단관절 운동으로 선피로','목표 근육 집중'],
+    wrongs:['복합 운동 후','복합 운동으로 선피로','보조 근육 집중'],
+    answerText:'{복합 운동 전}에 {단관절 운동으로 선피로}시켜 {목표 근육 집중} 자극',
+    a:'복합 운동 전에 단관절 운동으로 선피로시켜 목표 근육 집중 자극' },
+
+  { part:'PART 3 · 저항 트레이닝', category:'PART 3',
+    q:'레스트-폴즈(Rest-Pause)란?',
+    keywords:['한계 도달','짧은 휴식(10~20초)','추가 반복'],
+    wrongs:['한계 미달','긴 휴식(3~5분)','세트 종료'],
+    answerText:'{한계 도달} 후 {짧은 휴식(10~20초)} 뒤 {추가 반복} 실시',
+    a:'한계 도달 후 짧은 휴식(10~20초) 뒤 추가 반복 실시' },
+
+  // ── 추가 PART 5 심화 ──────────────────────────────
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'VO2max란?',
+    keywords:['최대 산소 섭취량','유산소 능력','mL/kg/min'],
+    wrongs:['최소 산소 섭취량','무산소 능력','L/min 고정'],
+    answerText:'{최대 산소 섭취량}. 단위 {mL/kg/min}. 높을수록 {유산소 능력} 우수',
+    a:'최대 산소 섭취량. 단위 mL/kg/min. 높을수록 유산소 능력 우수' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'유산소 운동의 심폐 적응 효과는?',
+    keywords:['심박출량 증가','안정 시 심박수 감소','모세혈관 밀도 증가'],
+    wrongs:['심박출량 감소','안정 시 심박수 증가','모세혈관 밀도 감소'],
+    answerText:'{심박출량 증가} / {안정 시 심박수 감소} / {모세혈관 밀도 증가}',
+    a:'심박출량 증가 / 안정 시 심박수 감소 / 모세혈관 밀도 증가' },
+
+  { part:'PART 5 · 유산소 트레이닝', category:'PART 5',
+    q:'운동 후 산소 부채(EPOC)란?',
+    keywords:['운동 후','기초대사 이상 산소 소비','칼로리 추가 소모'],
+    wrongs:['운동 중','기초대사 이하 산소 소비','칼로리 소모 없음'],
+    answerText:'{운동 후}에도 {기초대사 이상 산소 소비} 지속 → {칼로리 추가 소모}',
+    a:'운동 후에도 기초대사 이상 산소 소비 지속 → 칼로리 추가 소모' },
+
+  // ── 추가 PART 4 심화 ──────────────────────────────
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'벌크업(Bulk-up) 시즌과 컷팅(Cutting) 시즌의 목표 차이는?',
+    keywords:['벌크업(근육량 증가)','컷팅(체지방 감소)'],
+    wrongs:['벌크업(체지방 증가)','컷팅(근육량 감소)'],
+    answerText:'{벌크업(근육량 증가)} = 칼로리 과잉 + 고강도 저항 / {컷팅(체지방 감소)} = 칼로리 결핍 + 유산소 추가',
+    a:'벌크업(근육량 증가) = 칼로리 과잉 + 고강도 저항 / 컷팅(체지방 감소) = 칼로리 결핍 + 유산소 추가' },
+
+  { part:'PART 4 · 수준별 트레이닝', category:'PART 4',
+    q:'클린 벌크(Clean Bulk)란?',
+    keywords:['건강한 음식','적절한 칼로리 과잉','체지방 최소화'],
+    wrongs:['정크푸드','과도한 칼로리 과잉','체지방 무시'],
+    answerText:'{건강한 음식}으로 {적절한 칼로리 과잉}을 유지하면서 {체지방 최소화}하는 방식',
+    a:'건강한 음식으로 적절한 칼로리 과잉을 유지하면서 체지방 최소화하는 방식' },
+];
+
+// ── 카테고리 설정 ──
+const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4','PART 5','PART 6'];
+const CATEGORY_LABELS = {
+  ALL:'전체',
+  'PART 1':'PART 1 · 트레이닝 원리',
+  'PART 2':'PART 2 · 트레이닝 변인',
+  'PART 3':'PART 3 · 저항 트레이닝',
+  'PART 4':'PART 4 · 수준별',
+  'PART 5':'PART 5 · 유산소',
+  'PART 6':'PART 6 · 포즈 지도',
+};
+
+const LS_KEY = 'mentorone_wrong_training';
+
+// ── 상태 변수 ──
+let currentCards = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answeredSet = new Set();
+let wrongSet = new Set();
+let currentCategory = 'ALL';
+let currentMode = 'flash';
+
+let blankKeywords = [];
+let blankFilled = [];
+let blankResults = [];
+let blankCurrentIdx = 0;
+let blankCardCorrect = true;
+let currentAnswerText = '';
+
+// ── localStorage ──
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+  catch { return []; }
+}
+function lsSave(cards) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {}
+}
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); }
+  buildTabs();
+}
+function lsRemoveWrong(q) {
+  lsSave(lsLoad().filter(c => c.q !== q));
+  buildTabs();
+}
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+// ── 초기화 ──
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set();
+  updateScoreBadges();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]);
+  const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+init();
+</script>
+</body>
+</html>
