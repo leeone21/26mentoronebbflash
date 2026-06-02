@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운동영양학 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">운동영양학 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+
+  // ===== PART 1 · 영양소 기초 =====
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '3대, 5대, 6대 영양소를 설명하시오.',
+    keywords: ['탄수화물·단백질·지방', '비타민·무기질', '물'],
+    wrongs: ['탄수화물·지방·비타민', '단백질·무기질·수분', '탄수화물·단백질·비타민'],
+    answerText: '3대: {탄수화물·단백질·지방} / 5대: +{비타민·무기질} / 6대: +{물}',
+    a: '3대: 탄수화물·단백질·지방 / 5대: +비타민·무기질 / 6대: +물',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '탄수화물·단백질 1g당 ___kcal, 지방 1g당 ___kcal이다.',
+    keywords: ['4kcal', '9kcal'],
+    wrongs: ['탄수화물·단백질 9kcal / 지방 4kcal', '탄수화물·단백질 7kcal / 지방 9kcal', '탄수화물·단백질 4kcal / 지방 7kcal'],
+    answerText: '탄수화물·단백질 {4kcal} / 지방 {9kcal}',
+    a: '탄수화물·단백질 4kcal / 지방 9kcal',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '탄수화물이 저장되는 3곳과 형태를 말하시오.',
+    keywords: ['근육(글리코겐)', '간(글리코겐)', '혈액(글루코스)'],
+    wrongs: ['근육(글루코스) / 간(글리코겐) / 혈액(지방산)', '근육(글리코겐) / 신장(글리코겐) / 혈액(글루코스)', '간(글루코스) / 근육(글리코겐) / 혈액(포도당)'],
+    answerText: '{근육(글리코겐)} / {간(글리코겐)} / {혈액(글루코스)}',
+    a: '근육(글리코겐) / 간(글리코겐) / 혈액(글루코스)',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '단순 탄수화물과 복합 탄수화물의 예시를 말하시오.',
+    keywords: ['설탕·밀가루', '고구마·쌀·곡류'],
+    wrongs: ['현미·통밀 / 설탕·과당', '과당·포도당 / 고구마·밀가루', '설탕·꿀 / 쌀·감자·밀가루'],
+    answerText: '단순: {설탕·밀가루} / 복합: {고구마·쌀·곡류}',
+    a: '단순: 설탕·밀가루 / 복합: 고구마·쌀·곡류',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '완전 단백질과 불완전 단백질을 설명하시오.',
+    keywords: ['완전 단백질', '불완전 단백질'],
+    wrongs: ['동물성 단백질 / 식물성 단백질', '필수 단백질 / 비필수 단백질', '합성 단백질 / 천연 단백질'],
+    answerText: '{완전 단백질}: 모든 필수 아미노산 포함(소고기·달걀) / {불완전 단백질}: 하나 이상 부족(두부·견과류)',
+    a: '완전 단백질: 모든 필수 아미노산 포함(소고기·달걀) / 불완전 단백질: 하나 이상 부족(두부·견과류)',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '포화지방과 불포화지방을 설명하시오.',
+    keywords: ['포화지방', '불포화지방'],
+    wrongs: ['중성지방 / 인지질', 'LDL / HDL', '동물성지방 / 필수지방'],
+    answerText: '{포화지방}: 동물성·상온 고체·LDL 상승 / {불포화지방}: 식물성·상온 액체·콜레스테롤 저하',
+    a: '포화지방: 동물성·상온 고체·LDL 상승 / 불포화지방: 식물성·상온 액체·콜레스테롤 저하',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '필수지방산이란 무엇이며 대표적인 종류는?',
+    keywords: ['필수지방산', '오메가-3·오메가-6'],
+    wrongs: ['포화지방산 / 오메가-3·오메가-9', '불포화지방산 / 오메가-6·오메가-9', '필수지방산 / 오메가-1·오메가-3'],
+    answerText: '{필수지방산}: 체내 합성 불가, 음식으로 섭취 / 대표: {오메가-3·오메가-6}',
+    a: '필수지방산: 체내 합성 불가, 음식으로 섭취 / 대표: 오메가-3·오메가-6',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '"피부·근육 사이에 축적, 체온 유지·충격 완화"는 ___, "장기 주변 축적, 과다 시 대사증후군 유발"은 ___이다.',
+    keywords: ['피하지방', '내장지방'],
+    wrongs: ['내장지방 / 피하지방', '중성지방 / 내장지방', '체지방 / 중성지방'],
+    answerText: '{피하지방} / {내장지방}',
+    a: '피하지방 / 내장지방',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '"신체에 저장된 지방"은 ___, "체지방을 제외한 근육·뼈·수분 등"은 ___이다.',
+    keywords: ['체지방', '제지방'],
+    wrongs: ['내장지방 / 피하지방', '피하지방 / 제지방', '체지방 / 근육량'],
+    answerText: '{체지방} / {제지방}',
+    a: '체지방 / 제지방',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '"고밀도, 콜레스테롤을 간으로 운반, 동맥경화 예방"은 ___, "저밀도, 혈관 내벽 축적, 심혈관 질환 유발"은 ___이다.',
+    keywords: ['HDL', 'LDL'],
+    wrongs: ['LDL / HDL', 'HDL / VLDL', 'VLDL / LDL'],
+    answerText: '{HDL} / {LDL}',
+    a: 'HDL / LDL',
+  },
+  {
+    part: 'PART 1 · 영양소 기초', category: 'PART 1',
+    q: '에너지원으로서 탄수화물, 지방, 단백질의 단점을 각각 설명하시오.',
+    keywords: ['저장량 부족', '에너지 전환 느림', '근손실'],
+    wrongs: ['소화 어려움 / 저장량 부족 / 에너지 전환 느림', '저장량 부족 / 근손실 / 에너지 전환 느림', '흡수 느림 / 산소 불필요 / 근손실'],
+    answerText: '탄수화물: {저장량 부족}(고갈 시 피로) / 지방: {에너지 전환 느림}(고강도 운동 부적합) / 단백질: {근손실}(에너지원 사용 시)',
+    a: '탄수화물: 저장량 부족(고갈 시 피로) / 지방: 에너지 전환 느림(고강도 운동 부적합) / 단백질: 근손실(에너지원 사용 시)',
+  },
+
+  // ===== PART 2 · 수분 =====
+  {
+    part: 'PART 2 · 수분', category: 'PART 2',
+    q: '인체에서 수분의 역할 4가지를 말하시오.',
+    pool: ['체온 조절', '영양소 운반', '노폐물 배출', '세포막 구조 유지'],
+    pickCount: 3,
+    wrongs: ['에너지 생성', '호르몬 합성', '근육 수축'],
+    a: '체온 조절 / 영양소 운반 / 노폐물 배출 / 세포막 구조 유지',
+  },
+  {
+    part: 'PART 2 · 수분', category: 'PART 2',
+    q: '탈수의 원인과 증상을 설명하시오.',
+    keywords: ['과도한 발한·수분 섭취 부족·전해질 손실', '갈증·어지러움·근육 경련·운동 수행 능력 저하'],
+    wrongs: ['과호흡·고혈압 / 발열·구토', '수분 과다·전해질 손실 / 부종·두통', '과도한 발한·수분 섭취 부족 / 고혈압·빈맥'],
+    answerText: '원인: {과도한 발한·수분 섭취 부족·전해질 손실} / 증상: {갈증·어지러움·근육 경련·운동 수행 능력 저하}',
+    a: '원인: 과도한 발한·수분 섭취 부족·전해질 손실 / 증상: 갈증·어지러움·근육 경련·운동 수행 능력 저하',
+  },
+  {
+    part: 'PART 2 · 수분', category: 'PART 2',
+    q: '고온에서 운동 시 수분 섭취 방법을 설명하시오.',
+    keywords: ['전해질', '이온 음료·나트륨'],
+    wrongs: ['순수 물만 섭취 / 운동 후 한꺼번에', '카페인 음료 / 운동 중 금지', '탄산음료 / 소량 자주'],
+    answerText: '땀으로 {전해질}도 손실되므로 {이온 음료·나트륨} 포함 수분 섭취가 효과적',
+    a: '땀으로 전해질도 손실되므로 이온 음료·나트륨 포함 수분 섭취가 효과적',
+  },
+
+  // ===== PART 3 · 비타민 및 무기질 =====
+  {
+    part: 'PART 3 · 비타민 및 무기질', category: 'PART 3',
+    q: '수용성 비타민과 지용성 비타민을 설명하시오.',
+    keywords: ['B군·C', 'A·D·E·K'],
+    wrongs: ['B군·D / A·C·E·K', 'C·D / A·B·E·K', 'B군·C / A·D·E·B12'],
+    answerText: '수용성: {B군·C}(과잉 시 소변 배출) / 지용성: {A·D·E·K}(체내 축적, 과다 시 부작용)',
+    a: '수용성: B군·C(과잉 시 소변 배출) / 지용성: A·D·E·K(체내 축적, 과다 시 부작용)',
+  },
+  {
+    part: 'PART 3 · 비타민 및 무기질', category: 'PART 3',
+    q: '비타민 C의 역할과 결핍 시 발생하는 질환을 설명하시오.',
+    keywords: ['콜라겐 합성·항산화·면역력 강화', '괴혈병'],
+    wrongs: ['케라틴 합성·항산화 / 구루병', '엘라스틴 합성·면역력 / 야맹증', '콜라겐 합성·에너지 대사 / 빈혈'],
+    answerText: '역할: {콜라겐 합성·항산화·면역력 강화} / 결핍: {괴혈병}(잇몸 출혈·상처 회복 지연)',
+    a: '역할: 콜라겐 합성·항산화·면역력 강화 / 결핍: 괴혈병(잇몸 출혈·상처 회복 지연)',
+  },
+  {
+    part: 'PART 3 · 비타민 및 무기질', category: 'PART 3',
+    q: '에어로빅 운동 중 산소를 절약하는 비타민은 무엇인가?',
+    keywords: ['비타민 E'],
+    wrongs: ['비타민 C', '비타민 D', '비타민 B12'],
+    answerText: '{비타민 E}',
+    a: '비타민 E',
+  },
+  {
+    part: 'PART 3 · 비타민 및 무기질', category: 'PART 3',
+    q: '엽산에 대해 설명하시오.',
+    keywords: ['비타민 B군', 'DNA·RNA 합성·세포 분열', '임산부'],
+    wrongs: ['비타민 C군 / 단백질 합성 / 노인', '비타민 B군 / 지방 대사 / 운동선수', '비타민 A군 / DNA 합성 / 임산부'],
+    answerText: '{비타민 B군}의 일종 / 역할: {DNA·RNA 합성·세포 분열} / 특히 {임산부}에게 필요',
+    a: '비타민 B군의 일종 / 역할: DNA·RNA 합성·세포 분열 / 특히 임산부에게 필요',
+  },
+
+  // ===== PART 4 · 아미노산 및 보충제 =====
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '필수 아미노산 9가지를 모두 말하시오.',
+    pool: ['류신', '이소류신', '발린', '페닐알라닌', '메티오닌', '트레오닌', '히스티딘', '라이신', '트립토판'],
+    pickCount: 3,
+    wrongs: ['글루타민', '아르기닌', '글리신'],
+    a: '류신 / 이소류신 / 발린 / 페닐알라닌 / 메티오닌 / 트레오닌 / 히스티딘 / 라이신 / 트립토판',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: 'BCAA에 대해 설명하시오.',
+    keywords: ['분지사슬 아미노산', '류신·이소류신·발린', '근육 회복·근손실 예방·피로 감소'],
+    wrongs: ['필수 아미노산 전체 / 류신·메티오닌·발린 / 지방 연소', '분지사슬 아미노산 / 류신·이소류신·트립토판 / 면역력 강화', '비필수 아미노산 / 류신·이소류신·발린 / 근육 회복'],
+    answerText: '{분지사슬 아미노산} / 구성: {류신·이소류신·발린} / 효과: {근육 회복·근손실 예방·피로 감소}',
+    a: '분지사슬 아미노산 / 구성: 류신·이소류신·발린 / 효과: 근육 회복·근손실 예방·피로 감소',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '유청 단백질에 대해 설명하시오.',
+    keywords: ['치즈 가공 과정', '완전 단백질', '운동 후 빠른 근육 회복'],
+    wrongs: ['두부 가공 과정 / 불완전 단백질 / 운동 전 섭취', '치즈 가공 과정 / 불완전 단백질 / 운동 후 회복', '요거트 가공 과정 / 완전 단백질 / 운동 후 회복'],
+    answerText: '우유의 {치즈 가공 과정}에서 추출 / {완전 단백질} / 목적: {운동 후 빠른 근육 회복}',
+    a: '우유의 치즈 가공 과정에서 추출 / 완전 단백질 / 목적: 운동 후 빠른 근육 회복',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '크레아틴에 대해 설명하시오.',
+    keywords: ['골격근 95% 저장', 'ATP 재합성', '순간 근력·운동 수행 능력 향상'],
+    wrongs: ['간 80% 저장 / ADP 재합성 / 지구력 향상', '골격근 95% 저장 / ADP 재합성 / 근육 회복', '골격근 70% 저장 / ATP 재합성 / 지방 연소'],
+    answerText: '{골격근 95% 저장} / 고강도 운동 시 {ATP 재합성} / 효과: {순간 근력·운동 수행 능력 향상}',
+    a: '골격근 95% 저장 / 고강도 운동 시 ATP 재합성 / 효과: 순간 근력·운동 수행 능력 향상',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '카페인의 효과와 권장량을 설명하시오.',
+    keywords: ['각성·집중력·지방 연소·운동 수행 능력 향상', '성인 400mg·임산부 200mg·청소년 2.5mg/kg'],
+    wrongs: ['각성·근육 이완·지방 연소 / 성인 200mg·임산부 400mg', '집중력·혈압 상승·지방 연소 / 성인 400mg·임산부 300mg', '각성·집중력·수면 유도 / 성인 300mg·임산부 200mg'],
+    answerText: '효과: {각성·집중력·지방 연소·운동 수행 능력 향상} / 권장량: {성인 400mg·임산부 200mg·청소년 2.5mg/kg} 이하',
+    a: '효과: 각성·집중력·지방 연소·운동 수행 능력 향상 / 권장량: 성인 400mg·임산부 200mg·청소년 2.5mg/kg 이하',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '글루타민에 대해 설명하시오.',
+    keywords: ['비필수 아미노산', '면역력 강화·근손실 방지', '조건부 필수 아미노산'],
+    wrongs: ['필수 아미노산 / 지방 연소·피로 감소 / 일반 필수', '비필수 아미노산 / 면역력·ATP 재합성 / 조건부 필수', '준필수 아미노산 / 근손실 방지·혈관 확장 / 조건부 필수'],
+    answerText: '{비필수 아미노산} / 효과: {면역력 강화·근손실 방지} / 고강도 훈련 시 {조건부 필수 아미노산}으로 작용',
+    a: '비필수 아미노산 / 효과: 면역력 강화·근손실 방지 / 고강도 훈련 시 조건부 필수 아미노산으로 작용',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '아르기닌의 효과를 설명하시오.',
+    keywords: ['준필수 아미노산', '혈관 확장·혈류 증가', '근육 펌핑'],
+    wrongs: ['비필수 아미노산 / 혈관 수축·혈압 상승 / 지방 연소', '필수 아미노산 / 혈관 확장·혈류 증가 / 근손실 방지', '준필수 아미노산 / ATP 재합성 / 근육 펌핑'],
+    answerText: '{준필수 아미노산} / 효과: {혈관 확장·혈류 증가} / {근육 펌핑} 효과',
+    a: '준필수 아미노산 / 효과: 혈관 확장·혈류 증가 / 근육 펌핑 효과',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '아나볼릭 스테로이드에 대해 설명하시오.',
+    keywords: ['단백질 동화 촉진', '세계 도핑방지규약 금지', '심혈관 질환·호르몬 불균형'],
+    wrongs: ['지방 동화 촉진 / IOC 금지 / 근손실·탈수', '단백질 동화 촉진 / 국내법 금지 / 심혈관 질환', '탄수화물 동화 촉진 / 세계 도핑방지규약 금지 / 호르몬 불균형'],
+    answerText: '{단백질 동화 촉진}으로 근육 강화 / {세계 도핑방지규약 금지} 약물 / 부작용: {심혈관 질환·호르몬 불균형}',
+    a: '단백질 동화 촉진으로 근육 강화 / 세계 도핑방지규약 금지 약물 / 부작용: 심혈관 질환·호르몬 불균형',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '엘 카르니틴에 대해 설명하시오.',
+    keywords: ['지방산→미토콘드리아 운반', '지방 연소 촉진·피로 감소'],
+    wrongs: ['단백질→미토콘드리아 운반 / 근육 회복', '지방산→세포핵 운반 / 지방 연소·근력 향상', '포도당→미토콘드리아 운반 / 지방 연소'],
+    answerText: '{지방산→미토콘드리아 운반}하여 에너지 전환 / 효과: {지방 연소 촉진·피로 감소}',
+    a: '지방산→미토콘드리아 운반하여 에너지 전환 / 효과: 지방 연소 촉진·피로 감소',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: 'DHA에 대해 설명하시오.',
+    keywords: ['고도 불포화 지방산', '두뇌 활동 활성화·혈중 콜레스테롤 저하'],
+    wrongs: ['단순 불포화 지방산 / 근육 회복·혈당 조절', '포화 지방산 / 두뇌 활동·면역력 강화', '고도 불포화 지방산 / 혈당 조절·지방 연소'],
+    answerText: '{고도 불포화 지방산} / 효과: {두뇌 활동 활성화·혈중 콜레스테롤 저하}',
+    a: '고도 불포화 지방산 / 효과: 두뇌 활동 활성화·혈중 콜레스테롤 저하',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '크레아티닌에 대해 설명하시오.',
+    keywords: ['크레아틴 대사 산물', '신장 기능 지표'],
+    wrongs: ['글루타민 대사 산물 / 간 기능 지표', '크레아틴 전구체 / 신장 기능 지표', '크레아틴 대사 산물 / 간 기능 지표'],
+    answerText: '{크레아틴 대사 산물} / 소변으로 배설 / {신장 기능 지표}로 활용',
+    a: '크레아틴 대사 산물 / 소변으로 배설 / 신장 기능 지표로 활용',
+  },
+  {
+    part: 'PART 4 · 아미노산 및 보충제', category: 'PART 4',
+    q: '글루탐산에 대해 설명하시오.',
+    keywords: ['비필수 아미노산', '근육 합성 촉진·면역체계 활성화', '신장 이상 시 주의'],
+    wrongs: ['필수 아미노산 / 지방 분해·면역 활성화 / 간 이상 시 주의', '비필수 아미노산 / ATP 재합성·면역 활성화 / 신장 이상 시 주의', '조건부 필수 아미노산 / 근육 합성·혈관 확장 / 심장 이상 시 주의'],
+    answerText: '{비필수 아미노산} / 효과: {근육 합성 촉진·면역체계 활성화} / {신장 이상 시 주의}',
+    a: '비필수 아미노산 / 효과: 근육 합성 촉진·면역체계 활성화 / 신장 이상 시 주의',
+  },
+
+  // ===== PART 5 · 식이 전략 =====
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '포도당과 글리코겐에 대해 설명하시오.',
+    keywords: ['포도당(단당류·즉각 에너지원)', '글리코겐(간·근육 저장 형태)'],
+    wrongs: ['포도당(이당류) / 글리코겐(혈액 저장)', '과당(단당류) / 글리코겐(근육 저장)', '포도당(다당류) / 글리코겐(지방 저장)'],
+    answerText: '{포도당(단당류·즉각 에너지원)} / {글리코겐(간·근육 저장 형태)}, 필요 시 포도당으로 분해',
+    a: '포도당(단당류·즉각 에너지원) / 글리코겐(간·근육 저장 형태), 필요 시 포도당으로 분해',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '카보로딩(글리코겐 로딩)에 대해 설명하시오.',
+    keywords: ['근 글리코겐 저장량 극대화', '경기·고강도 운동 전 탄수화물 대량 섭취'],
+    wrongs: ['체지방 저장량 극대화 / 경기 후 탄수화물 섭취', '근 글리코겐 저장 / 경기 전 단백질 대량 섭취', '혈당 극대화 / 경기 중 탄수화물 섭취'],
+    answerText: '{근 글리코겐 저장량 극대화}를 위해 {경기·고강도 운동 전 탄수화물 대량 섭취}하는 방법',
+    a: '근 글리코겐 저장량 극대화를 위해 경기·고강도 운동 전 탄수화물 대량 섭취하는 방법',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '단백질 섭취 시기를 설명하시오.',
+    keywords: ['운동 후 30분~1시간 이내', '기회의 창', '동화작용 활성화'],
+    wrongs: ['운동 전 30분 / 준비의 창 / 이화작용 활성화', '운동 후 2~3시간 / 회복의 창 / 동화작용 활성화', '운동 후 30분~1시간 / 골든타임 / 이화작용 활성화'],
+    answerText: '{운동 후 30분~1시간 이내}가 최적 / 이 시간대를 {기회의 창}이라 함 / {동화작용 활성화}로 근육 회복·성장',
+    a: '운동 후 30분~1시간 이내가 최적 / 이 시간대를 기회의 창이라 함 / 동화작용 활성화로 근육 회복·성장',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '운동 1시간 전 탄수화물을 섭취하는 이유를 설명하시오.',
+    keywords: ['혈당·글리코겐 보충', '인슐린 과분비·혈당 급강하 방지'],
+    wrongs: ['단백질 보충 / 글루카곤 과분비 방지', '혈당 보충 / 코르티솔 과분비 방지', '글리코겐 보충 / 인슐린 과분비 방지 위해 운동 직전 섭취'],
+    answerText: '{혈당·글리코겐 보충}으로 운동 에너지 확보 / 직전 섭취 시 {인슐린 과분비·혈당 급강하 방지}를 위해 1시간 전 권장',
+    a: '혈당·글리코겐 보충으로 운동 에너지 확보 / 직전 섭취 시 인슐린 과분비·혈당 급강하 방지를 위해 1시간 전 권장',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '공복 상태에서 고강도 운동을 피해야 하는 이유를 설명하시오.',
+    keywords: ['혈당·글리코겐 부족', '근단백질 분해·근손실', '저혈당 증상'],
+    wrongs: ['체온 저하 / 지방 과다 연소 / 고혈당', '혈당 과잉 / 글리코겐 과다 / 근비대', '혈당 부족 / 지방 분해 증가 / 저혈압'],
+    answerText: '{혈당·글리코겐 부족}으로 수행 능력 저하 / {근단백질 분해·근손실} 발생 / {저혈당 증상}(어지러움·두통) 위험',
+    a: '혈당·글리코겐 부족으로 수행 능력 저하 / 근단백질 분해·근손실 발생 / 저혈당 증상(어지러움·두통) 위험',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '근력 운동 후 영양 섭취 방법을 설명하시오.',
+    keywords: ['운동 후 30분~1시간 이내', '단백질(근육 회복·성장)', '탄수화물(글리코겐 보충)'],
+    wrongs: ['운동 후 3시간 이내 / 지방 위주 섭취 / 단백질(글리코겐 보충)', '운동 직후 / 단백질만 섭취 / 탄수화물(에너지 보충)', '운동 전 30분 / 단백질+탄수화물 / 지방(글리코겐 보충)'],
+    answerText: '{운동 후 30분~1시간 이내} 섭취 / {단백질(근육 회복·성장)} + {탄수화물(글리코겐 보충)} 함께',
+    a: '운동 후 30분~1시간 이내 섭취 / 단백질(근육 회복·성장) + 탄수화물(글리코겐 보충) 함께',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '에너지 섭취 부족 시 여성에게 발생할 수 있는 증상 3가지를 말하시오.',
+    keywords: ['생리불순', '골다공증', '빈혈'],
+    wrongs: ['탈수', '고혈압', '비만'],
+    answerText: '{생리불순} / {골다공증} / {빈혈}',
+    a: '생리불순 / 골다공증 / 빈혈',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '알코올 섭취가 운동 수행 능력에 미치는 영향을 설명하시오.',
+    pool: ['반응 시간 저하', '신체 탈수', '균형 감각 저하', '근육 성장 방해', '심혈관계 지구력 저하'],
+    pickCount: 3,
+    wrongs: ['근력 향상', '집중력 향상', '혈당 증가'],
+    a: '반응 시간 저하 / 신체 탈수 / 균형 감각 저하 / 근육 성장 방해 / 심혈관계 지구력 저하',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '트레이닝을 위한 필요 칼로리를 설명하시오.',
+    keywords: ['2,000~2,500kcal', '3,000~3,500kcal'],
+    wrongs: ['1,500~2,000kcal / 2,500~3,000kcal', '2,000~2,500kcal / 2,500~3,000kcal', '2,500~3,000kcal / 3,500~4,000kcal'],
+    answerText: '일반 성인 일상: {2,000~2,500kcal} / 트레이닝 중: {3,000~3,500kcal}',
+    a: '일반 성인 일상: 2,000~2,500kcal / 트레이닝 중: 3,000~3,500kcal',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '보충제 1회 섭취 권장량을 말하시오.',
+    keywords: ['남성 30g', '여성 20g'],
+    wrongs: ['남성 20g / 여성 10g', '남성 40g / 여성 30g', '남성 50g / 여성 20g'],
+    answerText: '{남성 30g} / {여성 20g} 이하',
+    a: '남성 30g / 여성 20g 이하',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '시합 전 수분 조절 방법을 설명하시오.',
+    keywords: ['1~2주 전 충분한 수분 섭취', '하루 전 수분 조절·근육 선명도 향상'],
+    wrongs: ['시합 당일 수분 과다 섭취 / 근육 이완', '1~2주 전 수분 제한 / 체중 감량', '시합 직전 수분 보충 / 근육 선명도 향상'],
+    answerText: '{1~2주 전 충분한 수분 섭취} / {하루 전 수분 조절·근육 선명도 향상}',
+    a: '1~2주 전 충분한 수분 섭취 / 하루 전 수분 조절·근육 선명도 향상',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '당뇨병의 종류를 설명하시오.',
+    keywords: ['제1형(인슐린 생산 불가·소아 발병)', '제2형(인슐린 저항성·가장 빈번)'],
+    wrongs: ['제1형(인슐린 저항성) / 제2형(인슐린 생산 불가)', '제1형(성인 발병) / 제2형(소아 발병)', '제1형(글루카곤 과다) / 제2형(인슐린 저항성)'],
+    answerText: '{제1형(인슐린 생산 불가·소아 발병)} / {제2형(인슐린 저항성·가장 빈번)}',
+    a: '제1형(인슐린 생산 불가·소아 발병) / 제2형(인슐린 저항성·가장 빈번)',
+  },
+  {
+    part: 'PART 5 · 식이 전략', category: 'PART 5',
+    q: '음식물 섭취 후 입에서 위까지의 소화 과정을 설명하시오.',
+    keywords: ['아밀라아제(탄수화물 분해)', '위산·펩신(단백질 분해)'],
+    wrongs: ['리파아제(탄수화물) / 담즙(단백질)', '아밀라아제(지방) / 위산·펩신(탄수화물)', '펩신(탄수화물) / 위산·아밀라아제(단백질)'],
+    answerText: '① 구강: {아밀라아제(탄수화물 분해)} → ② 식도 이동 → ③ 위: {위산·펩신(단백질 분해)}',
+    a: '① 구강: 아밀라아제(탄수화물 분해) → ② 식도 이동 → ③ 위: 위산·펩신(단백질 분해)',
+  },
+];
+
+// ── 카테고리 설정 ──
+const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4','PART 5'];
+const CATEGORY_LABELS = {
+  ALL:'전체',
+  'PART 1':'PART 1 · 영양소 기초',
+  'PART 2':'PART 2 · 수분',
+  'PART 3':'PART 3 · 비타민·무기질',
+  'PART 4':'PART 4 · 아미노산·보충제',
+  'PART 5':'PART 5 · 식이 전략',
+};
+
+const LS_KEY = 'mentorone_wrong_nutrition';
+
+// ── 상태 변수 ──
+let currentCards = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answeredSet = new Set();
+let wrongSet = new Set();
+let currentCategory = 'ALL';
+let currentMode = 'flash';
+
+let blankKeywords = [];
+let blankFilled = [];
+let blankResults = [];
+let blankCurrentIdx = 0;
+let blankCardCorrect = true;
+let currentAnswerText = '';
+
+// ── localStorage ──
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+  catch { return []; }
+}
+function lsSave(cards) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {}
+}
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); }
+  buildTabs();
+}
+function lsRemoveWrong(q) {
+  lsSave(lsLoad().filter(c => c.q !== q));
+  buildTabs();
+}
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+// ── 초기화 ──
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set();
+  updateScoreBadges();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]);
+  const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+init();
+</script>
+</body>
+</html>
