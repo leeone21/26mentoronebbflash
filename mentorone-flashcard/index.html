@@ -122,12 +122,37 @@
     line-height: 1.7;
   }
 
+  /* 대분류 섹션 */
+  .section-block { margin-bottom: 36px; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: -0.3px;
+  }
+
+  .section-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+
   /* 과목 그리드 */
   .subject-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    margin-bottom: 32px;
   }
 
   .subject-card {
@@ -365,97 +390,114 @@
     <div class="wrong-note-count" id="totalWrongCount">0</div>
   </div>
 
-  <!-- 과목 카드 그리드 -->
-  <div class="subject-grid">
+  <!-- 대분류 1 · 규정 -->
+  <div class="section-block">
+    <div class="section-header">
+      <div class="section-title">규정</div>
+      <div class="section-score">50점 · 4과목</div>
+    </div>
+    <div class="subject-grid">
 
-    <a class="subject-card anatomy" href="anatomy.html">
-      <span class="subject-icon">🦴</span>
-      <div class="subject-tag">Part 01</div>
-      <div class="subject-name">기능해부학</div>
-      <div class="subject-desc">근육·관절·인대<br>신체 면과 방향 용어</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-anatomy">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card" href="regulation.html" style="--accent:#A07BE0;--accent-bg:rgba(160,123,224,0.08);opacity:1;cursor:pointer;">
+        <span class="subject-icon">📋</span>
+        <div class="subject-tag">Part 01</div>
+        <div class="subject-name">보디빌딩 규정</div>
+        <div class="subject-desc">IFBB 일반규정·종목별 규정<br>등록·심판 규정</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-regulation">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
-    <a class="subject-card physio" href="physiology.html">
-      <span class="subject-icon">❤️</span>
-      <div class="subject-tag">Part 02</div>
-      <div class="subject-name">운동생리학</div>
-      <div class="subject-desc">에너지 시스템·심폐기능<br>근육 생리와 적응</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-physio">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card" href="doping.html" style="--accent:#E07070;--accent-bg:rgba(224,112,112,0.08);opacity:1;cursor:pointer;">
+        <span class="subject-icon">🚫</span>
+        <div class="subject-tag">Part 02</div>
+        <div class="subject-name">도핑방지</div>
+        <div class="subject-desc">금지약물·금지방법·TUE<br>도핑 검사 절차·제재 규정</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-doping">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
-    <a class="subject-card training" href="training.html" style="opacity:1;cursor:pointer;">
-      <span class="subject-icon">🏋️</span>
-      <div class="subject-tag">Part 03</div>
-      <div class="subject-name">트레이닝방법론</div>
-      <div class="subject-desc">트레이닝 원리·처방<br>체력 요소와 측정</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-training">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card" href="first_aid.html" style="--accent:#5ABFB0;--accent-bg:rgba(90,191,176,0.08);opacity:1;cursor:pointer;">
+        <span class="subject-icon">🩹</span>
+        <div class="subject-tag">Part 03</div>
+        <div class="subject-name">응급처치</div>
+        <div class="subject-desc">CPR·AED·하임리히법<br>외상처치·RICE·PRICES</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-first_aid">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
-    <a class="subject-card nutrition" href="nutrition.html" style="opacity:1;cursor:pointer;">
-      <span class="subject-icon">🥗</span>
-      <div class="subject-tag">Part 04</div>
-      <div class="subject-name">운동영양학</div>
-      <div class="subject-desc">3대 영양소·보충제<br>운동 전후 영양 전략</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-nutrition">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card" href="sports_ethics.html" style="--accent:#9B7FD4;--accent-bg:rgba(155,127,212,0.08);opacity:1;cursor:pointer;">
+        <span class="subject-icon">🤝</span>
+        <div class="subject-tag">Part 04</div>
+        <div class="subject-name">생활스포츠&스포츠윤리</div>
+        <div class="subject-desc">생활체육 기본 개념·지도자<br>스포츠 인권·폭력·성폭력</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-sports_ethics">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
-    <a class="subject-card" href="regulation.html" style="--accent:#A07BE0;--accent-bg:rgba(160,123,224,0.08);opacity:1;cursor:pointer;">
-      <span class="subject-icon">📋</span>
-      <div class="subject-tag">Part 05</div>
-      <div class="subject-name">보디빌딩 규정</div>
-      <div class="subject-desc">IFBB 일반규정·종목별 규정<br>등록·심판 규정</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-regulation">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+    </div>
+  </div>
 
-    <a class="subject-card" href="doping.html" style="--accent:#E07070;--accent-bg:rgba(224,112,112,0.08);opacity:1;cursor:pointer;">
-      <span class="subject-icon">🚫</span>
-      <div class="subject-tag">Part 06</div>
-      <div class="subject-name">도핑방지</div>
-      <div class="subject-desc">금지약물·금지방법·TUE<br>도핑 검사 절차·제재 규정</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-doping">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+  <!-- 대분류 2 · 지도방법 -->
+  <div class="section-block">
+    <div class="section-header">
+      <div class="section-title">지도방법</div>
+      <div class="section-score">50점 · 4과목</div>
+    </div>
+    <div class="subject-grid">
 
-    <a class="subject-card" href="first_aid.html" style="--accent:#5ABFB0;--accent-bg:rgba(90,191,176,0.08);opacity:1;cursor:pointer;">
-      <span class="subject-icon">🩹</span>
-      <div class="subject-tag">Part 07</div>
-      <div class="subject-name">응급처치</div>
-      <div class="subject-desc">CPR·AED·하임리히법<br>외상처치·RICE·PRICES</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-first_aid">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card training" href="training.html" style="opacity:1;cursor:pointer;">
+        <span class="subject-icon">🏋️</span>
+        <div class="subject-tag">Part 05</div>
+        <div class="subject-name">트레이닝방법론</div>
+        <div class="subject-desc">트레이닝 원리·처방<br>체력 요소와 측정</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-training">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
-    <a class="subject-card" href="sports_ethics.html" style="--accent:#9B7FD4;--accent-bg:rgba(155,127,212,0.08);opacity:1;cursor:pointer;">
-      <span class="subject-icon">🤝</span>
-      <div class="subject-tag">Part 08</div>
-      <div class="subject-name">생활스포츠&스포츠윤리</div>
-      <div class="subject-desc">생활체육 기본 개념·지도자<br>스포츠 인권·폭력·성폭력</div>
-      <div class="subject-meta">
-        <span class="subject-count" id="count-sports_ethics">-- 문제</span>
-        <span class="subject-arrow">→</span>
-      </div>
-    </a>
+      <a class="subject-card anatomy" href="anatomy.html">
+        <span class="subject-icon">🦴</span>
+        <div class="subject-tag">Part 06</div>
+        <div class="subject-name">기능해부학</div>
+        <div class="subject-desc">근육·관절·인대<br>신체 면과 방향 용어</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-anatomy">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
 
+      <a class="subject-card physio" href="physiology.html">
+        <span class="subject-icon">❤️</span>
+        <div class="subject-tag">Part 07</div>
+        <div class="subject-name">운동생리학</div>
+        <div class="subject-desc">에너지 시스템·심폐기능<br>근육 생리와 적응</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-physio">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="subject-card nutrition" href="nutrition.html" style="opacity:1;cursor:pointer;">
+        <span class="subject-icon">🥗</span>
+        <div class="subject-tag">Part 08</div>
+        <div class="subject-name">운동영양학</div>
+        <div class="subject-desc">3대 영양소·보충제<br>운동 전후 영양 전략</div>
+        <div class="subject-meta">
+          <span class="subject-count" id="count-nutrition">-- 문제</span>
+          <span class="subject-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
   </div>
 
   <!-- 푸터 -->
