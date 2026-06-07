@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>응급처치 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">응급처치 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+
+  // ===== PART 1 · 응급처치 기본 개념 =====
+  {
+    part: 'PART 1 · 응급처치 기본 개념 (기출)',
+    category: 'PART 1',
+    q: '응급처치란 갑자기 발생한 사고나 질환에 대해 현장에서 ___ 행하는 긴급 처치 행위로, 의료기관 치료를 받기 전 또는 응급구조원이 도착하기 전까지 시행한다.',
+    keywords: ['급하게'],
+    wrongs: ['천천히', '전문적으로', '계획적으로'],
+    answerText: '{급하게} 행하는 긴급 처치 행위',
+    a: '급하게',
+  },
+  {
+    part: 'PART 1 · 응급처치 기본 개념',
+    category: 'PART 1',
+    q: '응급처치의 중요성 4가지를 말하시오.',
+    pool: [
+      '환자의 생명을 구하고 현 상태를 유지',
+      '상태의 악화를 방지하고 고통을 경감',
+      '치료 기간과 입원 기간을 단축',
+      '의료비 지출 감소',
+    ],
+    pickCount: 3,
+    wrongs: ['환자의 체력을 증진', '약물 투여로 통증 제거', '수술 대신 처치로 완치'],
+    a: '환자의 생명을 구하고 현 상태를 유지 / 상태의 악화를 방지하고 고통을 경감 / 치료·입원 기간 단축 / 의료비 지출 감소',
+  },
+  {
+    part: 'PART 1 · 응급처치 기본 개념 (기출)',
+    category: 'PART 1',
+    q: '응급처치 3C는 Check(___), Call(___), Care(___)이다.',
+    keywords: ['확인', '전화(신고)', '처치'],
+    wrongs: ['통제', '협력', '압박', '청소', '운반'],
+    answerText: 'Check({확인}) / Call({전화(신고)}) / Care({처치})',
+    a: 'Check(확인) / Call(전화·신고) / Care(처치)',
+  },
+  {
+    part: 'PART 1 · 응급처치 기본 개념 (기출)',
+    category: 'PART 1',
+    q: '응급처치 유형 3가지는 ___, ___, ___이다.',
+    keywords: ['하임리히법', '심폐소생술(CPR)', 'PRICE'],
+    wrongs: ['붕대감기', '산소투여', '수액공급'],
+    answerText: '{하임리히법} / {심폐소생술(CPR)} / {PRICE}',
+    a: '하임리히법 / 심폐소생술(CPR) / PRICE',
+  },
+  {
+    part: 'PART 1 · 응급처치 기본 개념',
+    category: 'PART 1',
+    q: '응급처치 시 지켜야 할 사항을 말하시오.',
+    pool: [
+      '처치자의 안전을 먼저 확보',
+      '침착하게 중증 환자부터 우선 처치',
+      '생사에 대한 판단은 하지 않음',
+      '의약품 및 검증되지 않은 민간 요법 사용 금지',
+      '전문 의료 요원의 처치에 맡김',
+    ],
+    pickCount: 3,
+    wrongs: ['화상 부위 옷 즉시 제거', '빠른 처치를 위해 혼자 판단·시행', '환자 이동을 최우선으로 진행'],
+    a: '처치자 안전 확보 / 중증 환자 우선 / 생사 판단 금지 / 의약품·민간 요법 금지 / 전문 의료 요원에게 인계',
+  },
+  {
+    part: 'PART 1 · 응급처치 기본 개념',
+    category: 'PART 1',
+    q: '응급처치가 필요한 이유: 뇌는 혈액 공급이 ___분만 중단돼도 영구적으로 손상될 수 있다.',
+    keywords: ['4~5'],
+    wrongs: ['1~2', '10~15', '30'],
+    answerText: '뇌는 혈액 공급 {4~5}분 중단 시 영구 손상',
+    a: '4~5',
+  },
+
+  // ===== PART 2 · CPR·CPCR =====
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: '심폐소생술(CPR)이란 심장박동과 호흡이 없는 환자에게 ___ 순환과 ___ 환기를 시행하여 뇌 손상을 지연시키고 심장 회복을 돕는 처치이다.',
+    keywords: ['혈액', '폐'],
+    wrongs: ['산소', '기도', '림프', '혈압'],
+    answerText: '{혈액} 순환과 {폐} 환기 시행',
+    a: '혈액 / 폐',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: 'CPR을 즉시 시행하면 생존 확률이 ___ 배 이상 증가한다.',
+    keywords: ['3'],
+    wrongs: ['2', '5', '10'],
+    answerText: '생존 확률 {3}배 이상 증가',
+    a: '3',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: 'CPR 순서: ①의식 확인 → ②___ 신고 → ③호흡 확인(___ 초) → ④흉부 압박 ___회 → ⑤인공호흡 ___회 → 반복',
+    keywords: ['119', '5~10', '30', '2'],
+    wrongs: ['112', '3~5초', '10~15초', '20회', '1회', '15회'],
+    answerText: '②{119} 신고 → ③호흡 확인({5~10}초) → ④흉부 압박 {30}회 → ⑤인공호흡 {2}회',
+    a: '119 / 5~10초 / 30회 / 2회',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: '흉부 압박 위치는 흉골 ___ 1/2 지점, 깊이는 최소 ___cm·최대 ___cm, 속도는 분당 ___회이다.',
+    keywords: ['아래', '5', '6', '100~120'],
+    wrongs: ['위', '중간', '3', '4', '7', '60~80', '80~100', '120~140'],
+    answerText: '흉골 {아래} 1/2 / 깊이 {5}~{6}cm / 분당 {100~120}회',
+    a: '아래 / 5cm / 6cm / 100~120회',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR',
+    category: 'PART 2',
+    q: '흉부 압박과 이완 비율은 ___:___, 압박과 인공호흡 비율은 ___:___이다.',
+    keywords: ['50', '50', '30', '2'],
+    wrongs: ['70', '60', '40', '15', '1', '3'],
+    answerText: '압박:이완 = {50}:{50} / 압박:인공호흡 = {30}:{2}',
+    a: '50:50 / 30:2',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: 'CPR 시 가슴을 깊게 압박하는 이유: 심장의 혈액을 ___ 신체 말단부까지 혈액을 공급하기 위함이다.',
+    keywords: ['짜내어'],
+    wrongs: ['채워', '압박하여', '순환시켜'],
+    answerText: '심장의 혈액을 {짜내어} 신체 말단부까지 혈액 공급',
+    a: '짜내어',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: '가슴 이완을 확인해야 하는 이유: 가슴이 이완되어야 심장에 충분한 ___ 이 공급되며, 이를 통해 흉부 압박 시 신체에 많은 혈액을 ___ 할 수 있기 때문이다.',
+    keywords: ['혈액', '순환'],
+    wrongs: ['산소', '혈압', '공급', '이완'],
+    answerText: '심장에 충분한 {혈액} 공급 → 흉부 압박 시 혈액 {순환}',
+    a: '혈액 / 순환',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: '가슴압박 CPR보다 표준 CPR을 하는 이유: 인공호흡을 통해 환자에게 부족한 ___를 공급하기 위함이다. 특히 ___, ___ 등 비심장성 심정지에 권장한다.',
+    keywords: ['산소', '익수', '질식'],
+    wrongs: ['혈액', '이산화탄소', '골절', '출혈', '화상', '호흡'],
+    answerText: '부족한 {산소} 공급 / 특히 {익수}·{질식} 등 비심장성 심정지에 권장',
+    a: '산소 / 익수 / 질식',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: 'CPR을 중단해도 되는 경우를 말하시오.',
+    pool: [
+      '응급의료종사자에게 치료 인계한 경우',
+      '환자의 자발순환 회복이 확인된 경우',
+      '구조자가 지치거나 위험한 상황에 빠진 경우',
+      'CPR 시행 중 유보 조건이 확인된 경우',
+      '현장이 안전하지 않은 경우',
+    ],
+    pickCount: 3,
+    wrongs: ['환자 가족이 요청한 경우', 'AED가 없는 경우', '10분 이상 경과한 경우'],
+    a: '응급의료종사자 인계 / 자발순환 회복 / 구조자 탈진·위험 / CPR 유보 조건 확인 / 현장 안전 불가',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR (기출)',
+    category: 'PART 2',
+    q: '심폐뇌소생술(CPCR)은 심장·폐뿐만 아니라 ___ 손상 최소화까지 목적으로 하며, ___ 의료인이 시행하는 의료적 소생술이다.',
+    keywords: ['뇌', '전문'],
+    wrongs: ['신장', '간', '일반', '보조'],
+    answerText: '{뇌} 손상 최소화 / {전문} 의료인 시행',
+    a: '뇌 / 전문',
+  },
+  {
+    part: 'PART 2 · CPR·CPCR',
+    category: 'PART 2',
+    q: '심장의 역할은 ___ 작용으로 뇌와 체내에 혈액을 공급하는 것이다. 심정지 시 심장이 이 역할을 못하므로 ___ 압박으로 혈액을 공급한다.',
+    keywords: ['펌프', '가슴'],
+    wrongs: ['필터', '밸브', '등', '복부'],
+    answerText: '심장: {펌프} 작용 / 심정지 시 {가슴} 압박으로 대체',
+    a: '펌프 / 가슴',
+  },
+
+  // ===== PART 3 · AED =====
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED란 환자의 ___ 를 자동으로 분석하여 ___ 필요 여부를 구분하고, 전기 충격으로 세동을 제거해 심장이 규칙적으로 뛰도록 유도하는 장비이다.',
+    keywords: ['심전도', '제세동'],
+    wrongs: ['혈압', '수혈', '맥박', '산소공급'],
+    answerText: '{심전도} 자동 분석 / {제세동} 필요 여부 구분',
+    a: '심전도 / 제세동',
+  },
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED 켜기 전 실시해야 할 3가지는 ① ___ 확인, ② ___ 신고, ③ AED 사용 가능 상황 확인이다.',
+    keywords: ['의식', '119'],
+    wrongs: ['호흡', '맥박', '112'],
+    answerText: '① {의식} 확인 / ② {119} 신고 / ③ AED 사용 가능 상황 확인',
+    a: '의식 / 119',
+  },
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED 패드 부착 위치: 오른쪽 패드는 오른쪽 ___ 아래, 왼쪽 패드는 왼쪽 ___ 아래 중간 겨드랑이선이다.',
+    keywords: ['쇄골(빗장뼈)', '젖꼭지'],
+    wrongs: ['겨드랑이', '명치', '어깨', '갈비뼈'],
+    answerText: '오른쪽: {쇄골(빗장뼈)} 아래 / 왼쪽: {젖꼭지} 아래 중간 겨드랑이선',
+    a: '쇄골(빗장뼈) / 젖꼭지',
+  },
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED 사용 중 2번 물러서는 이유: 1번째는 ___ 분석 시 오작동 방지, 2번째는 전기 충격 시 ___ 위험 때문이다.',
+    keywords: ['리듬(심전도)', '감전'],
+    wrongs: ['혈압', '화재', '골절', '산소'],
+    answerText: '1번째: {리듬(심전도)} 분석 시 오작동 방지 / 2번째: {감전} 위험',
+    a: '리듬(심전도) / 감전',
+  },
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED 사용 시 주의사항을 말하시오.',
+    pool: [
+      '환자 몸에 물기 있으면 닦아낸 후 사용',
+      '패드 부착 위치에 털이 많을 경우 제모 후 부착',
+      '환자 몸에 금속 물질 있으면 제거 후 사용',
+      '리듬 분석 시 환자에게 닿지 않기',
+      '여성 환자: 브래지어 위치 조정 후 맨 가슴에 패드 부착',
+    ],
+    pickCount: 3,
+    wrongs: ['패드를 등에 부착', '충격 후 바로 환자 접촉 가능', '전원 끈 채로 패드 부착'],
+    a: '물기 제거 / 털 제모 후 부착 / 금속 제거 / 분석 시 접촉 금지 / 여성: 브래지어 조정 후 맨 가슴 부착',
+  },
+  {
+    part: 'PART 3 · AED (기출)',
+    category: 'PART 3',
+    q: 'AED에서 "제세동이 필요 없다"고 나오면 즉시 ___을 재시작한다.',
+    keywords: ['CPR(심폐소생술)'],
+    wrongs: ['AED 전원 끄기', '환자 이송', '인공호흡만'],
+    answerText: '즉시 {CPR(심폐소생술)} 재시작',
+    a: 'CPR(심폐소생술)',
+  },
+
+  // ===== PART 4 · 기도 폐쇄·하임리히법 =====
+  {
+    part: 'PART 4 · 기도 폐쇄·하임리히법 (기출)',
+    category: 'PART 4',
+    q: '기도폐쇄 유형별 응급처치: 부분 폐쇄 → ___ 유도, 완전 폐쇄(의식 있음) → ___, 완전 폐쇄(의식 없음) → ___',
+    keywords: ['기침', '하임리히법', 'CPR'],
+    wrongs: ['인공호흡', 'AED', '압박'],
+    answerText: '부분 폐쇄 → {기침} 유도 / 완전 폐쇄(의식 있음) → {하임리히법} / 완전 폐쇄(의식 없음) → {CPR}',
+    a: '기침 / 하임리히법 / CPR',
+  },
+  {
+    part: 'PART 4 · 기도 폐쇄·하임리히법 (기출)',
+    category: 'PART 4',
+    q: '하임리히법: 환자 ___ 에 서서 한 손 주먹을 ___ 와 배꼽 사이에 대고 다른 손으로 감싼 후 세게 ___ 으로 밀어올린다.',
+    keywords: ['등쪽(뒤)', '명치', '안쪽 위'],
+    wrongs: ['앞', '옆', '배꼽', '갈비뼈', '아래쪽', '옆쪽'],
+    answerText: '환자 {등쪽(뒤)}에 서서 / 주먹을 {명치}와 배꼽 사이에 / {안쪽 위}으로 밀어올리기',
+    a: '등쪽(뒤) / 명치 / 안쪽 위',
+  },
+  {
+    part: 'PART 4 · 기도 폐쇄·하임리히법',
+    category: 'PART 4',
+    q: '기도 폐쇄 확인 방법을 말하시오.',
+    pool: [
+      '양손으로 목을 감싸 쥐는 초크 사인(Choking sign)',
+      '거친 숨소리 또는 쉰 소리',
+      '말을 제대로 하지 못하는 경우',
+      '기침 가능 여부',
+      '얼굴·입술이 파랗게 변하는 청색증',
+    ],
+    pickCount: 3,
+    wrongs: ['발열 여부', '혈압 하락', '동공 확대'],
+    a: '초크 사인 / 거친·쉰 숨소리 / 말하기 어려움 / 기침 가능 여부 / 청색증',
+  },
+
+  // ===== PART 5 · 외상 처치 =====
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '출혈 응급처치: 깨끗한 거즈로 출혈 부위를 ___ 압박하고, 상처 부위를 ___ 보다 높게 올린다.',
+    keywords: ['직접', '심장'],
+    wrongs: ['간접', '강하게', '머리', '바닥'],
+    answerText: '{직접} 압박 / {심장}보다 높게',
+    a: '직접 / 심장',
+  },
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '드레싱을 하는 이유: ___ 방지와 ___ 유지, 상처 배액 흡수를 위함이다.',
+    keywords: ['2차 감염', '습도'],
+    wrongs: ['출혈', '체온', '골절', '압박', '통증', '건조'],
+    answerText: '{2차 감염} 방지 / {습도} 유지 / 상처 배액 흡수',
+    a: '2차 감염 / 습도',
+  },
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '골절 응급처치: 함부로 ___ 금지, 출혈 시 ___ 압박, 뼈 돌출 시 억지로 밀어넣지 말고 ___으로 고정.',
+    keywords: ['이동·접촉', '직접', '부목'],
+    wrongs: ['간접', '깁스', '마사지', '냉찜질'],
+    answerText: '{이동·접촉} 금지 / {직접} 압박 지혈 / {부목}으로 고정',
+    a: '이동·접촉 / 직접 / 부목',
+  },
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '골절 분류: ___ 골절은 피부 상처 없이 외부와 차단된 상태, ___ 골절은 뼈가 피부 밖으로 노출된 상태(감염 위험 큼)이다.',
+    keywords: ['폐쇄성', '개방성'],
+    wrongs: ['단순', '복합', '1도', '2도'],
+    answerText: '{폐쇄성} 골절: 피부 상처 없음 / {개방성} 골절: 뼈 외부 노출·감염 위험',
+    a: '폐쇄성 / 개방성',
+  },
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '화상 종류 5가지를 말하시오.',
+    pool: ['화염 화상', '열탕 화상', '전기 화상', '화학 화상', '접촉 화상'],
+    pickCount: 3,
+    wrongs: ['동상', '자외선 화상', '압박 화상'],
+    a: '화염·열탕·전기·화학·접촉 화상',
+  },
+  {
+    part: 'PART 5 · 외상 처치 (기출)',
+    category: 'PART 5',
+    q: '화상 응급처치: 1도(발적·통증) → ___, 2도(수포·부종) → ___·멸균 드레싱, 3도(통증 없음·흑갈색) → 멸균 드레싱·___ 방지',
+    keywords: ['찬물', '찬물', '쇼크'],
+    wrongs: ['온찜질', '얼음', '냉찜질포', '출혈', '골절', '탈수'],
+    answerText: '1도: {찬물} / 2도: {찬물}·멸균 드레싱 / 3도: 멸균 드레싱·{쇼크} 방지',
+    a: '1도: 찬물 / 2도: 찬물·멸균 드레싱 / 3도: 멸균 드레싱·쇼크 방지',
+  },
+
+  // ===== PART 6 · 쇼크·저체온·동상 =====
+  {
+    part: 'PART 6 · 쇼크·저체온·동상 (기출)',
+    category: 'PART 6',
+    q: '쇼크의 종류를 말하시오.',
+    pool: [
+      '출혈성 쇼크: 급격한 출혈로 혈압 하락',
+      '심인성(심장성) 쇼크: 심장 기능 감소',
+      '패혈성 쇼크: 심각한 혈액 감염',
+      '과민성 쇼크: 알러지 반응',
+      '저혈량 쇼크: 혈액 순환량 부족',
+      '신경성 쇼크: 척추 손상 등',
+    ],
+    pickCount: 3,
+    wrongs: ['운동성 쇼크', '열성 쇼크', '압박성 쇼크'],
+    a: '출혈성·심인성·패혈성·과민성·저혈량·신경성 쇼크',
+  },
+  {
+    part: 'PART 6 · 쇼크·저체온·동상',
+    category: 'PART 6',
+    q: '쇼크 환자 응급처치: 환자를 눕히고 ___ 를 심장보다 높게 유지하여 ___ 순환을 원활하게 한다.',
+    keywords: ['다리', '혈액'],
+    wrongs: ['머리', '팔', '산소', '림프'],
+    answerText: '{다리}를 심장보다 높게 / {혈액} 순환 원활하게',
+    a: '다리 / 혈액',
+  },
+  {
+    part: 'PART 6 · 쇼크·저체온·동상 (기출)',
+    category: 'PART 6',
+    q: '저체온증이란 체온이 ___°C 이하로 떨어진 상태로, 응급처치는 젖은 옷 제거 후 ___ 로 감싸고 따뜻한 수분·당분을 공급한다.',
+    keywords: ['35', '담요'],
+    wrongs: ['37', '36', '34', '냉찜질포', '핫팩'],
+    answerText: '체온 {35}°C 이하 / {담요}로 감싸기',
+    a: '35 / 담요',
+  },
+  {
+    part: 'PART 6 · 쇼크·저체온·동상 (기출)',
+    category: 'PART 6',
+    q: '동상 응급처치: 마찰·움직임 ___, ___~___°C 물에 30~60분 담그기',
+    keywords: ['금지', '37', '42'],
+    wrongs: ['권장', '20~30', '0~4', '50~60'],
+    answerText: '마찰·움직임 {금지} / {37}~{42}°C 물에 담그기',
+    a: '마찰·움직임 금지 / 37~42°C',
+  },
+
+  // ===== PART 7 · RICE·PRICES =====
+  {
+    part: 'PART 7 · RICE·PRICES (기출)',
+    category: 'PART 7',
+    q: 'PRICE는 Protection(___)·Rest(___)·Ice(___)·Compression(___)·Elevation(___)이고, PRICES는 여기에 Splint(___)가 추가된다.',
+    keywords: ['보호', '휴식', '냉각', '압박', '거상', '부목'],
+    wrongs: ['재활', '온찜질', '마사지', '수평유지', '이완', '마찰'],
+    answerText: 'P({보호}) R({휴식}) I({냉각}) C({압박}) E({거상}) S({부목})',
+    a: '보호 / 휴식 / 냉각 / 압박 / 거상 / 부목',
+  },
+  {
+    part: 'PART 7 · RICE·PRICES',
+    category: 'PART 7',
+    q: 'RICE: R은 ___, I는 ___, C는 ___, E는 ___(부상 부위를 심장보다 높게)이다.',
+    keywords: ['휴식', '냉찜질', '압박', '거상'],
+    wrongs: ['운동', '온찜질', '마사지', '수평유지', '재활', '얼음찜질', '하강', '부목'],
+    answerText: 'R({휴식}) I({냉찜질}) C({압박}) E({거상})',
+    a: '휴식(Rest) / 냉찜질(Ice) / 압박(Compression) / 거상(Elevation)',
+  },
+  {
+    part: 'PART 7 · RICE·PRICES',
+    category: 'PART 7',
+    q: '맥박촉진법: ___ 끝을 이용하여 주로 ___ 이나 목 부위의 동맥을 촉진하여 심박동을 확인한다.',
+    keywords: ['손가락', '손목'],
+    wrongs: ['손바닥', '발목', '발가락', '팔꿈치'],
+    answerText: '{손가락} 끝으로 {손목}이나 목 부위 동맥 촉진',
+    a: '손가락 / 손목',
+  },
+];
+
+// ── 카테고리 설정 ──
+const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4','PART 5','PART 6','PART 7'];
+const CATEGORY_LABELS = {
+  ALL:'전체',
+  'PART 1':'PART 1 · 응급처치 기본 개념',
+  'PART 2':'PART 2 · CPR·CPCR',
+  'PART 3':'PART 3 · AED',
+  'PART 4':'PART 4 · 기도 폐쇄·하임리히법',
+  'PART 5':'PART 5 · 외상 처치',
+  'PART 6':'PART 6 · 쇼크·저체온·동상',
+  'PART 7':'PART 7 · RICE·PRICES',
+};
+
+const LS_KEY = 'mentorone_wrong_first_aid';
+
+// ── 상태 변수 ──
+let currentCards = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answeredSet = new Set();
+let wrongSet = new Set();
+let currentCategory = 'ALL';
+let currentMode = 'flash';
+
+let blankKeywords = [];
+let blankFilled = [];
+let blankResults = [];
+let blankCurrentIdx = 0;
+let blankCardCorrect = true;
+let currentAnswerText = '';
+
+// ── localStorage ──
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+  catch { return []; }
+}
+function lsSave(cards) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {}
+}
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); }
+  buildTabs();
+}
+function lsRemoveWrong(q) {
+  lsSave(lsLoad().filter(c => c.q !== q));
+  buildTabs();
+}
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+// ── 초기화 ──
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set();
+  updateScoreBadges();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]);
+  const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('mode') === 'wrongnote') {
+  window.addEventListener('DOMContentLoaded', () => { init(); loadWrongNote(); });
+} else {
+  init();
+}
+</script>
+</body>
+</html>
