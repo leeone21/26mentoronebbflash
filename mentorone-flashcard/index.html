@@ -412,6 +412,17 @@
       </div>
     </a>
 
+    <a class="subject-card" href="regulation.html" style="--accent:#A07BE0;--accent-bg:rgba(160,123,224,0.08);opacity:1;cursor:pointer;">
+      <span class="subject-icon">📋</span>
+      <div class="subject-tag">Part 05</div>
+      <div class="subject-name">보디빌딩 규정</div>
+      <div class="subject-desc">IFBB 일반규정·종목별 규정<br>도핑·등록·심사 규정</div>
+      <div class="subject-meta">
+        <span class="subject-count" id="count-regulation">-- 문제</span>
+        <span class="subject-arrow">→</span>
+      </div>
+    </a>
+
   </div>
 
   <!-- 푸터 -->
@@ -431,6 +442,7 @@ const WRONG_NOTE_KEYS = {
   physio:    'mentorone_wrong_physiology',
   training:  'mentorone_wrong_training',
   nutrition: 'mentorone_wrong_nutrition',
+  regulation: 'mentorone_wrong_regulation',
 };
 
 // 각 과목 총 카드 수
@@ -439,6 +451,7 @@ const TOTAL_COUNTS = {
   physio: 44,
   training: 65,
   nutrition: 43,
+  regulation: 162,
 };
 
 function loadWrongCount(key) {
@@ -453,6 +466,7 @@ function updateUI() {
   document.getElementById('count-physio').textContent = `${TOTAL_COUNTS.physio}문제`;
   document.getElementById('count-training').textContent = `${TOTAL_COUNTS.training}문제`;
   document.getElementById('count-nutrition').textContent = `${TOTAL_COUNTS.nutrition}문제`;
+  document.getElementById('count-regulation').textContent = `${TOTAL_COUNTS.regulation}문제`;
 
   // 전체 오답 수 합산
   const total = Object.values(WRONG_NOTE_KEYS).reduce((sum, key) => {
@@ -484,6 +498,7 @@ function goWrongNote() {
     physio:    'physiology.html',
     training:  'training.html',
     nutrition: 'nutrition.html',
+    regulation: 'regulation.html',
   };
 
   window.location.href = urls[top.subject] + '?mode=wrongnote';

@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보디빌딩 규정 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">보디빌딩 규정 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+
+  // ===== PART 1 · IFBB 일반규정 =====
+
+  // --- 역사 및 기관 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '보디빌딩의 창시자와 국내 보급자를 말하시오.',
+    keywords: ['유젠 산도우 (19세기 독일 태생)', '문곡 서상천 선생 (역도와 함께 보디빌딩 전파)'],
+    wrongs: ['아놀드 슈워제네거 / 김성률', '유젠 산도우 / 박정희', '찰스 아틀라스 / 문곡 서상천'],
+    answerText: '창시자: {유젠 산도우 (19세기 독일 태생)} / 국내 보급: {문곡 서상천 선생 (역도와 함께 보디빌딩 전파)}',
+    a: '창시자: 유젠 산도우 (19세기 독일 태생) / 국내 보급: 문곡 서상천 선생 (역도와 함께 보디빌딩 전파)',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB, KBBF, ABBF, KADA의 정식 명칭을 말하시오.',
+    pool: [
+      'IFBB: International Federation of Bodybuilding and Fitness',
+      'KBBF: Korean Bodybuilding & Fitness Federation (대한보디빌딩협회)',
+      'ABBF: Asian Bodybuilding and Physique Sports Federation',
+      'KADA: Korea Anti-Doping Agency (한국도핑방지위원회)',
+    ],
+    pickCount: 3,
+    wrongs: ['IFBB: International Fitness & Bodybuilding Federation', 'KBBF: Korea Body & Fitness Federation', 'KADA: Korean Anti-Drug Agency'],
+    a: 'IFBB: International Federation of Bodybuilding and Fitness / KBBF: Korean Bodybuilding & Fitness Federation / ABBF: Asian Bodybuilding and Physique Sports Federation / KADA: Korea Anti-Doping Agency',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '보디빌딩 종목별 IFBB 총회 공식 인정 연도와 장소를 말하시오.',
+    pool: [
+      '남자 보디빌딩: 1970년 유고슬라비아 베오그라드',
+      '여자 보디빌딩: 1982년 벨기에 브뤼헤 (2013년 여자 피지크로 대체)',
+      '보디 피트니스: 2002년 이집트 카이로',
+      '클래식 보디빌딩: 2005년 중국 상하이',
+      '비키니: 2010년 아제르바이잔 바쿠',
+      '남녀 피지크: 2012년 에콰도르 과야킬',
+      '남자 클래식 피지크: 2018년 스페인 베니돔',
+    ],
+    pickCount: 3,
+    wrongs: ['클래식 보디빌딩: 2002년 이집트 카이로', '비키니: 2012년 에콰도르 과야킬', '남자 피지크: 2010년 아제르바이잔 바쿠'],
+    a: '남자 보디빌딩: 1970년 유고슬라비아 베오그라드 / 여자 보디빌딩: 1982년 벨기에 브뤼헤 / 보디 피트니스: 2002년 이집트 카이로 / 클래식 보디빌딩: 2005년 중국 상하이 / 비키니: 2010년 아제르바이잔 바쿠 / 남녀 피지크: 2012년 에콰도르 과야킬 / 남자 클래식 피지크: 2018년 스페인 베니돔',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '보디빌딩과 역도의 차이를 설명하시오.',
+    keywords: ['보디빌딩: 근비대 목적·최대 근력 70~85%·1세트 8~12회·균형 잡힌 육체미 심사', '역도: 파워·힘 목적·최대 근력 80% 이상·1세트 1~3회·무게 들어 올리기 심사'],
+    wrongs: ['보디빌딩: 파워 목적·1세트 1~3회 / 역도: 근비대·1세트 8~12회', '보디빌딩: 최대 근력 80%↑ / 역도: 최대 근력 70~85%', '두 종목 모두 근비대 목적·동일한 방식'],
+    answerText: '{보디빌딩: 근비대 목적·최대 근력 70~85%·1세트 8~12회·균형 잡힌 육체미 심사} / {역도: 파워·힘 목적·최대 근력 80% 이상·1세트 1~3회·무게 들어 올리기 심사}',
+    a: '보디빌딩: 근비대 목적·최대 근력 70~85%·1세트 8~12회·균형 잡힌 육체미 심사 / 역도: 파워·힘 목적·최대 근력 80% 이상·1세트 1~3회·무게 들어 올리기 심사',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '보디빌딩의 효과를 설명하시오.',
+    pool: ['근력 향상', '근지구력 향상', '심폐지구력 향상', '유연성 향상', '체지방 감소', '자세 교정'],
+    pickCount: 3,
+    wrongs: ['순발력 향상', '골밀도 감소', '심박수 증가'],
+    a: '근력·근지구력·심폐지구력·유연성 향상 / 체지방 감소 / 자세 교정',
+  },
+
+  // --- 체급 및 계체 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '세계선수권대회에서 한 체급 출전 선수가 5명 미만인 경우 처리 방법을 설명하시오.',
+    keywords: ['다음 상위 체급과 통합', '통합 후에도 5명 미만 시 타이틀·메달 미수여', '2년 연속 5명 미만 시 체급 삭제 가능'],
+    wrongs: ['즉시 해당 체급 폐지', '3명 미만 시 통합 / 1년 연속 미만 시 삭제', '5명 미만이어도 경기 그대로 진행'],
+    answerText: '{다음 상위 체급과 통합} / {통합 후에도 5명 미만 시 타이틀·메달 미수여} / {2년 연속 5명 미만 시 체급 삭제 가능}',
+    a: '다음 상위 체급과 통합 / 통합 후에도 5명 미만 시 타이틀·메달 미수여 / 2년 연속 5명 미만 시 체급 삭제 가능',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '계체에 실패한 선수에게 주어지는 시간과 미복귀 시 처리는?',
+    keywords: ['최대 30분', '30분 내 미복귀 시 경기 참가 불가'],
+    wrongs: ['최대 15분 / 재도전 1회 허용', '최대 60분 / 경고 후 참가 가능', '최대 30분 / 상위 체급 출전 가능'],
+    answerText: '{최대 30분} 제공 / {30분 내 미복귀 시 경기 참가 불가} / 복귀 책임은 선수에게 있음',
+    a: '최대 30분 제공 / 30분 내 미복귀 시 경기 참가 불가 / 복귀 책임은 선수에게 있음',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '선택 체급 제한 체중을 초과한 선수는 어떻게 되는가?',
+    keywords: ['다음 상위 체급 출전 가능'],
+    wrongs: ['즉시 실격', '하위 체급으로 변경 가능', '30분 내 감량 후 재측정'],
+    answerText: '{다음 상위 체급 출전 가능}',
+    a: '다음 상위 체급 출전 가능',
+  },
+
+  // --- 대회 진행 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '예선 라운드 진행 기준과 통과 인원을 설명하시오.',
+    keywords: ['15명 초과 시 예선 라운드 진행', '상위 15명 제1라운드 진출'],
+    wrongs: ['10명 초과 시 / 상위 10명 진출', '20명 초과 시 / 상위 15명 진출', '15명 초과 시 / 상위 6명 바로 결선'],
+    answerText: '{15명 초과 시 예선 라운드 진행} / {상위 15명 제1라운드 진출} / 필요 시 심판위원장이 10~17명으로 조정 가능',
+    a: '15명 초과 시 예선 라운드 진행 / 상위 15명 제1라운드 진출 / 필요 시 심판위원장이 10~17명으로 조정 가능',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '준결선(제1라운드) 생략 기준과 결선 진출 인원을 설명하시오.',
+    keywords: ['7명 이하 시 제1라운드 생략', '상위 6명 결선 진출·0점으로 시작'],
+    wrongs: ['5명 이하 시 생략 / 상위 8명 결선', '10명 이하 시 생략 / 상위 6명 결선', '7명 이하 시 생략 / 상위 3명 결선'],
+    answerText: '{7명 이하 시 제1라운드 생략} / {상위 6명 결선 진출·0점으로 시작}',
+    a: '7명 이하 시 제1라운드 생략 / 상위 6명 결선 진출·0점으로 시작',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '결선 채점 방식과 최종 순위 결정 방법을 설명하시오.',
+    keywords: ['심판 9명이 1~6위 순위 부여', '최종 점수 가장 낮은 선수가 1위'],
+    wrongs: ['심판 9명이 점수 부여 / 높은 점수가 1위', '심판 6명이 1~6위 부여 / 낮은 점수가 1위', '최고·최저 제외 후 합산 / 높은 점수가 1위'],
+    answerText: '{심판 9명이 1~6위 순위 부여} / {최종 점수 가장 낮은 선수가 1위} / 동일 순위 부여 불가',
+    a: '심판 9명이 1~6위 순위 부여 / 최종 점수 가장 낮은 선수가 1위 / 동일 순위 부여 불가',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '허용되는 남자 종목 간 중복 출전 조합을 설명하시오.',
+    keywords: ['게임즈 클래식-클래식 보디빌딩-클래식 피지크-보디빌딩', '남자 피트니스-남자 피지크'],
+    wrongs: ['보디빌딩-피지크-비키니', '클래식 보디빌딩-피지크-비키니', '보디빌딩-클래식 피지크-피트니스'],
+    answerText: '① {게임즈 클래식-클래식 보디빌딩-클래식 피지크-보디빌딩} / ② {남자 피트니스-남자 피지크}',
+    a: '① 게임즈 클래식-클래식 보디빌딩-클래식 피지크-보디빌딩 / ② 남자 피트니스-남자 피지크',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '공식 선수 등록(계체) 시 반드시 지참해야 할 서류·물품을 설명하시오.',
+    pool: ['유효한 IFBB 국제 카드', '유효한 여권 또는 사진 포함 신분증', '음악 CD(선수 이름·시작 부분 표시) 또는 MP3 USB'],
+    pickCount: 3,
+    wrongs: ['도핑 검사 결과서', '체지방 측정 결과지', '소속 국가 추천서'],
+    a: '유효한 IFBB 국제 카드 / 유효한 여권 또는 사진 포함 신분증 / 음악 CD(선수 이름·시작 부분 표시) 또는 MP3 USB',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '포즈용 음악에 불경하거나 저속한 언어가 포함된 경우 처리 방법은?',
+    keywords: ['심판위원장이 즉시 음악 중지·무대 퇴장 지시', '재포즈 기회 없음·해당 라운드 0점'],
+    wrongs: ['경고 후 다른 음악으로 교체 가능', '감점 처리 후 계속 진행', '해당 라운드 점수 절반 감점'],
+    answerText: '{심판위원장이 즉시 음악 중지·무대 퇴장 지시} / {재포즈 기회 없음·해당 라운드 0점}',
+    a: '심판위원장이 즉시 음악 중지·무대 퇴장 지시 / 재포즈 기회 없음·해당 라운드 0점',
+  },
+
+  // --- 시상식 및 오버롤 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB 국제 대회 시상식 선수 호명 순서를 설명하시오.',
+    keywords: ['6위부터 역순 호명', '6위: 시상대 왼편 / 5위: 오른편'],
+    wrongs: ['1위부터 순서대로 호명', '추첨으로 순서 결정', '3위부터 역순 호명'],
+    answerText: '{6위부터 역순 호명} / {6위: 시상대 왼편 / 5위: 오른편} → 4·3·2·1위 순',
+    a: '6위부터 역순 호명 / 6위: 시상대 왼편, 5위: 오른편 → 4·3·2·1위 순',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '시상식에서 결과에 불만을 드러내거나 무대를 조기에 떠나는 경우 처리는?',
+    keywords: ['실격 처리'],
+    wrongs: ['경고 후 다음 대회 출전 제한', '점수 감점', '해당 순위 박탈 후 재심사'],
+    answerText: '{실격 처리} / 메달·상 수령 후 사진 촬영 종료까지 참여 의무',
+    a: '실격 처리 / 메달·상 수령 후 사진 촬영 종료까지 참여 의무',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB 대회 오버롤 진행 시기와 방식을 설명하시오.',
+    keywords: ['마지막 체급 시상식 직후', '채점지 6으로 전 선수 순위 부여'],
+    wrongs: ['경기 시작 전 / 채점지 1로 진행', '제2라운드 직후 / 상위 3명만 참가', '마지막 체급 시상 직후 / 규정포즈 없이 쿼터턴만'],
+    answerText: '{마지막 체급 시상식 직후} 진행 / {채점지 6으로 전 선수 순위 부여}',
+    a: '마지막 체급 시상식 직후 진행 / 채점지 6으로 전 선수 순위 부여',
+  },
+
+  // --- 경기장·복장·컬러링 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB 국제 대회 무대 최적 규격을 설명하시오.',
+    keywords: ['높이 80~100cm', '너비 16~24m·깊이 6~8m', '회색 카펫·중간색 배경'],
+    wrongs: ['높이 60cm / 너비 6m 이상·깊이 1.5m 이상', '높이 100~120cm / 너비 10~15m·깊이 4~6m', '높이 80~100cm / 너비 6~8m·깊이 16~24m'],
+    answerText: '{높이 80~100cm} / {너비 16~24m·깊이 6~8m} / {회색 카펫·중간색 배경}',
+    a: '높이 80~100cm / 너비 16~24m·깊이 6~8m / 회색 카펫·중간색 배경(무광택 진한 파란색 또는 검은색)',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '무대 조명 기준을 설명하시오.',
+    keywords: ['평균 밝기 4,500~5,000럭스', '그늘진 구역 없어야 함', '전체 라인업 조명·무대 중앙 집중 조명 2가지 설정'],
+    wrongs: ['평균 밝기 2,000~3,000럭스 / 그늘 허용', '평균 밝기 4,500~5,000럭스 / 조명 1가지 설정', '밝기 기준 없음 / 3가지 조명 설정'],
+    answerText: '{평균 밝기 4,500~5,000럭스} / {그늘진 구역 없어야 함} / {전체 라인업 조명·무대 중앙 집중 조명 2가지 설정}',
+    a: '평균 밝기 4,500~5,000럭스 / 그늘진 구역 없어야 함 / 전체 라인업 조명·무대 중앙 집중 조명 2가지 설정',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '탈의실 접근 및 무대 뒤 출입 규정을 설명하시오.',
+    keywords: ['필수 인력으로 엄격히 제한', '배우자·가족·친척 접근 불가', '코치·트레이너는 선수와 동일 성별이어야 함'],
+    wrongs: ['누구나 접근 가능', '배우자만 허용·가족 불가', '코치는 성별 무관·가족 동반 가능'],
+    answerText: '{필수 인력으로 엄격히 제한} / {배우자·가족·친척 접근 불가} / {코치·트레이너는 선수와 동일 성별이어야 함} / 카메라·영상 장치 반입 금지',
+    a: '필수 인력으로 엄격히 제한 / 배우자·가족·친척 접근 불가 / 코치·트레이너는 선수와 동일 성별이어야 함 / 카메라·영상 장치 반입 금지',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '컬러링(무대 태닝) 규정을 설명하시오.',
+    keywords: ['탄·브론저 사용 금지(지워지면 무대 입장 불가)', '인공 착색·셀프 태닝 허용(예선 24시간 전 이후)', '메탈릭 펄·황금빛·광택 제품 엄격히 금지'],
+    wrongs: ['탄·브론저 허용 / 셀프 태닝 금지', '모든 태닝 제품 금지', '메탈릭 펄 허용·셀프 태닝 금지'],
+    answerText: '{탄·브론저 사용 금지(지워지면 무대 입장 불가)} / {인공 착색·셀프 태닝 허용(예선 24시간 전 이후)} / {메탈릭 펄·황금빛·광택 제품 엄격히 금지}',
+    a: '탄·브론저 사용 금지(지워지면 무대 입장 불가) / 인공 착색·셀프 태닝 허용(예선 24시간 전 이후) / 메탈릭 펄·황금빛·광택 제품 엄격히 금지',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '남자 대회 공통 복장 금지 사항을 설명하시오.',
+    pool: ['결혼반지 제외 악세서리(신발·안경·시계·귀걸이 등) 금지', '임플란트·액상 주사로 신체 형태 변형 금지', '지워지는 탄·브론저 사용 금지', '패딩 처리 금지'],
+    pickCount: 3,
+    wrongs: ['문신 금지', '기하학적 무늬 금지', '단색 이외 복장 금지'],
+    a: '결혼반지 제외 악세서리 금지 / 임플란트·액상 주사 금지 / 탄·브론저 금지 / 패딩 처리 금지',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '경기 대기 및 무대 관련 주의사항을 설명하시오.',
+    keywords: ['체급 시작 45분 전까지 준비 구역 도착', '호명 시 불참 시 탈락 가능', '무대 위 껌·음식·음료 금지'],
+    wrongs: ['30분 전까지 도착 / 불참 시 경고 1회', '1시간 전까지 도착 / 음료만 금지', '45분 전까지 도착 / 음식만 금지'],
+    answerText: '{체급 시작 45분 전까지 준비 구역 도착} / {호명 시 불참 시 탈락 가능} / {무대 위 껌·음식·음료 금지}',
+    a: '체급 시작 45분 전까지 준비 구역 도착 / 호명 시 불참 시 탈락 가능 / 무대 위 껌·음식·음료 금지',
+  },
+
+  // --- 심판 구성 및 행동강령 ---
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '보디빌딩 심판 구성을 설명하시오.',
+    keywords: ['심판위원장 1명·심판장 1명·심판원 9명', '여성 심사 시 여성 심판 4명 이상'],
+    wrongs: ['심판위원장 1명·심판원 7명', '심판위원장 2명·심판원 9명', '심판위원장 1명·심판장 1명·심판원 7명'],
+    answerText: '{심판위원장 1명·심판장 1명·심판원 9명} / {여성 심사 시 여성 심판 4명 이상} / 각 심판원에 예비 심판원 배정',
+    a: '심판위원장 1명·심판장 1명·심판원 9명 / 여성 심사 시 여성 심판 4명 이상 / 각 심판원에 예비 심판원 배정',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB 국제 심판 등급 체계(C→B→A)를 설명하시오.',
+    keywords: ['C등급: 세미나+이론시험+실기시험', 'B등급: 3년 연속 3회 이상 또는 2년 연속 12회 이상+세미나', 'A등급: B등급 기준과 동일하게 충족+세미나'],
+    wrongs: ['C→B: 2년 활동+시험 / B→A: 3년 활동', 'C등급: 이론시험만 / B등급: 1년 활동', 'A·B·C 등급 모두 동일한 기준'],
+    answerText: '{C등급: 세미나+이론시험+실기시험} / {B등급: 3년 연속 3회 이상 또는 2년 연속 12회 이상+세미나} / {A등급: B등급 기준과 동일하게 충족+세미나}',
+    a: 'C등급: 세미나+이론시험+실기시험 / B등급: 3년 연속 3회 이상 또는 2년 연속 12회 이상+세미나 / A등급: B등급과 동일 기준 충족+세미나',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: 'IFBB 심판이 즉시 퇴출되는 행위 5가지를 말하시오.',
+    pool: ['다른 심판과의 담화', '다른 심판의 결정에 영향을 미치려는 시도', '심사 중 사진 촬영', '출전 선수 코칭', '주류 음용 또는 마약·주류 영향 하에 심사'],
+    pickCount: 3,
+    wrongs: ['심판 복장 규정 위반', '채점지 분실', '심판석 이탈'],
+    a: '다른 심판과의 담화 / 다른 심판 결정에 영향 시도 / 심사 중 사진 촬영 / 선수 코칭 / 주류 음용 또는 마약·주류 영향 하에 심사',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '코치를 겸하는 IFBB 심판이 본인이 지도하는 선수가 무대에 오를 때 해야 할 행동은?',
+    keywords: ['심판위원석을 떠나야 함', '은폐 시 1차 1년 자격정지·2차 2년·3차 영구 삭제'],
+    wrongs: ['계속 심사 가능·단 해당 선수 채점 제외', '기권 신청 후 관중석으로 이동', '심판위원장에게 보고 후 계속 심사'],
+    answerText: '{심판위원석을 떠나야 함} / 은폐 시 {은폐 시 1차 1년 자격정지·2차 2년·3차 영구 삭제}',
+    a: '심판위원석을 떠나야 함 / 은폐 시 1차 1년 자격정지·2차 2년·3차 영구 삭제',
+  },
+  {
+    part: 'PART 1 · IFBB 일반규정',
+    category: 'PART 1',
+    q: '쿼터턴만 있는 종목 3가지를 말하시오.',
+    keywords: ['남자 피지크', '여자 보디 피트니스', '여자 비키니'],
+    wrongs: ['남자 클래식 피지크', '여자 피지크', '남자 보디빌딩'],
+    answerText: '{남자 피지크} / {여자 보디 피트니스} / {여자 비키니}',
+    a: '남자 피지크 / 여자 보디 피트니스 / 여자 비키니',
+  },
+
+  // ===== PART 2 · 남자 보디빌딩 =====
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩이 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['1970년', '유고슬라비아 베오그라드'],
+    wrongs: ['1982년 / 벨기에 브뤼헤', '1970년 / 미국 뉴욕', '1968년 / 유고슬라비아 베오그라드'],
+    answerText: '{1970년} / {유고슬라비아 베오그라드} IFBB 국제 총회',
+    a: '1970년 / 유고슬라비아 베오그라드 IFBB 국제 총회',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '여자 보디빌딩 공식 인정 연도·장소와 이후 변경 사항을 설명하시오.',
+    keywords: ['1982년·벨기에 브뤼헤', '2013년 모로코 마라케시·여자 피지크로 대체'],
+    wrongs: ['1980년·미국 뉴욕 / 2015년 여자 피트니스로 대체', '1982년·벨기에 브뤼헤 / 2010년 여자 비키니로 대체', '1985년·독일 베를린 / 2013년 여자 피지크로 대체'],
+    answerText: '{1982년·벨기에 브뤼헤} 인정 / {2013년 모로코 마라케시·여자 피지크로 대체}',
+    a: '1982년 벨기에 브뤼헤 인정 / 2013년 모로코 마라케시에서 여자 피지크로 대체',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 시니어 체급 9개를 말하시오.',
+    pool: ['Bantamweight (65kg↓)', 'Lightweight (70kg↓)', 'Welterweight (75kg↓)', 'Light-Middleweight (80kg↓)', 'Middleweight (85kg↓)', 'Super-Middleweight (90kg↓)', 'Light-Heavyweight (95kg↓)', 'Heavyweight (100kg↓)', 'Super-Heavyweight (100kg↑)'],
+    pickCount: 3,
+    wrongs: ['Featherweight (60kg↓)', 'Cruiserweight (88kg↓)', 'Super-Heavyweight (105kg↑)'],
+    a: 'Bantam(65↓) / Light(70↓) / Welter(75↓) / Light-Middle(80↓) / Middle(85↓) / Super-Middle(90↓) / Light-Heavy(95↓) / Heavy(100↓) / Super-Heavy(100↑)',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 주니어 체급을 연령대별로 설명하시오.',
+    keywords: ['16~20세: 오픈 체급 1개', '21~23세: Lightweight(75↓)·Heavyweight(75↑)'],
+    wrongs: ['16~20세: 2개 체급 / 21~23세: 오픈 1개', '16~18세: 오픈 / 19~23세: 2개 체급', '16~20세: 오픈 / 21~23세: 3개 체급'],
+    answerText: '{16~20세: 오픈 체급 1개} / {21~23세: Lightweight(75↓)·Heavyweight(75↑)}',
+    a: '16~20세: 오픈 체급 1개 / 21~23세: Lightweight(75kg↓)·Heavyweight(75kg↑)',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 경기 라운드 구성을 설명하시오.',
+    keywords: ['예선 라운드(규정포즈 4개)', '제1라운드(규정포즈 4개+7개 비교심사)', '제2라운드(규정포즈 7개×2+포즈다운)', '제3라운드(자유포즈 최대 60초)'],
+    wrongs: ['예선·제1·제2 3개 라운드', '제1라운드(쿼터턴) / 제2라운드(자유포즈)', '예선·제1·제2·제3·포즈다운 5단계'],
+    answerText: '{예선 라운드(규정포즈 4개)} → {제1라운드(규정포즈 4개+7개 비교심사)} → {제2라운드(규정포즈 7개×2+포즈다운)} → {제3라운드(자유포즈 최대 60초)}',
+    a: '예선 라운드(규정포즈 4개) → 제1라운드(규정포즈 4개+7개 비교심사) → 제2라운드(규정포즈 7개×2+포즈다운) → 제3라운드(자유포즈 최대 60초)',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 예선 라운드 규정포즈 4개를 말하시오.',
+    pool: ['Front Double Biceps', 'Side Chest', 'Back Double Biceps', 'Abdominals & Thighs'],
+    pickCount: 3,
+    wrongs: ['Front Lat Spread', 'Back Lat Spread', 'Side Triceps'],
+    a: 'Front Double Biceps / Side Chest / Back Double Biceps / Abdominals & Thighs',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 제1라운드 규정포즈 7개를 말하시오.',
+    pool: ['Front Double Biceps', 'Front Lat Spread', 'Side Chest', 'Back Double Biceps', 'Back Lat Spread', 'Side Triceps', 'Abdominals & Thighs'],
+    pickCount: 3,
+    wrongs: ['Vacuum Pose', 'Classic Pose', 'Most Muscular'],
+    a: 'Front Double Biceps / Front Lat Spread / Side Chest / Back Double Biceps / Back Lat Spread / Side Triceps / Abdominals & Thighs',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 제3라운드(자유포즈) 심사 기준을 설명하시오.',
+    keywords: ['음악에 맞춰 육체미 표현', '육체미 50%+개인 자유포즈 50%'],
+    wrongs: ['규정포즈 정확도 / 체급별 체중', '근육 선명도·혈관 / 체지방률', '포즈 수행 속도 / 무대 동선'],
+    answerText: '{음악에 맞춰 육체미 표현} / {육체미 50%+개인 자유포즈 50%} / Moon포즈·복장 당기기 금지',
+    a: '음악에 맞춰 육체미 표현 / 육체미 50%+개인 자유포즈 50% / Moon포즈·복장 당기기 금지',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 복장 규정을 설명하시오.',
+    keywords: ['단색 불투명 트렁크', '대둔근 3/4 이상·전면·측면 5cm', '패딩 금지·임플란트 금지'],
+    wrongs: ['체조용 반바지 / 대둔근 전체·측면 15cm / 패딩 금지', '루즈핏 반바지 / 대둔근 1/2·측면 5cm / 장식 허용', '단색 트렁크 / 대둔근 1/2·측면 10cm / 패딩 금지'],
+    answerText: '{단색 불투명 트렁크} / {대둔근 3/4 이상·전면·측면 5cm} / {패딩 금지·임플란트 금지}',
+    a: '단색 불투명 트렁크 / 대둔근 3/4 이상·전면·측면 5cm / 패딩 금지·임플란트 금지',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 최종 점수 계산 방식을 설명하시오.',
+    keywords: ['제2라운드 하위점수+제3라운드 하위점수', '낮은 점수가 1위'],
+    wrongs: ['제1라운드+제2라운드 합산 / 높은 점수가 1위', '제2라운드×2+제3라운드 / 낮은 점수가 1위', '제1·2·3라운드 단순 합산 / 낮은 점수가 1위'],
+    answerText: '최종 점수 = {제2라운드 하위점수+제3라운드 하위점수} / {낮은 점수가 1위}',
+    a: '최종 점수 = 제2라운드 하위점수 + 제3라운드 하위점수 / 낮은 점수가 1위',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '남자 보디빌딩 감점 요인에 해당하는 신체 조건은?',
+    keywords: ['부풀어 오른 배·부자연스러운 근육 형태', '여성형 유방·과도한 체지방'],
+    wrongs: ['탄탄한 근육·낮은 체지방', '선명한 혈관·깊은 근육 분리', '균형 잡힌 체격·적절한 근육량'],
+    answerText: '{부풀어 오른 배·부자연스러운 근육 형태} / {여성형 유방·과도한 체지방} → 심판위원장이 실격 가능',
+    a: '부풀어 오른 배·부자연스러운 근육 형태 / 여성형 유방·과도한 체지방 → 심판위원장이 실격 가능',
+  },
+  {
+    part: 'PART 2 · 남자 보디빌딩',
+    category: 'PART 2',
+    q: '예선 심사와 비교 심사의 차이를 설명하시오.',
+    keywords: ['예선 심사: 전체 체격 비율·대칭·근육 크기와 우수성', '비교 심사: 근육군 세밀 평가·밀도·선명도 비교'],
+    wrongs: ['예선: 복장 검사 / 비교: 체격 비율', '예선: 개인 자유포즈 / 비교: 규정포즈', '예선: 밀도·선명도 / 비교: 전체 체격'],
+    answerText: '{예선 심사: 전체 체격 비율·대칭·근육 크기와 우수성} / {비교 심사: 근육군 세밀 평가·밀도·선명도 비교}',
+    a: '예선 심사: 전체 체격 비율·대칭·근육 크기와 우수성 / 비교 심사: 근육군 세밀 평가·밀도·선명도 비교',
+  },
+
+  // ===== PART 3 · 남자 클래식 보디빌딩 =====
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩이 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2005년 11월 27일', '중국 상하이'],
+    wrongs: ['2002년 / 이집트 카이로', '2005년 / 스페인 베니돔', '2010년 / 아제르바이잔 바쿠'],
+    answerText: '{2005년 11월 27일} / {중국 상하이} IFBB 총회',
+    a: '2005년 11월 27일 / 중국 상하이 IFBB 총회',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 게임즈 클래식 보디빌딩이 인정받은 연도와 클래식 보디빌딩과의 차이는?',
+    keywords: ['2016년·스페인 베니돔', '체중 상한이 더 낮음(근육을 덜 발달시키는 선수 대상)'],
+    wrongs: ['2018년·스페인 베니돔 / 체중 상한이 더 높음', '2016년·중국 상하이 / 체급 구성이 다름', '2014년·스페인 베니돔 / 동일한 체중 공식'],
+    answerText: '{2016년·스페인 베니돔} 인정 / {체중 상한이 더 낮음(근육을 덜 발달시키는 선수 대상)}',
+    a: '2016년 스페인 베니돔 인정 / 체중 상한이 더 낮음(근육을 덜 발달시키는 선수 대상)',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩 시니어 체급별 최대 체중 공식을 설명하시오.',
+    keywords: ['Class A(168↓): (신장-100)+0', 'Class B(171↓): +2 / Class C(175↓): +4', 'Class D(180↓): +7 / Class E(180↑): +9~+13'],
+    wrongs: ['A(168↓): +2 / B(171↓): +4 / C(175↓): +6 / D(180↓): +9', 'A(170↓): +0 / B(175↓): +4 / C(180↓): +7 / D(180↑): +9', 'A(168↓): +0 / B(171↓): +2 / C(175↓): +6 / D(180↓): +9'],
+    answerText: '{Class A(168↓): (신장-100)+0} / {Class B(171↓): +2 / Class C(175↓): +4} / {Class D(180↓): +7 / Class E(180↑): +9~+13}',
+    a: 'Class A(168↓): (신장-100)+0 / B(171↓): +2 / C(175↓): +4 / D(180↓): +7 / E(180↑): 180~188cm: +9 / 188~196cm: +11 / 196↑: +13',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩 경기 라운드 구성을 설명하시오.',
+    keywords: ['남자 보디빌딩과 동일한 4개 라운드', '예선 라운드는 15명 초과 시 진행'],
+    wrongs: ['3개 라운드(제3라운드 없음)', '5개 라운드(아이워킹 포함)', '보디빌딩과 다른 구성'],
+    answerText: '{남자 보디빌딩과 동일한 4개 라운드} / {예선 라운드는 15명 초과 시 진행} / 규정포즈 7개·자유포즈 동일',
+    a: '남자 보디빌딩과 동일한 4개 라운드 / 예선 라운드는 15명 초과 시 진행 / 규정포즈 7개·자유포즈 동일',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩 복장 규정을 설명하시오.',
+    keywords: ['단색 불투명 체조용 반바지', '대둔근 전체·전면·측면 15cm 이상', '패딩 금지·장식품 금지'],
+    wrongs: ['트렁크 / 대둔근 3/4·측면 5cm / 패딩 금지', '루즈핏 반바지 / 대둔근 1/2·측면 15cm / 장식 허용', '체조용 반바지 / 대둔근 전체·측면 10cm / 패딩 금지'],
+    answerText: '{단색 불투명 체조용 반바지} / {대둔근 전체·전면·측면 15cm 이상} / {패딩 금지·장식품 금지}',
+    a: '단색 불투명 체조용 반바지 / 대둔근 전체·전면·측면 15cm 이상 / 패딩 금지·장식품 금지',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 보디빌딩 트렁크와 클래식 보디빌딩 반바지의 복장 차이를 설명하시오.',
+    keywords: ['보디빌딩: 트렁크(대둔근 3/4·측면 5cm)', '클래식: 체조용 반바지(대둔근 전체·측면 15cm·장식품 금지)'],
+    wrongs: ['보디빌딩: 반바지(측면 15cm) / 클래식: 트렁크(측면 5cm)', '보디빌딩: 체조용 반바지 / 클래식: 트렁크', '둘 다 동일한 복장 기준'],
+    answerText: '{보디빌딩: 트렁크(대둔근 3/4·측면 5cm)} / {클래식: 체조용 반바지(대둔근 전체·측면 15cm·장식품 금지)}',
+    a: '보디빌딩: 트렁크(대둔근 3/4·측면 5cm) / 클래식: 체조용 반바지(대둔근 전체·측면 15cm·장식품 금지)',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩 평가 기준을 설명하시오.',
+    keywords: ['근육군은 체지방 적고 단단하며 둥근 형태', '건강하고 체격 좋으며 근육 탄탄하게 발달된 전체적으로 다 갖춘 모습'],
+    wrongs: ['극단적 근육질·선명도 우선 / 체지방 최소화', '혈관 도드라짐·분리도 우수 / 체중 최대화', '근육 크기 최우선 / 체격 비율 무관'],
+    answerText: '{근육군은 체지방 적고 단단하며 둥근 형태} / {건강하고 체격 좋으며 근육 탄탄하게 발달된 전체적으로 다 갖춘 모습}',
+    a: '근육군은 체지방 적고 단단하며 둥근 형태 / 건강하고 체격 좋으며 근육 탄탄하게 발달된 전체적으로 다 갖춘 모습',
+  },
+  {
+    part: 'PART 3 · 남자 클래식 보디빌딩',
+    category: 'PART 3',
+    q: '남자 클래식 보디빌딩 오버롤 시니어·주니어·마스터 최대 참가 인원은?',
+    keywords: ['시니어: 최대 5명', '주니어: 최대 2명', '마스터: 최대 3명'],
+    wrongs: ['시니어 6명 / 주니어 3명 / 마스터 4명', '시니어 4명 / 주니어 2명 / 마스터 3명', '시니어 5명 / 주니어 3명 / 마스터 2명'],
+    answerText: '{시니어: 최대 5명} / {주니어: 최대 2명} / {마스터: 최대 3명}',
+    a: '시니어: 최대 5명 / 주니어: 최대 2명 / 마스터: 최대 3명',
+  },
+
+  // ===== PART 4 · 남자 클래식 피지크 =====
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크가 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2018년 11월', '스페인 베니돔'],
+    wrongs: ['2016년 / 스페인 베니돔', '2018년 / 중국 상하이', '2015년 / 에콰도르 과야킬'],
+    answerText: '{2018년 11월} / {스페인 베니돔} IFBB 총회',
+    a: '2018년 11월 / 스페인 베니돔 IFBB 총회',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크 시니어 체급별 최대 체중 공식을 설명하시오.',
+    keywords: ['Class 1(168↓): (신장-100)+4', 'Class 2(171↓): +6 / Class 3(175↓): +8', 'Class 4(180↓): +11 / Class 5(180↑): +13~+17'],
+    wrongs: ['Class 1(168↓): +0 / Class 2(171↓): +2 / Class 3(175↓): +4 / Class 4(180↓): +7', 'Class 1(168↓): +4 / Class 2(171↓): +8 / Class 3(175↓): +12 / Class 4(180↓): +15', 'Class 1(170↓): +4 / Class 2(175↓): +8 / Class 3(180↓): +11'],
+    answerText: '{Class 1(168↓): (신장-100)+4} / {Class 2(171↓): +6 / Class 3(175↓): +8} / {Class 4(180↓): +11 / Class 5(180↑): +13~+17}',
+    a: 'Class 1(168↓): (신장-100)+4 / Class 2(171↓): +6 / Class 3(175↓): +8 / Class 4(180↓): +11 / Class 5(180↑): 180~188cm: +13 / 188~196cm: +15 / 196↑: +17',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 보디빌딩과 클래식 피지크의 체중 공식 차이를 설명하시오.',
+    keywords: ['클래식 보디빌딩이 더 낮은 체중 허용', '피지크가 동일 신장 대비 4kg 더 높음'],
+    wrongs: ['클래식 보디빌딩이 더 높은 체중 허용', '두 종목 체중 공식 동일', '피지크가 2kg 더 높음'],
+    answerText: '동일 신장 기준 {클래식 보디빌딩이 더 낮은 체중 허용} / {피지크가 동일 신장 대비 4kg 더 높음} (예: 168cm → 클래식 +0, 피지크 +4)',
+    a: '동일 신장 기준 클래식 보디빌딩이 더 낮은 체중 허용 / 피지크가 동일 신장 대비 4kg 더 높음 (예: 168cm → 클래식 +0, 피지크 +4)',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크 예선 라운드 규정포즈 4개를 말하시오.',
+    pool: ['Front Double Biceps', 'Side Chest', 'Back Double Biceps', 'Vacuum Pose'],
+    pickCount: 3,
+    wrongs: ['Front Lat Spread', 'Abdominals & Thighs', 'Classic Pose'],
+    a: 'Front Double Biceps / Side Chest / Back Double Biceps / Vacuum Pose',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크 7개 규정포즈를 말하시오.',
+    pool: ['Front Double Biceps', 'Side Chest', 'Back Double Biceps', 'Vacuum Pose', 'Side Triceps', 'Abdominals & Thighs', 'Classic Pose(애슬릿 초이스)'],
+    pickCount: 3,
+    wrongs: ['Front Lat Spread', 'Back Lat Spread', 'Most Muscular'],
+    a: 'Front Double Biceps / Side Chest / Back Double Biceps / Vacuum Pose / Side Triceps / Abdominals & Thighs / Classic Pose(애슬릿 초이스)',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 보디빌딩 7개 규정포즈와 클래식 피지크 7개 규정포즈의 차이를 설명하시오.',
+    keywords: ['보디빌딩: Front Lat Spread·Back Lat Spread 포함', '클래식 피지크: Vacuum Pose·Classic Pose 포함(Front/Back Lat Spread 없음)'],
+    wrongs: ['두 종목 규정포즈 동일', '보디빌딩: Vacuum Pose 포함 / 클래식: Front Lat Spread 포함', '보디빌딩: Classic Pose 포함 / 클래식: Abdominals & Thighs 없음'],
+    answerText: '{보디빌딩: Front Lat Spread·Back Lat Spread 포함} / {클래식 피지크: Vacuum Pose·Classic Pose 포함(Front/Back Lat Spread 없음)}',
+    a: '보디빌딩: Front Lat Spread·Back Lat Spread 포함 / 클래식 피지크: Vacuum Pose·Classic Pose 포함(Front/Back Lat Spread 없음)',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '애슬릿 초이스(Classic Pose)를 설명하시오.',
+    keywords: ['클래식 피지크 마지막 포즈', '자신 있는 전면 포즈 1가지·주동근 표현', '모스트 머스큘러 포즈 불가'],
+    wrongs: ['보디빌딩의 마지막 규정포즈 / 어떤 포즈든 가능', '클래식 피지크 첫 번째 포즈 / 측면 포즈', '자유포즈 전 준비 동작 / 모스트 머스큘러 포함 가능'],
+    answerText: '{클래식 피지크 마지막 포즈} / {자신 있는 전면 포즈 1가지·주동근 표현} / {모스트 머스큘러 포즈 불가}',
+    a: '클래식 피지크 마지막 포즈 / 자신 있는 전면 포즈 1가지·주동근 표현 / 모스트 머스큘러 포즈 불가',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '배큠 포즈(Vacuum Pose) 지도 방법을 설명하시오.',
+    keywords: ['정면으로 서서 두 팔을 머리 뒤에·두 발 모음', '숨을 내쉬고 복부를 척추 쪽으로 당김·복횡근 수축', '복직근은 수축하지 않음'],
+    wrongs: ['등이 심판을 향해 서서 / 숨을 들이쉬며 복부 팽창 / 복직근 최대 수축', '정면으로 서서 팔을 옆으로 / 숨 참고 복부 당김 / 복직근·복횡근 모두 수축', '측면으로 서서 한 팔 들고 / 숨 내쉬며 복부 당김 / 복직근 수축'],
+    answerText: '{정면으로 서서 두 팔을 머리 뒤에·두 발 모음} → {숨을 내쉬고 복부를 척추 쪽으로 당김·복횡근 수축} / {복직근은 수축하지 않음}',
+    a: '정면으로 서서 두 팔을 머리 뒤에·두 발 모음 → 숨을 내쉬고 복부를 척추 쪽으로 당김·복횡근 수축 / 복직근은 수축하지 않음',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크 복장 규정을 설명하시오.',
+    keywords: ['단색 불투명 체조용 반바지', '대둔근 전체·전면·측면 15cm 이상', '패딩 금지·장식품 금지·임플란트 금지'],
+    wrongs: ['트렁크 / 대둔근 3/4·측면 5cm / 패딩 금지', '루즈핏 반바지 / 슬개골까지 / 라이크라 금지', '체조용 반바지 / 대둔근 1/2·측면 10cm / 장식 허용'],
+    answerText: '{단색 불투명 체조용 반바지} / {대둔근 전체·전면·측면 15cm 이상} / {패딩 금지·장식품 금지·임플란트 금지} ※클래식 보디빌딩과 동일',
+    a: '단색 불투명 체조용 반바지 / 대둔근 전체·전면·측면 15cm 이상 / 패딩 금지·장식품 금지·임플란트 금지 ※클래식 보디빌딩과 동일',
+  },
+  {
+    part: 'PART 4 · 남자 클래식 피지크',
+    category: 'PART 4',
+    q: '남자 클래식 피지크 예선 라운드 동시 출전 최대 인원은?',
+    keywords: ['최대 10명'],
+    wrongs: ['최대 8명', '최대 12명', '최대 6명'],
+    answerText: '{최대 10명} ※남자 보디빌딩(8명)과 다름',
+    a: '최대 10명 ※남자 보디빌딩(8명)과 다름',
+  },
+
+  // ===== PART 5 · 남자 피지크 =====
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크가 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2012년', '에콰도르 과야킬'],
+    wrongs: ['2010년 / 아제르바이잔 바쿠', '2005년 / 중국 상하이', '2018년 / 스페인 베니돔'],
+    answerText: '{2012년} 11월 / {에콰도르 과야킬} IFBB 총회',
+    a: '2012년 11월 / 에콰도르 과야킬 IFBB 총회',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 시니어 체급 6개를 말하시오.',
+    pool: ['Class A (170cm 이하)', 'Class B (173cm 이하)', 'Class C (176cm 이하)', 'Class D (179cm 이하)', 'Class E (182cm 이하)', 'Class F (182cm 초과)'],
+    pickCount: 3,
+    wrongs: ['Class A (168cm 이하)', 'Class B (175cm 이하)', 'Class G (185cm 초과)'],
+    a: 'Class A(170↓) / Class B(173↓) / Class C(176↓) / Class D(179↓) / Class E(182↓) / Class F(182↑)',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '머스큘러 남자 피지크란 무엇인가?',
+    keywords: ['2016년 도입', '일반 피지크보다 근육이 약간 더 큰 선수 대상'],
+    wrongs: ['2012년 도입 / 보디빌딩과 동일한 기준', '2018년 도입 / 체급 없는 오픈 종목', '2016년 도입 / 클래식 피지크와 동일한 체중 공식'],
+    answerText: '{2016년 도입} / {일반 피지크보다 근육이 약간 더 큰 선수 대상} / 수행·평가 규정은 남자 피지크와 동일',
+    a: '2016년 도입 / 일반 피지크보다 근육이 약간 더 큰 선수 대상 / 수행·평가 규정은 남자 피지크와 동일',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 라운드 구성을 말하시오.',
+    keywords: ['예선 라운드(쿼터턴)', '제1라운드(쿼터턴+비교심사)', '제2라운드(쿼터턴×2)'],
+    wrongs: ['예선·제1·제2·제3라운드 4개', '제1라운드(규정포즈) / 제2라운드(자유포즈)', '예선·제1·제2라운드 + 포즈다운 별도'],
+    answerText: '{예선 라운드(쿼터턴)} → {제1라운드(쿼터턴+비교심사)} → {제2라운드(쿼터턴×2)} ※제3라운드 없음',
+    a: '예선 라운드(쿼터턴) → 제1라운드(쿼터턴+비교심사) → 제2라운드(쿼터턴×2) ※제3라운드 없음',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 쿼터턴 4가지를 순서대로 말하시오.',
+    keywords: ['Quarter Turn Right', 'Quarter Turn Back', 'Quarter Turn Right', 'Quarter Turn Front'],
+    wrongs: ['Front → Right → Back → Right', 'Right → Left → Back → Front', 'Front → Back → Right → Left'],
+    answerText: '① {Quarter Turn Right} ② {Quarter Turn Back} ③ {Quarter Turn Right} ④ {Quarter Turn Front}',
+    a: '① Quarter Turn Right ② Quarter Turn Back ③ Quarter Turn Right ④ Quarter Turn Front',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 복장 규정을 설명하시오.',
+    keywords: ['루즈핏 보드 반바지', '슬개골 위쪽까지', '라이크라 금지·패딩 금지'],
+    wrongs: ['트렁크 / 대둔근 3/4 이상 / 측면 5cm', '체조용 반바지 / 무릎 아래까지 / 패딩 허용', '루즈핏 반바지 / 허벅지 중간까지 / 스폰서 로고 허용'],
+    answerText: '{루즈핏 보드 반바지} / {슬개골 위쪽까지} 내려와야 함 / {라이크라 금지·패딩 금지}, 제조사 로고만 허용',
+    a: '루즈핏 보드 반바지 / 슬개골 위쪽까지 내려와야 함 / 라이크라 금지·패딩 금지, 제조사 로고만 허용',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 평가 기준 2가지를 말하시오.',
+    keywords: ['근육질·신체 상태(균형·비율·형태)', '무대 연기·개성(자신감·표현력)'],
+    wrongs: ['근육 크기·선명도 / 규정포즈 정확도', '체지방률·혈관 도드라짐 / 복장 규정 준수', '체격 대칭·근육 선명도 / 포즈다운 퍼포먼스'],
+    answerText: '① {근육질·신체 상태(균형·비율·형태)} / ② {무대 연기·개성(자신감·표현력)}',
+    a: '① 근육질·신체 상태(균형·비율·형태) / ② 무대 연기·개성(자신감·표현력)',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크에서 반드시 감점 처리되는 신체 상태는?',
+    keywords: ['극단적 근육질·건조함·낮은 체지방', '깊은 근육 분리도·줄무늬'],
+    wrongs: ['적절한 근육량·균형 잡힌 체격', '낮은 체지방·선명한 혈관', '과도한 근육·높은 체지방'],
+    answerText: '{극단적 근육질·건조함·낮은 체지방} / {깊은 근육 분리도·줄무늬} 돋보이는 경우',
+    a: '극단적 근육질·건조함·낮은 체지방 / 깊은 근육 분리도·줄무늬 돋보이는 경우',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 예선 라운드 옐로카드·레드카드 제도를 설명하시오.',
+    keywords: ['쿼터턴 잘못 수행 시 옐로카드', '레드카드 = X 1개 차감'],
+    wrongs: ['쿼터턴 잘못 수행 시 즉시 실격', '레드카드 = 한 순위 강등(예선)', '옐로카드 = X 1개 차감 / 레드카드 = 실격'],
+    answerText: '쿼터턴 잘못 수행 시 {쿼터턴 잘못 수행 시 옐로카드} 경고 → 반복 시 {레드카드 = X 1개 차감}',
+    a: '쿼터턴 잘못 수행 시 옐로카드 경고 → 반복 시 레드카드 = X 1개 차감',
+  },
+  {
+    part: 'PART 5 · 남자 피지크',
+    category: 'PART 5',
+    q: '남자 피지크 오버롤 구성을 말하시오.',
+    keywords: ['시니어 최대 6명', '주니어 최대 5명', '마스터 최대 3명'],
+    wrongs: ['시니어 최대 8명 / 주니어 최대 6명 / 마스터 최대 4명', '시니어 최대 4명 / 주니어 최대 3명 / 마스터 최대 2명', '시니어 최대 6명 / 주니어 최대 4명 / 마스터 최대 3명'],
+    answerText: '시니어 {시니어 최대 6명} / 주니어 {주니어 최대 5명} / 마스터 {마스터 최대 3명} ※머스큘러 피지크 우승자는 시니어 오버롤 불참',
+    a: '시니어 최대 6명 / 주니어 최대 5명 / 마스터 최대 3명 ※머스큘러 피지크 우승자는 시니어 오버롤 불참',
+  },
+
+  // ===== PART 6 · 여자 피지크 =====
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크가 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2012년', '에콰도르 과야킬'],
+    wrongs: ['2002년 / 이집트 카이로', '2010년 / 아제르바이잔 바쿠', '2013년 / 모로코 마라케시'],
+    answerText: '{2012년} 11월 11일 / {에콰도르 과야킬} IFBB 총회',
+    a: '2012년 11월 11일 / 에콰도르 과야킬 IFBB 총회',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 보디빌딩이 여자 피지크로 대체된 연도와 장소는?',
+    keywords: ['2013년', '모로코 마라케시'],
+    wrongs: ['2012년 / 에콰도르 과야킬', '2015년 / 스페인 베니돔', '2010년 / 아제르바이잔 바쿠'],
+    answerText: '{2013년} / {모로코 마라케시} IFBB 총회',
+    a: '2013년 / 모로코 마라케시 IFBB 총회',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 시니어 체급을 말하시오.',
+    keywords: ['Class A (163cm 이하)', 'Class B (163cm 초과)'],
+    wrongs: ['Class A(158↓) / Class B(163↓) / Class C(163↑)', 'Class A(160↓) / Class B(160↑)', 'Class A(165↓) / Class B(165↑)'],
+    answerText: '{Class A (163cm 이하)} / {Class B (163cm 초과)}',
+    a: 'Class A (163cm 이하) / Class B (163cm 초과)',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 라운드 구성을 말하시오.',
+    keywords: ['예선 라운드(규정포즈 4개)', '제1라운드(규정포즈+쿼터턴 비교심사)', '제2라운드(쿼터턴+규정포즈×2+포즈다운)', '제3라운드(자유포즈 60초)'],
+    wrongs: ['예선·제1·제2 총 3개 라운드', '예선·제1·제2·제3 + 포즈다운 별도 5단계', '제1라운드(쿼터턴) / 제2라운드(자유포즈)'],
+    answerText: '{예선 라운드(규정포즈 4개)} → {제1라운드(규정포즈+쿼터턴 비교심사)} → {제2라운드(쿼터턴+규정포즈×2+포즈다운)} → {제3라운드(자유포즈 60초)}',
+    a: '예선 라운드(규정포즈 4개) → 제1라운드(규정포즈+쿼터턴 비교심사) → 제2라운드(쿼터턴+규정포즈×2+포즈다운) → 제3라운드(자유포즈 60초)',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 예선 라운드 규정포즈 4개를 말하시오.',
+    pool: ['Front Double Biceps', 'Side Chest', 'Back Double Biceps', 'Side Triceps'],
+    pickCount: 3,
+    wrongs: ['Front Lat Spread', 'Abdominals & Thighs', 'Vacuum Pose'],
+    a: 'Front Double Biceps / Side Chest / Back Double Biceps / Side Triceps',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크와 남자 클래식 피지크의 Front/Back Double Biceps 포즈 차이는?',
+    keywords: ['여자: 주먹을 쥐지 않고 손가락이 하늘을 향함', '남자 클래식: 주먹을 꽉 쥐고 아래를 향함'],
+    wrongs: ['여자: 주먹을 쥐고 위를 향함 / 남자: 손을 펴고 아래를 향함', '여자: 팔을 어깨 아래로 / 남자: 팔을 어깨 위로', '차이 없음 / 동일한 방법으로 수행'],
+    answerText: '{여자: 주먹을 쥐지 않고 손가락이 하늘을 향함} / {남자 클래식: 주먹을 꽉 쥐고 아래를 향함}',
+    a: '여자: 주먹을 쥐지 않고 손가락이 하늘을 향함 / 남자 클래식: 주먹을 꽉 쥐고 아래를 향함',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 남자 피지크의 라운드 수 차이를 설명하시오.',
+    keywords: ['여자 피지크 4개 라운드', '남자 피지크 3개 라운드(제3라운드 없음)'],
+    wrongs: ['여자 3개 / 남자 4개', '여자·남자 모두 3개', '여자·남자 모두 4개'],
+    answerText: '{여자 피지크 4개 라운드}(예선·제1·제2·제3) / {남자 피지크 3개 라운드(제3라운드 없음)}',
+    a: '여자 피지크 4개 라운드(예선·제1·제2·제3) / 남자 피지크 3개 라운드(제3라운드 없음)',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 복장 규정을 설명하시오.',
+    keywords: ['품위 있는 비키니', '하의 대둔근 1/2 이상·전면 전체', '신발 금지·끈 비키니 금지'],
+    wrongs: ['트렁크 / 대둔근 1/3 이상 / 하이힐 허용', '비키니 / 대둔근 1/2 이상 / 신발 허용', '반바지 / 전면만 가림 / 끈 비키니 허용'],
+    answerText: '{품위 있는 비키니} / 하의 {하의 대둔근 1/2 이상·전면 전체} 덮어야 함 / {신발 금지·끈 비키니 금지}',
+    a: '품위 있는 비키니 / 하의 대둔근 1/2 이상·전면 전체 덮어야 함 / 신발 금지·끈 비키니 금지',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크에서 반드시 감점 처리되는 신체 상태는?',
+    keywords: ['여자 보디빌딩 수준의 근육질·혈관 도드라짐', '과도한 근육 선명도·지나친 저체지방'],
+    wrongs: ['적절한 근육 발달·균형 잡힌 체격', '낮은 체지방·탄탄한 근육', '과도한 체지방·근육 부족'],
+    answerText: '{여자 보디빌딩 수준의 근육질·혈관 도드라짐} / {과도한 근육 선명도·지나친 저체지방} 상태',
+    a: '여자 보디빌딩 수준의 근육질·혈관 도드라짐 / 과도한 근육 선명도·지나친 저체지방 상태',
+  },
+  {
+    part: 'PART 6 · 여자 피지크',
+    category: 'PART 6',
+    q: '여자 피지크 최종 점수 계산 방식을 설명하시오.',
+    keywords: ['제2라운드 하위점수×2', '제3라운드 하위점수', '낮은 점수가 1위'],
+    wrongs: ['제1라운드+제2라운드 합산 / 높은 점수가 1위', '제2라운드+제3라운드 단순 합산 / 낮은 점수가 1위', '제2라운드×2+제3라운드 / 높은 점수가 1위'],
+    answerText: '최종 점수 = {제2라운드 하위점수×2} + {제3라운드 하위점수} / {낮은 점수가 1위}',
+    a: '최종 점수 = 제2라운드 하위점수×2 + 제3라운드 하위점수 / 낮은 점수가 1위',
+  },
+
+  // ===== PART 7 · 여자 보디 피트니스 =====
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스가 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2002년 10월 27일', '이집트 카이로'],
+    wrongs: ['2010년 / 아제르바이잔 바쿠', '2012년 / 에콰도르 과야킬', '2005년 / 중국 상하이'],
+    answerText: '{2002년 10월 27일} / {이집트 카이로} IFBB 총회',
+    a: '2002년 10월 27일 / 이집트 카이로 IFBB 총회',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스 시니어 체급 4개를 말하시오.',
+    keywords: ['Class A (158cm 이하)', 'Class B (163cm 이하)', 'Class C (168cm 이하)', 'Class D (168cm 초과)'],
+    wrongs: ['Class A(155↓) / Class B(160↓) / Class C(165↓) / Class D(165↑)', 'Class A(158↓) / Class B(163↓) / Class C(165↓) / Class D(165↑)', 'Class A(160↓) / Class B(165↓) / Class C(168↓) / Class D(168↑)'],
+    answerText: '{Class A (158cm 이하)} / {Class B (163cm 이하)} / {Class C (168cm 이하)} / {Class D (168cm 초과)}',
+    a: 'Class A (158cm 이하) / Class B (163cm 이하) / Class C (168cm 이하) / Class D (168cm 초과)',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스 라운드 구성을 말하시오.',
+    keywords: ['예선 라운드(쿼터턴)', '제1라운드(쿼터턴+비교심사)', '제2라운드(아이워킹+쿼터턴×2)'],
+    wrongs: ['예선·제1·제2·제3 4개 라운드', '제1라운드(규정포즈) / 제2라운드(자유포즈)', '예선·제1·제2 + 포즈다운 별도'],
+    answerText: '{예선 라운드(쿼터턴)} → {제1라운드(쿼터턴+비교심사)} → {제2라운드(아이워킹+쿼터턴×2)} ※제3라운드 없음',
+    a: '예선 라운드(쿼터턴) → 제1라운드(쿼터턴+비교심사) → 제2라운드(아이워킹+쿼터턴×2) ※제3라운드 없음',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '아이워킹(I-Walking)이란 무엇인가?',
+    keywords: ['무대 중앙으로 걸어가 4가지 포즈', '무대 뒤 라인업으로 복귀'],
+    wrongs: ['무대를 왕복하며 규정포즈 수행', '심판 앞에서 쿼터턴 4가지 수행', '음악에 맞춰 자유롭게 걷고 포즈'],
+    answerText: '{무대 중앙으로 걸어가 4가지 포즈} 취한 후 {무대 뒤 라인업으로 복귀}하는 개인 프레젠테이션',
+    a: '무대 중앙으로 걸어가 4가지 포즈 취한 후 무대 뒤 라인업으로 복귀하는 개인 프레젠테이션',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '아이워킹 평가 기준을 설명하시오.',
+    pool: ['속도', '동작의 우아함', '몸짓·쇼맨십', '개성·카리스마', '무대 존재감·매력·자연스러운 리듬'],
+    pickCount: 3,
+    wrongs: ['근육 선명도', '체급별 체중', '규정포즈 정확도'],
+    a: '속도 / 동작의 우아함 / 몸짓·쇼맨십 / 개성·카리스마 / 무대 존재감·매력·자연스러운 리듬',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스 복장 규정을 설명하시오.',
+    keywords: ['불투명한 일반 비키니', '하의 대둔근 1/2 이상·전면 전체', '하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지'],
+    wrongs: ['끈 비키니 허용 / 대둔근 1/3 이상 / 신발 금지', '불투명 비키니 / 대둔근 1/2 이상 / 신발 금지', '반바지 / 대둔근 전체 / 하이힐 허용'],
+    answerText: '{불투명한 일반 비키니} / 하의 {하의 대둔근 1/2 이상·전면 전체} / {하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지}',
+    a: '불투명한 일반 비키니 / 하의 대둔근 1/2 이상·전면 전체 / 하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스에서 반드시 감점 처리되는 신체 상태는?',
+    keywords: ['여자 피지크 수준의 극단적 근육질·혈관 도드라짐', '과도한 근육 선명도·깊은 근육 분리도'],
+    wrongs: ['탄탄한 근육·낮은 체지방', '균형 잡힌 체격·적절한 근육량', '과도한 체지방·근육 부족'],
+    answerText: '{여자 피지크 수준의 극단적 근육질·혈관 도드라짐} / {과도한 근육 선명도·깊은 근육 분리도} 보이면 감점',
+    a: '여자 피지크 수준의 극단적 근육질·혈관 도드라짐 / 과도한 근육 선명도·깊은 근육 분리도 보이면 감점',
+  },
+  {
+    part: 'PART 7 · 여자 보디 피트니스',
+    category: 'PART 7',
+    q: '여자 보디 피트니스와 여자 피지크의 복장 차이점은?',
+    keywords: ['보디 피트니스: 하이힐 허용(앞굽 1cm·힐 12cm)', '여자 피지크: 신발 착용 금지'],
+    wrongs: ['보디 피트니스: 신발 금지 / 피지크: 하이힐 허용', '둘 다 하이힐 허용', '둘 다 신발 착용 금지'],
+    answerText: '{보디 피트니스: 하이힐 허용(앞굽 1cm·힐 12cm)} / {여자 피지크: 신발 착용 금지}',
+    a: '보디 피트니스: 하이힐 허용(앞굽 1cm·힐 12cm) / 여자 피지크: 신발 착용 금지',
+  },
+
+  // ===== PART 8 · 여자 비키니 =====
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니가 IFBB 공식 종목으로 인정받은 연도와 장소는?',
+    keywords: ['2010년 11월 7일', '아제르바이잔 바쿠'],
+    wrongs: ['2012년 / 에콰도르 과야킬', '2002년 / 이집트 카이로', '2005년 / 중국 상하이'],
+    answerText: '{2010년 11월 7일} / {아제르바이잔 바쿠} IFBB 총회',
+    a: '2010년 11월 7일 / 아제르바이잔 바쿠 IFBB 총회',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 명칭이 변경된 연도와 이전 명칭은?',
+    keywords: ['2021년', '여자 비키니 피트니스'],
+    wrongs: ['2018년 / 여자 피트니스', '2015년 / 여자 비키니 피트니스', '2019년 / 여자 보디 비키니'],
+    answerText: '{2021년} / 이전 명칭: {여자 비키니 피트니스}에서 여자 비키니로 변경',
+    a: '2021년 / 이전 명칭: 여자 비키니 피트니스에서 여자 비키니로 변경',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 시니어 체급 8개를 말하시오.',
+    pool: ['Class A (158cm 이하)', 'Class B (160cm 이하)', 'Class C (162cm 이하)', 'Class D (164cm 이하)', 'Class E (166cm 이하)', 'Class F (169cm 이하)', 'Class G (172cm 이하)', 'Class H (172cm 초과)'],
+    pickCount: 3,
+    wrongs: ['Class A (155cm 이하)', 'Class F (170cm 이하)', 'Class H (175cm 초과)'],
+    a: 'A(158↓) / B(160↓) / C(162↓) / D(164↓) / E(166↓) / F(169↓) / G(172↓) / H(172↑)',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 라운드 구성을 말하시오.',
+    keywords: ['제1라운드(쿼터턴+비교심사)', '제2라운드(아이워킹+쿼터턴×2)'],
+    wrongs: ['예선·제1·제2·제3 4개 라운드', '예선 라운드·제1·제2 3개 라운드', '제1라운드(규정포즈) / 제2라운드(자유포즈)'],
+    answerText: '{제1라운드(쿼터턴+비교심사)} → {제2라운드(아이워킹+쿼터턴×2)} ※예선 라운드 없음',
+    a: '제1라운드(쿼터턴+비교심사) → 제2라운드(아이워킹+쿼터턴×2) ※예선 라운드 없음',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 복장 규정을 설명하시오.',
+    keywords: ['불투명한 일반 비키니', '하의 대둔근 1/3 이상·전면 전체', '하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지'],
+    wrongs: ['끈 비키니 허용 / 대둔근 1/2 이상 / 신발 금지', '불투명 비키니 / 대둔근 1/4 이상 / 하이힐 허용', '반바지 / 대둔근 전체 / 하이힐 허용'],
+    answerText: '{불투명한 일반 비키니} / 하의 {하의 대둔근 1/3 이상·전면 전체} / {하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지}',
+    a: '불투명한 일반 비키니 / 하의 대둔근 1/3 이상·전면 전체 / 하이힐(앞굽 최대 1cm·힐 최대 12cm)·플랫폼 금지',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니·보디 피트니스·피지크의 비키니 하의 대둔근 커버리지 차이는?',
+    keywords: ['비키니: 1/3 이상', '보디 피트니스·피지크: 1/2 이상'],
+    wrongs: ['비키니 1/2 / 보디 피트니스 1/3 / 피지크 1/4', '비키니 1/4 / 보디 피트니스 1/2 / 피지크 3/4', '모두 동일하게 1/2 이상'],
+    answerText: '{비키니: 1/3 이상} / {보디 피트니스·피지크: 1/2 이상}',
+    a: '비키니: 1/3 이상 / 보디 피트니스·피지크: 1/2 이상',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 평가 기준을 설명하시오.',
+    keywords: ['보디 피트니스보다 더 부드럽고 매끄러운 모습', '조화롭고 클래식한 여성 체격·자세·비율'],
+    wrongs: ['보디 피트니스보다 근육 선명도 높게 / 혈관 도드라짐 허용', '여자 피지크와 동일한 기준 / 규정포즈 4개 평가', '극단적 근육질 선호 / 체지방 최저 상태 평가'],
+    answerText: '{보디 피트니스보다 더 부드럽고 매끄러운 모습} / {조화롭고 클래식한 여성 체격·자세·비율} 평가',
+    a: '보디 피트니스보다 더 부드럽고 매끄러운 모습 / 조화롭고 클래식한 여성 체격·자세·비율 평가',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니에서 반드시 감점 처리되는 신체 상태는?',
+    keywords: ['극도의 근육질·혈관 도드라짐·근육 선명도', '보디 피트니스 수준의 분리도·건조함·저체지방'],
+    wrongs: ['탄탄한 근육·낮은 체지방', '균형 잡힌 체격·적절한 근육', '과도한 체지방·근육 부족'],
+    answerText: '{극도의 근육질·혈관 도드라짐·근육 선명도} / {보디 피트니스 수준의 분리도·건조함·저체지방} 보이면 감점',
+    a: '극도의 근육질·혈관 도드라짐·근육 선명도 / 보디 피트니스 수준의 분리도·건조함·저체지방 보이면 감점',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '여자 비키니 예선 라운드 레드카드의 효과는?',
+    keywords: ['예선: X 1개 차감', '제1라운드: 한 순위 강등', '제2라운드: 하위점수에서 한 순위 강등'],
+    wrongs: ['모든 라운드에서 즉시 실격', '예선: 한 순위 강등 / 제1·제2라운드: X 차감', '경고만 부여, 점수 차감 없음'],
+    answerText: '{예선: X 1개 차감} / {제1라운드: 한 순위 강등} / {제2라운드: 하위점수에서 한 순위 강등}',
+    a: '예선: X 1개 차감 / 제1라운드: 한 순위 강등 / 제2라운드: 하위점수에서 한 순위 강등',
+  },
+  {
+    part: 'PART 8 · 여자 비키니',
+    category: 'PART 8',
+    q: '쿼터턴만 있는 종목 3가지를 말하시오.',
+    keywords: ['남자 피지크', '여자 보디 피트니스', '여자 비키니'],
+    wrongs: ['남자 클래식 피지크 / 여자 피지크 / 여자 비키니', '남자 피지크 / 여자 피지크 / 여자 비키니', '남자 피지크 / 여자 보디 피트니스 / 여자 피지크'],
+    answerText: '{남자 피지크} / {여자 보디 피트니스} / {여자 비키니}',
+    a: '남자 피지크 / 여자 보디 피트니스 / 여자 비키니',
+  },
+
+  // ===== PART 9 · 별도 규정 =====
+
+  // --- 경기인 등록 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 규정의 목적을 설명하시오.',
+    keywords: ['선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립', '건전하고 효율적인 육성·우리나라 체육의 균형발전 도모'],
+    wrongs: ['선수의 체력 향상과 경기력 증진', '도핑 방지 및 공정한 경기 운영', '국제대회 참가 자격 관리'],
+    answerText: '{선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립} / {건전하고 효율적인 육성·우리나라 체육의 균형발전 도모}',
+    a: '선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립 / 건전하고 효율적인 육성·우리나라 체육의 균형발전 도모',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인이란 무엇인가?',
+    keywords: ['선수·지도자·심판·선수관리담당자'],
+    wrongs: ['선수·코치·감독', '선수·심판·운영요원', '지도자·심판·행정직원'],
+    answerText: '{선수·지도자·심판·선수관리담당자}',
+    a: '선수·지도자·심판·선수관리담당자',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 목적에 따른 구분을 설명하시오.',
+    keywords: ['육성 목적(15세 이하): 12세 이하부·15세 이하부', '전문체육 목적(16세 이상): 18세 이하부·대학부·일반부', '생활체육 목적(16세 이상): 18세 이하부·대학부·일반부'],
+    wrongs: ['육성(12세↓) / 전문(13세↑) / 생활(18세↑)', '육성(15세↓) / 전문(16세↑) / 생활(20세↑)', '육성·전문·생활 모두 18세 기준'],
+    answerText: '{육성 목적(15세 이하): 12세 이하부·15세 이하부} / {전문체육 목적(16세 이상): 18세 이하부·대학부·일반부} / {생활체육 목적(16세 이상): 18세 이하부·대학부·일반부}',
+    a: '육성 목적(15세 이하): 12세 이하부·15세 이하부 / 전문체육 목적(16세 이상): 18세 이하부·대학부·일반부 / 생활체육 목적(16세 이상): 18세 이하부·대학부·일반부',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 기간을 설명하시오.',
+    keywords: ['전문체육 기존 선수: 매년 4월 10일 이전', '추가 등록: 7월 10일~30일', '생활체육·신규선수·지도자·심판: 상시 등록'],
+    wrongs: ['전문체육: 1월 10일 이전 / 추가: 5월', '모든 경기인 상시 등록', '전문체육: 4월 10일 이전 / 추가: 8월'],
+    answerText: '{전문체육 기존 선수: 매년 4월 10일 이전} / {추가 등록: 7월 10일~30일} / {생활체육·신규선수·지도자·심판: 상시 등록}',
+    a: '전문체육 기존 선수: 매년 4월 10일 이전 / 추가 등록: 7월 10일~30일 / 생활체육·신규선수·지도자·심판: 상시 등록',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 절차를 설명하시오.',
+    keywords: ['신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내)', '협회 승인(승인요청일로부터 15일 이내)'],
+    wrongs: ['협회에 직접 신청 → 즉시 승인', '시·도지부 신청 → 30일 이내 처리', '온라인 신청 → 자동 승인'],
+    answerText: '{신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내)} → {협회 승인(승인요청일로부터 15일 이내)} / 결격사유 시 승인거부 후 통보',
+    a: '신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내) → 협회 승인(승인요청일로부터 15일 이내) / 결격사유 시 승인거부 후 통보',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '선수 등록 결격사유를 설명하시오.',
+    pool: [
+      '관계단체로부터 제명 징계를 받은 자',
+      '자격정지 징계를 받고 처분이 종료되지 않은 자',
+      '성폭력죄로 퇴학처분 후 10년이 지나지 않은 자',
+      '학교폭력으로 퇴학 조치 후 5년이 지나지 않은 자',
+      '승부조작으로 유죄 판결된 자',
+      '관계단체로부터 해임 후 10년이 지나지 않은 자',
+    ],
+    pickCount: 3,
+    wrongs: ['도핑 양성 반응 후 2년 이내인 자', '연령 미달인 자', '외국 국적 보유자'],
+    a: '관계단체 제명 징계 / 자격정지 미종료 / 성폭력 퇴학 후 10년 미경과 / 학교폭력 퇴학 후 5년 미경과 / 승부조작 유죄 / 관계단체 해임 후 10년 미경과',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '지도자·심판·선수관리담당자 등록 결격사유를 설명하시오.',
+    pool: [
+      '피성년후견인',
+      '금고 이상의 형 선고유예 기간 중인 자',
+      '집행유예 종료 후 2년이 지나지 않은 자',
+      '성폭력 범죄로 100만원 이상 벌금형 후 3년이 지나지 않은 자',
+      '미성년자 대상 성폭력으로 파면·해임된 자',
+      '선수 대상 상해·폭행으로 금고 이상 형 후 집행유예 면제 10년 이내인 자',
+      '자격정지 이상 징계 처분이 종료되지 않은 자',
+    ],
+    pickCount: 3,
+    wrongs: ['도핑 양성 후 3년 이내', '연령 60세 초과', '외국 국적 보유자'],
+    a: '피성년후견인 / 선고유예 기간 중 / 집행유예 종료 후 2년 미경과 / 성폭력 벌금 후 3년 미경과 / 미성년자 성폭력 파면·해임 / 선수 폭행 금고 이상 10년 이내 / 자격정지 미종료',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록이 취소·해지되는 사유를 설명하시오.',
+    keywords: ['스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우', '경기인 본인이 등록 취소 요청한 경우'],
+    wrongs: ['도핑 양성 반응이 나온 경우', '대회 미출전 시 자동 취소', '등록비 미납 시'],
+    answerText: '{스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우} / {경기인 본인이 등록 취소 요청한 경우} ※결격사유와 혼동 주의',
+    a: '스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우 / 경기인 본인이 등록 취소 요청한 경우',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '폭력 행위 및 성폭력에 대한 징계 기준을 설명하시오.',
+    keywords: ['지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명', '선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명', '성폭력 범죄: 선수·지도자 1차 영구제명'],
+    wrongs: ['지도자: 1차 3년 / 선수: 1차 5년 / 성폭력: 3차 영구제명', '지도자·선수 동일 기준 / 성폭력 2차 영구제명', '폭력: 1차 경고·2차 자격정지·3차 제명'],
+    answerText: '{지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명} / {선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명} / {성폭력 범죄: 선수·지도자 1차 영구제명}',
+    a: '지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명 / 선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명 / 성폭력 범죄: 선수·지도자 1차 영구제명',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인으로 등록할 때 필요한 교육을 말하시오.',
+    keywords: ['성폭력 등 폭력 예방교육', '도핑방지 교육'],
+    wrongs: ['응급처치 교육·인성 교육', '리더십 교육·스포츠 윤리 교육', '심판 교육·경기 규칙 교육'],
+    answerText: '{성폭력 등 폭력 예방교육} / {도핑방지 교육}',
+    a: '성폭력 등 폭력 예방교육 / 도핑방지 교육',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '보디빌딩 지도자 이수 교육 5가지를 말하시오.',
+    pool: ['성폭력 등 폭력 예방교육', '도핑방지 교육', '리더십 교육', '응급처치 교육', '인성 교육'],
+    pickCount: 3,
+    wrongs: ['경기 규칙 교육', '재정 관리 교육', '미디어 교육'],
+    a: '성폭력 등 폭력 예방교육 / 도핑방지 교육 / 리더십 교육 / 응급처치 교육 / 인성 교육',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 규정 위반에 대한 조치를 설명하시오.',
+    keywords: ['1년 이상 5년 이하 등록 금지'],
+    wrongs: ['6개월 이상 3년 이하 등록 금지', '즉시 영구제명', '경고 후 재등록 가능'],
+    answerText: '{1년 이상 5년 이하 등록 금지} 조치',
+    a: '1년 이상 5년 이하 등록 금지 조치',
+  },
+
+  // --- 심판위원회 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판위원회 설치 목적을 설명하시오.',
+    keywords: ['심판의 독립성·자율성·역할·임무·의무 자문', '공정성 향상'],
+    wrongs: ['선수 권익 보호', '경기 규칙 제정', '도핑 검사 관리'],
+    answerText: '스포츠 기본정신과 책임감을 갖고 {심판의 독립성·자율성·역할·임무·의무 자문}하여 {공정성 향상}',
+    a: '스포츠 기본정신과 책임감을 갖고 심판의 독립성·자율성·역할·임무·의무 자문하여 공정성 향상',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판의 등급과 심사 범위를 설명하시오.',
+    keywords: ['국제심판(A·B·C급): 국제대회·전국규모 심사 가능', '국내 1급: 전국규모·지역규모 심사 가능', '국내 2급: 지역규모 심사만 가능'],
+    wrongs: ['국제심판: 지역규모만 / 1급: 전국·국제 / 2급: 전국', '국제·1급·2급 모두 전국규모 심사 가능', '국제심판: 전국만 / 1급: 지역만 / 2급: 지역만'],
+    answerText: '{국제심판(A·B·C급): 국제대회·전국규모 심사 가능} / {국내 1급: 전국규모·지역규모 심사 가능} / {국내 2급: 지역규모 심사만 가능}',
+    a: '국제심판(A·B·C급): 국제대회·전국규모 심사 가능 / 국내 1급: 전국규모·지역규모 심사 가능 / 국내 2급: 지역규모 심사만 가능',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국내 2급 심판 자격 요건을 말하시오.',
+    keywords: ['보디빌딩 분야 상당한 경력·대회 운영요원 활동', '시·도지부 또는 협회 추천'],
+    wrongs: ['1급 심판 2년 활동 후 자동 승급', '이론시험 합격 후 취득', '국가대표 출전 경력 보유자'],
+    answerText: '{보디빌딩 분야 상당한 경력·대회 운영요원 활동} + {시·도지부 또는 협회 추천}',
+    a: '보디빌딩 분야 상당한 경력·대회 운영요원 활동 + 시·도지부 또는 협회 추천',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국내 1급 심판 자격 요건을 말하시오.',
+    keywords: ['2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천', '예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사'],
+    wrongs: ['2급 취득 후 1년·전국대회 1회 참가', '이론·실기시험 합격 후 취득', '3급 심판 3년 활동 후 자동 승급'],
+    answerText: '{2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천} / 예외: {예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사}',
+    a: '2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천 / 예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국제심판 자격 요건을 설명하시오.',
+    pool: [
+      '1급 취득 후 3년 + 전국규모 5회 이상 + 시·도지부 추천',
+      '1급 취득 후 3년 + 전국규모 2회 이상 + 시·도지부 대회 5회 이상 + 추천',
+      '1급 취득 후 3년 + 심판위원회 추천',
+      '1급 자격 보유 + 협회장 추천',
+    ],
+    pickCount: 3,
+    wrongs: ['1급 취득 후 1년 + 지역대회 3회', '2급 취득 후 5년 + 전국대회 10회', '이론시험 합격 후 자동 취득'],
+    a: '1급 취득 후 3년+전국규모 5회+추천 / 1급 취득 후 3년+전국2회+시도5회+추천 / 1급 취득 후 3년+심판위원회 추천 / 1급 보유+협회장 추천',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판 자격 유지 및 부활 방법을 설명하시오.',
+    keywords: ['유지: 4년에 1회 재교육', '미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활', '징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활'],
+    wrongs: ['유지: 매년 재교육 / 미이수: 즉시 취소', '유지: 2년에 1회 재교육 / 징계: 해제 즉시 부활', '유지: 3년에 1회 / 미이수: 1급 강등'],
+    answerText: '{유지: 4년에 1회 재교육} / {미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활} / {징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활}',
+    a: '유지: 4년에 1회 재교육 / 미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활 / 징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판원의 주의사항을 설명하시오.',
+    pool: [
+      '다른 심판원과 담화 금지',
+      '다른 심판원의 결정에 의도적 영향 금지',
+      '심사 중 사진 촬영 금지',
+      '참가 선수에게 지도 금지',
+      '심사 중 알코올 음료 금지',
+      '선수로 참가 불가',
+    ],
+    pickCount: 3,
+    wrongs: ['채점지 공개 금지', '심판석 착석 의무', '국기 게양 금지'],
+    a: '다른 심판원과 담화 금지 / 결정에 의도적 영향 금지 / 사진 촬영 금지 / 선수 지도 금지 / 알코올 음료 금지 / 선수로 참가 불가',
+  },
+
+  // --- 도핑 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑이란 무엇인가?',
+    keywords: ['경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치', '고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙'],
+    wrongs: ['의도적 부상 유발 행위', '불법 보충제 구매 행위', '훈련 중 약물 복용 행위'],
+    answerText: '{경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치} / {고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙}',
+    a: '경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치 / 고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '금지약물 선정 기준을 설명하시오.',
+    keywords: ['WADA에서 매년 정기 개정', '다음 기준 중 2개 이상 해당 시 금지: 경기력 향상·건강 위험·스포츠 정신 위배'],
+    wrongs: ['IOC에서 5년마다 개정 / 3개 기준 모두 해당 시 금지', 'IFBB에서 매년 개정 / 1개 기준 해당 시 금지', 'KADA에서 개정 / 2개 이상 기준 해당 시 금지'],
+    answerText: '{WADA에서 매년 정기 개정} / {다음 기준 중 2개 이상 해당 시 금지: 경기력 향상·건강 위험·스포츠 정신 위배}',
+    a: 'WADA에서 매년 정기 개정 / 다음 기준 중 2개 이상 해당 시 금지: 경기력 향상 가능성·건강 위험·스포츠 정신 위배',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '주요 금지약물과 부작용을 3가지 이상 설명하시오.',
+    pool: [
+      '아나볼릭 스테로이드(동화작용제): 심장마비·간질환·성기능 장애·고혈압',
+      '성장호르몬(펩티드호르몬): 신체 기형화·당뇨·관절 약화·심장질환',
+      '이뇨제: 심각한 저혈압·탈수·근육경련·실신',
+      'EPO(에리스로포이에틴): 고혈압·뇌졸중·혈관폐색',
+      '베타차단제: 기관지 발작·저혈압·수면장애·성기능 장애',
+      '베타-2작용제: 두통·부정맥·근육경련',
+      '호르몬 및 대사 변조제: 저혈당',
+      '마약: 환각·정신착란·중독',
+    ],
+    pickCount: 3,
+    wrongs: ['비타민C: 신장 결석', '카페인: 심박수 감소', '크레아틴: 근손실'],
+    a: '아나볼릭 스테로이드: 심장마비·간질환·성기능 장애 / 성장호르몬: 신체 기형화·당뇨·관절 약화 / 이뇨제: 저혈압·탈수·실신 / EPO: 고혈압·뇌졸중 / 베타차단제: 기관지 발작·저혈압',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑방지규정 위반 사항을 3가지 이상 설명하시오.',
+    pool: [
+      '시료 내 금지약물·대사물질·표지자 존재',
+      '금지약물·금지방법 사용 또는 시도',
+      '시료 채취 제공 회피·거부·실패',
+      '소재지 정보 불이행(12개월 내 검사불이행·제출불이행 합산 3회)',
+      '금지약물·금지방법 소지',
+      '금지약물·금지방법 부정 거래',
+      '공모·제보 제지·보복',
+    ],
+    pickCount: 3,
+    wrongs: ['경기 중 불법 영상 촬영', '계체 체중 조작', '경기 규칙 위반'],
+    a: '시료 내 금지약물 존재 / 사용 또는 시도 / 채취 회피·거부 / 소재지 불이행 / 부정행위 / 소지 / 부정 거래 / 공모·제보 제지·보복',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기기간 중 도핑검사와 경기기간 외 도핑검사를 설명하시오.',
+    keywords: ['경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지', '경기기간 외: 자택·훈련장소 등 불시·사전 미통보'],
+    wrongs: ['경기기간 중: 경기 당일만 / 경기기간 외: 사전 통보 후 실시', '경기기간 중: 경기 2일 전부터 / 경기기간 외: 훈련장만', '두 검사 방식 동일'],
+    answerText: '{경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지} / {경기기간 외: 자택·훈련장소 등 불시·사전 미통보}',
+    a: '경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지 / 경기기간 외: 자택·훈련장소 등 불시·사전 미통보',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑검사 절차를 설명하시오.',
+    keywords: ['검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml)', 'A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석'],
+    wrongs: ['혈액만 채취 → 즉시 분석 → 결과 통보', '선수 자진 신고 → 검사관 배정 → 시료 제공', '무작위 선정 → 24시간 내 시료 제공 → 분석'],
+    answerText: '{검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml)} → {A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석}',
+    a: '검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml) → A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑검사 거부 또는 소변검사를 혈액검사로 대체할 수 있는가?',
+    keywords: ['검사 거부 불가·양성 반응과 동일하게 취급', '혈액검사로 대체 불가·분석 목적이 다름'],
+    wrongs: ['긴급 시 거부 가능·경고 처리', '혈액검사로 대체 가능·동일 효력', '의사 소견서 제출 시 면제 가능'],
+    answerText: '{검사 거부 불가·양성 반응과 동일하게 취급} / {혈액검사로 대체 불가·분석 목적이 다름} / 소변 부족 시 제공분 봉인 후 추가 제공',
+    a: '검사 거부 불가·양성 반응과 동일하게 취급 / 혈액검사로 대체 불가·분석 목적이 다름 / 소변 부족 시 제공분 봉인 후 추가 제공',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '소재지 정보란 무엇이며 포함 내용을 설명하시오.',
+    keywords: ['검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보', '거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소'],
+    wrongs: ['선수의 식단과 보충제 목록', '경기 일정과 체급 정보', '소속 팀과 지도자 연락처'],
+    answerText: '{검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보} / 포함: {거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소} / 변경 시 즉시 업데이트',
+    a: '검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보 / 포함: 거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소 / 변경 시 즉시 업데이트',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '치료목적사용면책(TUE)이란 무엇이며 승인 기준 4가지를 말하시오.',
+    keywords: ['질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도', '①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음'],
+    wrongs: ['도핑 면제 신청 제도 / 3가지 기준', '경기 중 부상 치료 허가 제도 / 2가지 기준', '의사 처방 시 자동 면제 / 기준 없음'],
+    answerText: '{질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도} / {①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음}',
+    a: '질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도 / ①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑 위반 과징금을 설명하시오.',
+    keywords: ['선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원', '선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원', '시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지'],
+    wrongs: ['일반부 1차 200만원 / 학생부 1차 400만원', '코치 1차 400만원 / 감독 1차 200만원', '시·도지부 500만원 고정'],
+    answerText: '{선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원} / {선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원} / {시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지}',
+    a: '선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원 / 선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원 / 시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '금지약물 복용의 책임은 누가 지는가?',
+    keywords: ['선수가 사용한 모든 물질에 대해 선수가 책임', '병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야'],
+    wrongs: ['지도자가 책임', '팀 닥터가 책임', '처방 의사가 책임'],
+    answerText: '{선수가 사용한 모든 물질에 대해 선수가 책임} / {병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야} / 처방약 투여 결과도 선수 책임',
+    a: '선수가 사용한 모든 물질에 대해 선수가 책임 / 병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야 / 처방약 투여 결과도 선수 책임',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '선수지원요원의 도핑방지 역할과 책임을 설명하시오.',
+    pool: [
+      '도핑방지 정책과 규정 숙지 및 준수',
+      '선수 검사 프로그램에 협조',
+      '선수가 도핑방지에 대한 바람직한 가치관·태도를 형성하도록 지도',
+      '정당한 사유 없이 금지약물·금지방법 사용·소지 불가',
+    ],
+    pickCount: 3,
+    wrongs: ['선수 대신 시료 제공 가능', '도핑 검사 일정 선수에게 사전 통보', '금지약물 처방 권한 보유'],
+    a: '도핑방지 정책 숙지·준수 / 선수 검사 프로그램 협조 / 선수 가치관·태도 지도 / 금지약물·금지방법 사용·소지 불가',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: 'TUE 신청 및 처리 절차를 설명하시오.',
+    keywords: ['금지약물 확인 → 신청서·진단서·검사결과서 제출', 'TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정'],
+    wrongs: ['의사 처방전 제출 → 협회 자동 승인', '선수 자진 신고 → WADA 심사', '신청서만 제출 → 30일 내 자동 승인'],
+    answerText: '{금지약물 확인 → 신청서·진단서·검사결과서 제출} → {TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정}',
+    a: '금지약물 확인 → 신청서·진단서·검사결과서 제출 → TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '의도하지 않은 도핑에 대해 설명하시오.',
+    keywords: ['부주의·실수로 금지약물 섭취 후 검출', '고의성 무관하게 규정 위반 성립·선수 책임', '과실 없음 입증 시에만 예외적 감경 가능'],
+    wrongs: ['의도 없으면 면책 가능', '보충제 섭취는 예외 인정', '병원 처방이면 책임 없음'],
+    answerText: '{부주의·실수로 금지약물 섭취 후 검출} / {고의성 무관하게 규정 위반 성립·선수 책임} / {과실 없음 입증 시에만 예외적 감경 가능}',
+    a: '부주의·실수로 금지약물 섭취 후 검출 / 고의성 무관하게 규정 위반 성립·선수 책임 / 과실 없음 입증 시에만 예외적 감경 가능',
+  },
+];
+
+
+const PART9_CARDS = [
+
+  // ===== PART 9 · 별도 규정 =====
+
+  // --- 경기인 등록 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 규정의 목적을 설명하시오.',
+    keywords: ['선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립', '건전하고 효율적인 육성·우리나라 체육의 균형발전 도모'],
+    wrongs: ['선수의 체력 향상과 경기력 증진', '도핑 방지 및 공정한 경기 운영', '국제대회 참가 자격 관리'],
+    answerText: '{선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립} / {건전하고 효율적인 육성·우리나라 체육의 균형발전 도모}',
+    a: '선수·지도자·심판·선수관리담당자의 등록과 활동 기준·절차 정립 / 건전하고 효율적인 육성·우리나라 체육의 균형발전 도모',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인이란 무엇인가?',
+    keywords: ['선수·지도자·심판·선수관리담당자'],
+    wrongs: ['선수·코치·감독', '선수·심판·운영요원', '지도자·심판·행정직원'],
+    answerText: '{선수·지도자·심판·선수관리담당자}',
+    a: '선수·지도자·심판·선수관리담당자',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 목적에 따른 구분을 설명하시오.',
+    keywords: ['육성 목적(15세 이하): 12세 이하부·15세 이하부', '전문체육 목적(16세 이상): 18세 이하부·대학부·일반부', '생활체육 목적(16세 이상): 18세 이하부·대학부·일반부'],
+    wrongs: ['육성(12세↓) / 전문(13세↑) / 생활(18세↑)', '육성(15세↓) / 전문(16세↑) / 생활(20세↑)', '육성·전문·생활 모두 18세 기준'],
+    answerText: '{육성 목적(15세 이하): 12세 이하부·15세 이하부} / {전문체육 목적(16세 이상): 18세 이하부·대학부·일반부} / {생활체육 목적(16세 이상): 18세 이하부·대학부·일반부}',
+    a: '육성 목적(15세 이하): 12세 이하부·15세 이하부 / 전문체육 목적(16세 이상): 18세 이하부·대학부·일반부 / 생활체육 목적(16세 이상): 18세 이하부·대학부·일반부',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 기간을 설명하시오.',
+    keywords: ['전문체육 기존 선수: 매년 4월 10일 이전', '추가 등록: 7월 10일~30일', '생활체육·신규선수·지도자·심판: 상시 등록'],
+    wrongs: ['전문체육: 1월 10일 이전 / 추가: 5월', '모든 경기인 상시 등록', '전문체육: 4월 10일 이전 / 추가: 8월'],
+    answerText: '{전문체육 기존 선수: 매년 4월 10일 이전} / {추가 등록: 7월 10일~30일} / {생활체육·신규선수·지도자·심판: 상시 등록}',
+    a: '전문체육 기존 선수: 매년 4월 10일 이전 / 추가 등록: 7월 10일~30일 / 생활체육·신규선수·지도자·심판: 상시 등록',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 절차를 설명하시오.',
+    keywords: ['신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내)', '협회 승인(승인요청일로부터 15일 이내)'],
+    wrongs: ['협회에 직접 신청 → 즉시 승인', '시·도지부 신청 → 30일 이내 처리', '온라인 신청 → 자동 승인'],
+    answerText: '{신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내)} → {협회 승인(승인요청일로부터 15일 이내)} / 결격사유 시 승인거부 후 통보',
+    a: '신청서·동의서 제출 → 시·도지부 결격사유 심사·협회 승인요청(15일 이내) → 협회 승인(승인요청일로부터 15일 이내) / 결격사유 시 승인거부 후 통보',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '선수 등록 결격사유를 설명하시오.',
+    pool: [
+      '관계단체로부터 제명 징계를 받은 자',
+      '자격정지 징계를 받고 처분이 종료되지 않은 자',
+      '성폭력죄로 퇴학처분 후 10년이 지나지 않은 자',
+      '학교폭력으로 퇴학 조치 후 5년이 지나지 않은 자',
+      '승부조작으로 유죄 판결된 자',
+      '관계단체로부터 해임 후 10년이 지나지 않은 자',
+    ],
+    pickCount: 3,
+    wrongs: ['도핑 양성 반응 후 2년 이내인 자', '연령 미달인 자', '외국 국적 보유자'],
+    a: '관계단체 제명 징계 / 자격정지 미종료 / 성폭력 퇴학 후 10년 미경과 / 학교폭력 퇴학 후 5년 미경과 / 승부조작 유죄 / 관계단체 해임 후 10년 미경과',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '지도자·심판·선수관리담당자 등록 결격사유를 설명하시오.',
+    pool: [
+      '피성년후견인',
+      '금고 이상의 형 선고유예 기간 중인 자',
+      '집행유예 종료 후 2년이 지나지 않은 자',
+      '성폭력 범죄로 100만원 이상 벌금형 후 3년이 지나지 않은 자',
+      '미성년자 대상 성폭력으로 파면·해임된 자',
+      '선수 대상 상해·폭행으로 금고 이상 형 후 집행유예 면제 10년 이내인 자',
+      '자격정지 이상 징계 처분이 종료되지 않은 자',
+    ],
+    pickCount: 3,
+    wrongs: ['도핑 양성 후 3년 이내', '연령 60세 초과', '외국 국적 보유자'],
+    a: '피성년후견인 / 선고유예 기간 중 / 집행유예 종료 후 2년 미경과 / 성폭력 벌금 후 3년 미경과 / 미성년자 성폭력 파면·해임 / 선수 폭행 금고 이상 10년 이내 / 자격정지 미종료',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록이 취소·해지되는 사유를 설명하시오.',
+    keywords: ['스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우', '경기인 본인이 등록 취소 요청한 경우'],
+    wrongs: ['도핑 양성 반응이 나온 경우', '대회 미출전 시 자동 취소', '등록비 미납 시'],
+    answerText: '{스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우} / {경기인 본인이 등록 취소 요청한 경우} ※결격사유와 혼동 주의',
+    a: '스포츠공정위원회 규정에 따라 해임·자격정지 징계를 받은 경우 / 경기인 본인이 등록 취소 요청한 경우',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '폭력 행위 및 성폭력에 대한 징계 기준을 설명하시오.',
+    keywords: ['지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명', '선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명', '성폭력 범죄: 선수·지도자 1차 영구제명'],
+    wrongs: ['지도자: 1차 3년 / 선수: 1차 5년 / 성폭력: 3차 영구제명', '지도자·선수 동일 기준 / 성폭력 2차 영구제명', '폭력: 1차 경고·2차 자격정지·3차 제명'],
+    answerText: '{지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명} / {선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명} / {성폭력 범죄: 선수·지도자 1차 영구제명}',
+    a: '지도자 폭력: 1차 5년↑ / 2차 10년↑ / 3차 영구제명 / 선수 폭력: 1차 3년↑ / 2차 5년↑ / 3차 영구제명 / 성폭력 범죄: 선수·지도자 1차 영구제명',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인으로 등록할 때 필요한 교육을 말하시오.',
+    keywords: ['성폭력 등 폭력 예방교육', '도핑방지 교육'],
+    wrongs: ['응급처치 교육·인성 교육', '리더십 교육·스포츠 윤리 교육', '심판 교육·경기 규칙 교육'],
+    answerText: '{성폭력 등 폭력 예방교육} / {도핑방지 교육}',
+    a: '성폭력 등 폭력 예방교육 / 도핑방지 교육',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '보디빌딩 지도자 이수 교육 5가지를 말하시오.',
+    pool: ['성폭력 등 폭력 예방교육', '도핑방지 교육', '리더십 교육', '응급처치 교육', '인성 교육'],
+    pickCount: 3,
+    wrongs: ['경기 규칙 교육', '재정 관리 교육', '미디어 교육'],
+    a: '성폭력 등 폭력 예방교육 / 도핑방지 교육 / 리더십 교육 / 응급처치 교육 / 인성 교육',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기인 등록 규정 위반에 대한 조치를 설명하시오.',
+    keywords: ['1년 이상 5년 이하 등록 금지'],
+    wrongs: ['6개월 이상 3년 이하 등록 금지', '즉시 영구제명', '경고 후 재등록 가능'],
+    answerText: '{1년 이상 5년 이하 등록 금지} 조치',
+    a: '1년 이상 5년 이하 등록 금지 조치',
+  },
+
+  // --- 심판위원회 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판위원회 설치 목적을 설명하시오.',
+    keywords: ['심판의 독립성·자율성·역할·임무·의무 자문', '공정성 향상'],
+    wrongs: ['선수 권익 보호', '경기 규칙 제정', '도핑 검사 관리'],
+    answerText: '스포츠 기본정신과 책임감을 갖고 {심판의 독립성·자율성·역할·임무·의무 자문}하여 {공정성 향상}',
+    a: '스포츠 기본정신과 책임감을 갖고 심판의 독립성·자율성·역할·임무·의무 자문하여 공정성 향상',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판의 등급과 심사 범위를 설명하시오.',
+    keywords: ['국제심판(A·B·C급): 국제대회·전국규모 심사 가능', '국내 1급: 전국규모·지역규모 심사 가능', '국내 2급: 지역규모 심사만 가능'],
+    wrongs: ['국제심판: 지역규모만 / 1급: 전국·국제 / 2급: 전국', '국제·1급·2급 모두 전국규모 심사 가능', '국제심판: 전국만 / 1급: 지역만 / 2급: 지역만'],
+    answerText: '{국제심판(A·B·C급): 국제대회·전국규모 심사 가능} / {국내 1급: 전국규모·지역규모 심사 가능} / {국내 2급: 지역규모 심사만 가능}',
+    a: '국제심판(A·B·C급): 국제대회·전국규모 심사 가능 / 국내 1급: 전국규모·지역규모 심사 가능 / 국내 2급: 지역규모 심사만 가능',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국내 2급 심판 자격 요건을 말하시오.',
+    keywords: ['보디빌딩 분야 상당한 경력·대회 운영요원 활동', '시·도지부 또는 협회 추천'],
+    wrongs: ['1급 심판 2년 활동 후 자동 승급', '이론시험 합격 후 취득', '국가대표 출전 경력 보유자'],
+    answerText: '{보디빌딩 분야 상당한 경력·대회 운영요원 활동} + {시·도지부 또는 협회 추천}',
+    a: '보디빌딩 분야 상당한 경력·대회 운영요원 활동 + 시·도지부 또는 협회 추천',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국내 1급 심판 자격 요건을 말하시오.',
+    keywords: ['2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천', '예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사'],
+    wrongs: ['2급 취득 후 1년·전국대회 1회 참가', '이론·실기시험 합격 후 취득', '3급 심판 3년 활동 후 자동 승급'],
+    answerText: '{2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천} / 예외: {예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사}',
+    a: '2급 취득 후 2년·시·도지부 대회 2회 이상 참가·시·도지부 추천 / 예외: 미스터&미즈 코리아 대상·국가대표 국제대회 금메달·협회 이사',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '국제심판 자격 요건을 설명하시오.',
+    pool: [
+      '1급 취득 후 3년 + 전국규모 5회 이상 + 시·도지부 추천',
+      '1급 취득 후 3년 + 전국규모 2회 이상 + 시·도지부 대회 5회 이상 + 추천',
+      '1급 취득 후 3년 + 심판위원회 추천',
+      '1급 자격 보유 + 협회장 추천',
+    ],
+    pickCount: 3,
+    wrongs: ['1급 취득 후 1년 + 지역대회 3회', '2급 취득 후 5년 + 전국대회 10회', '이론시험 합격 후 자동 취득'],
+    a: '1급 취득 후 3년+전국규모 5회+추천 / 1급 취득 후 3년+전국2회+시도5회+추천 / 1급 취득 후 3년+심판위원회 추천 / 1급 보유+협회장 추천',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판 자격 유지 및 부활 방법을 설명하시오.',
+    keywords: ['유지: 4년에 1회 재교육', '미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활', '징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활'],
+    wrongs: ['유지: 매년 재교육 / 미이수: 즉시 취소', '유지: 2년에 1회 재교육 / 징계: 해제 즉시 부활', '유지: 3년에 1회 / 미이수: 1급 강등'],
+    answerText: '{유지: 4년에 1회 재교육} / {미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활} / {징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활}',
+    a: '유지: 4년에 1회 재교육 / 미이수로 상실: 강습비 납부+재교육 후 동일 자격 부활 / 징계로 정지: 해제 후 3년 경과+재교육 → 2급 자격 부활',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '심판원의 주의사항을 설명하시오.',
+    pool: [
+      '다른 심판원과 담화 금지',
+      '다른 심판원의 결정에 의도적 영향 금지',
+      '심사 중 사진 촬영 금지',
+      '참가 선수에게 지도 금지',
+      '심사 중 알코올 음료 금지',
+      '선수로 참가 불가',
+    ],
+    pickCount: 3,
+    wrongs: ['채점지 공개 금지', '심판석 착석 의무', '국기 게양 금지'],
+    a: '다른 심판원과 담화 금지 / 결정에 의도적 영향 금지 / 사진 촬영 금지 / 선수 지도 금지 / 알코올 음료 금지 / 선수로 참가 불가',
+  },
+
+  // --- 도핑 규정 ---
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑이란 무엇인가?',
+    keywords: ['경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치', '고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙'],
+    wrongs: ['의도적 부상 유발 행위', '불법 보충제 구매 행위', '훈련 중 약물 복용 행위'],
+    answerText: '{경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치} / {고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙}',
+    a: '경기력 향상 목적으로 금지약물 섭취·특수 의학적 처치 / 고의성 여부와 무관하게 성립·WADA 엄격한 책임 원칙',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '금지약물 선정 기준을 설명하시오.',
+    keywords: ['WADA에서 매년 정기 개정', '다음 기준 중 2개 이상 해당 시 금지: 경기력 향상·건강 위험·스포츠 정신 위배'],
+    wrongs: ['IOC에서 5년마다 개정 / 3개 기준 모두 해당 시 금지', 'IFBB에서 매년 개정 / 1개 기준 해당 시 금지', 'KADA에서 개정 / 2개 이상 기준 해당 시 금지'],
+    answerText: '{WADA에서 매년 정기 개정} / {다음 기준 중 2개 이상 해당 시 금지: 경기력 향상·건강 위험·스포츠 정신 위배}',
+    a: 'WADA에서 매년 정기 개정 / 다음 기준 중 2개 이상 해당 시 금지: 경기력 향상 가능성·건강 위험·스포츠 정신 위배',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '주요 금지약물과 부작용을 3가지 이상 설명하시오.',
+    pool: [
+      '아나볼릭 스테로이드(동화작용제): 심장마비·간질환·성기능 장애·고혈압',
+      '성장호르몬(펩티드호르몬): 신체 기형화·당뇨·관절 약화·심장질환',
+      '이뇨제: 심각한 저혈압·탈수·근육경련·실신',
+      'EPO(에리스로포이에틴): 고혈압·뇌졸중·혈관폐색',
+      '베타차단제: 기관지 발작·저혈압·수면장애·성기능 장애',
+      '베타-2작용제: 두통·부정맥·근육경련',
+      '호르몬 및 대사 변조제: 저혈당',
+      '마약: 환각·정신착란·중독',
+    ],
+    pickCount: 3,
+    wrongs: ['비타민C: 신장 결석', '카페인: 심박수 감소', '크레아틴: 근손실'],
+    a: '아나볼릭 스테로이드: 심장마비·간질환·성기능 장애 / 성장호르몬: 신체 기형화·당뇨·관절 약화 / 이뇨제: 저혈압·탈수·실신 / EPO: 고혈압·뇌졸중 / 베타차단제: 기관지 발작·저혈압',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑방지규정 위반 사항을 3가지 이상 설명하시오.',
+    pool: [
+      '시료 내 금지약물·대사물질·표지자 존재',
+      '금지약물·금지방법 사용 또는 시도',
+      '시료 채취 제공 회피·거부·실패',
+      '소재지 정보 불이행(12개월 내 검사불이행·제출불이행 합산 3회)',
+      '금지약물·금지방법 소지',
+      '금지약물·금지방법 부정 거래',
+      '공모·제보 제지·보복',
+    ],
+    pickCount: 3,
+    wrongs: ['경기 중 불법 영상 촬영', '계체 체중 조작', '경기 규칙 위반'],
+    a: '시료 내 금지약물 존재 / 사용 또는 시도 / 채취 회피·거부 / 소재지 불이행 / 부정행위 / 소지 / 부정 거래 / 공모·제보 제지·보복',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '경기기간 중 도핑검사와 경기기간 외 도핑검사를 설명하시오.',
+    keywords: ['경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지', '경기기간 외: 자택·훈련장소 등 불시·사전 미통보'],
+    wrongs: ['경기기간 중: 경기 당일만 / 경기기간 외: 사전 통보 후 실시', '경기기간 중: 경기 2일 전부터 / 경기기간 외: 훈련장만', '두 검사 방식 동일'],
+    answerText: '{경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지} / {경기기간 외: 자택·훈련장소 등 불시·사전 미통보}',
+    a: '경기기간 중: 경기 전날 오후 11:59부터 시료채취 끝나는 시점까지 / 경기기간 외: 자택·훈련장소 등 불시·사전 미통보',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑검사 절차를 설명하시오.',
+    keywords: ['검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml)', 'A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석'],
+    wrongs: ['혈액만 채취 → 즉시 분석 → 결과 통보', '선수 자진 신고 → 검사관 배정 → 시료 제공', '무작위 선정 → 24시간 내 시료 제공 → 분석'],
+    answerText: '{검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml)} → {A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석}',
+    a: '검사 대상자 선정 → 선수 통지 → 시료 채취(소변 최소 90ml) → A병·B병 나눠 담기 → 봉인 → 비중 측정 → 검사서 작성 → WADA 인증 시험실 분석',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑검사 거부 또는 소변검사를 혈액검사로 대체할 수 있는가?',
+    keywords: ['검사 거부 불가·양성 반응과 동일하게 취급', '혈액검사로 대체 불가·분석 목적이 다름'],
+    wrongs: ['긴급 시 거부 가능·경고 처리', '혈액검사로 대체 가능·동일 효력', '의사 소견서 제출 시 면제 가능'],
+    answerText: '{검사 거부 불가·양성 반응과 동일하게 취급} / {혈액검사로 대체 불가·분석 목적이 다름} / 소변 부족 시 제공분 봉인 후 추가 제공',
+    a: '검사 거부 불가·양성 반응과 동일하게 취급 / 혈액검사로 대체 불가·분석 목적이 다름 / 소변 부족 시 제공분 봉인 후 추가 제공',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '소재지 정보란 무엇이며 포함 내용을 설명하시오.',
+    keywords: ['검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보', '거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소'],
+    wrongs: ['선수의 식단과 보충제 목록', '경기 일정과 체급 정보', '소속 팀과 지도자 연락처'],
+    answerText: '{검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보} / 포함: {거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소} / 변경 시 즉시 업데이트',
+    a: '검사대상등록명부 선수가 도핑방지위원회에 제출하는 정보 / 포함: 거주지·훈련 일정·정기 활동·검사 가능한 특정 60분과 그 장소 / 변경 시 즉시 업데이트',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '치료목적사용면책(TUE)이란 무엇이며 승인 기준 4가지를 말하시오.',
+    keywords: ['질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도', '①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음'],
+    wrongs: ['도핑 면제 신청 제도 / 3가지 기준', '경기 중 부상 치료 허가 제도 / 2가지 기준', '의사 처방 시 자동 면제 / 기준 없음'],
+    answerText: '{질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도} / {①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음}',
+    a: '질병 치료·부상 회복 위해 금지약물 사용 시 사전 심사·승인하는 제도 / ①금지약물 미사용 시 건강 심각 손상 ②경기력 향상 없음 ③대체 치료 없음 ④이전 도핑에 기인하지 않음',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '도핑 위반 과징금을 설명하시오.',
+    keywords: ['선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원', '선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원', '시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지'],
+    wrongs: ['일반부 1차 200만원 / 학생부 1차 400만원', '코치 1차 400만원 / 감독 1차 200만원', '시·도지부 500만원 고정'],
+    answerText: '{선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원} / {선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원} / {시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지}',
+    a: '선수 일반부: 1차 400만원·2차 1,000만원·3차 1,500만원 / 선수 학생부: 1차 200만원·2차 500만원·3차 1,500만원 / 시·도지부: 위반 선수 1명당 300만원+관련 임원 자격정지',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '금지약물 복용의 책임은 누가 지는가?',
+    keywords: ['선수가 사용한 모든 물질에 대해 선수가 책임', '병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야'],
+    wrongs: ['지도자가 책임', '팀 닥터가 책임', '처방 의사가 책임'],
+    answerText: '{선수가 사용한 모든 물질에 대해 선수가 책임} / {병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야} / 처방약 투여 결과도 선수 책임',
+    a: '선수가 사용한 모든 물질에 대해 선수가 책임 / 병원·약국 처방 시에도 선수임을 밝히고 금지약물 제외 처방받아야 / 처방약 투여 결과도 선수 책임',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '선수지원요원의 도핑방지 역할과 책임을 설명하시오.',
+    pool: [
+      '도핑방지 정책과 규정 숙지 및 준수',
+      '선수 검사 프로그램에 협조',
+      '선수가 도핑방지에 대한 바람직한 가치관·태도를 형성하도록 지도',
+      '정당한 사유 없이 금지약물·금지방법 사용·소지 불가',
+    ],
+    pickCount: 3,
+    wrongs: ['선수 대신 시료 제공 가능', '도핑 검사 일정 선수에게 사전 통보', '금지약물 처방 권한 보유'],
+    a: '도핑방지 정책 숙지·준수 / 선수 검사 프로그램 협조 / 선수 가치관·태도 지도 / 금지약물·금지방법 사용·소지 불가',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: 'TUE 신청 및 처리 절차를 설명하시오.',
+    keywords: ['금지약물 확인 → 신청서·진단서·검사결과서 제출', 'TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정'],
+    wrongs: ['의사 처방전 제출 → 협회 자동 승인', '선수 자진 신고 → WADA 심사', '신청서만 제출 → 30일 내 자동 승인'],
+    answerText: '{금지약물 확인 → 신청서·진단서·검사결과서 제출} → {TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정}',
+    a: '금지약물 확인 → 신청서·진단서·검사결과서 제출 → TUEC에서 치료목적사용면책 국제표준 기준에 따라 승인 여부 결정',
+  },
+  {
+    part: 'PART 9 · 별도 규정',
+    category: 'PART 9',
+    q: '의도하지 않은 도핑에 대해 설명하시오.',
+    keywords: ['부주의·실수로 금지약물 섭취 후 검출', '고의성 무관하게 규정 위반 성립·선수 책임', '과실 없음 입증 시에만 예외적 감경 가능'],
+    wrongs: ['의도 없으면 면책 가능', '보충제 섭취는 예외 인정', '병원 처방이면 책임 없음'],
+    answerText: '{부주의·실수로 금지약물 섭취 후 검출} / {고의성 무관하게 규정 위반 성립·선수 책임} / {과실 없음 입증 시에만 예외적 감경 가능}',
+    a: '부주의·실수로 금지약물 섭취 후 검출 / 고의성 무관하게 규정 위반 성립·선수 책임 / 과실 없음 입증 시에만 예외적 감경 가능',
+  },
+];
+
+// ── 카테고리 설정 ──
+const CATEGORIES = ['ALL','PART 1','PART 2','PART 3','PART 4','PART 5','PART 6','PART 7','PART 8','PART 9'];
+const CATEGORY_LABELS = {
+  ALL:'전체',
+  'PART 1':'PART 1 · IFBB 일반규정',
+  'PART 2':'PART 2 · 남자 보디빌딩',
+  'PART 3':'PART 3 · 남자 클래식 보디빌딩',
+  'PART 4':'PART 4 · 남자 클래식 피지크',
+  'PART 5':'PART 5 · 남자 피지크',
+  'PART 6':'PART 6 · 여자 피지크',
+  'PART 7':'PART 7 · 여자 보디 피트니스',
+  'PART 8':'PART 8 · 여자 비키니',
+  'PART 9':'PART 9 · 별도 규정',
+};
+
+const LS_KEY = 'mentorone_wrong_regulation';
+
+// ── 상태 변수 ──
+let currentCards = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answeredSet = new Set();
+let wrongSet = new Set();
+let currentCategory = 'ALL';
+let currentMode = 'flash';
+
+let blankKeywords = [];
+let blankFilled = [];
+let blankResults = [];
+let blankCurrentIdx = 0;
+let blankCardCorrect = true;
+let currentAnswerText = '';
+
+// ── localStorage ──
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+  catch { return []; }
+}
+function lsSave(cards) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {}
+}
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); }
+  buildTabs();
+}
+function lsRemoveWrong(q) {
+  lsSave(lsLoad().filter(c => c.q !== q));
+  buildTabs();
+}
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+// ── 초기화 ──
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set();
+  updateScoreBadges();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]);
+  const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+init();
+</script>
+</body>
+</html>
