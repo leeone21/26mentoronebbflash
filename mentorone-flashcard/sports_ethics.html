@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생활스포츠&스포츠윤리 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">생활스포츠&스포츠윤리 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner" onclick="flipCard()">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+
+  // ===== PART 1 · 생활체육 기본 개념 =====
+
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육이란 ___ 시간을 활용하여 건강 및 체력 증진을 위한 자발적이고 일상적인 체육 활동으로, 신체·정서·사회적으로 ___ 하게 발달하고 삶의 질을 높이는 활동이다.',
+    keywords: ['여가', '조화'],
+    wrongs: ['훈련', '전문', '획일', '업무'],
+    answerText: '{여가} 시간 활용 / 신체·정서·사회적으로 {조화}롭게 발달',
+    a: '여가 / 조화',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육의 본질은 활동 그 자체의 ___ 과 기쁨이며, 개인의 잠재적 욕구를 자연스럽게 ___ 하게 한다.',
+    keywords: ['즐거움', '표현·발산'],
+    wrongs: ['승리', '억제', '경쟁'],
+    answerText: '활동 그 자체의 {즐거움}과 기쁨 / 잠재적 욕구를 자연스럽게 {표현·발산}',
+    a: '즐거움 / 표현·발산',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육의 필요성 4가지를 말하시오.',
+    pool: [
+      '건강과 체력 증진에 대한 요구 증대',
+      '여가 시간 증가와 대중 스포츠 인구 증가',
+      '체육에 대한 가치관과 태도의 변화',
+      '여가 활동에 대한 요구 증대',
+    ],
+    pickCount: 3,
+    wrongs: ['엘리트 선수 발굴 필요성', '국제 대회 성적 향상', '학교 체육 의무화'],
+    a: '건강·체력 증진 요구 / 여가 시간 증가 / 체육 가치관 변화 / 여가 활동 요구 증대',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육의 목적(참가자 개인의 기대효과)을 설명하시오.',
+    pool: [
+      '기분 전환과 즐거움으로 보람된 일상생활 영위',
+      '체력 증진을 통해 건강 유지',
+      '운동기능 향상으로 건전한 여가생활',
+      '대인관계 원리 터득·사회생활 능력 함양',
+      '자율적 참가로 협동심·준법정신·책임감 함양',
+    ],
+    pickCount: 3,
+    wrongs: ['국가 체력 순위 향상', '메달 획득', '선수 선발'],
+    a: '기분 전환·즐거움 / 건강 유지 / 건전한 여가생활 / 사회생활 능력 함양 / 협동심·준법정신·책임감 함양',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육의 역할 6가지를 말하시오.',
+    pool: ['인간성 회복', '평생 교육', '국민 건강 증진', '지역 사회 개발', '청소년 선도', '여가 선용'],
+    pickCount: 3,
+    wrongs: ['국제 경쟁력 강화', '메달 획득', '엘리트 선수 발굴'],
+    a: '인간성 회복 / 평생 교육 / 국민 건강 증진 / 지역 사회 개발 / 청소년 선도 / 여가 선용',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '생활체육의 목표(체육 행정·정책 방향) 4가지는 체육 내용의 ___, 체육 활동의 ___, 체육 방법의 ___, 체육 환경의 ___이다.',
+    keywords: ['다양화', '생활화', '합리화', '복지화'],
+    wrongs: ['전문화', '의무화', '국제화', '상업화'],
+    answerText: '체육 내용의 {다양화} / 체육 활동의 {생활화} / 체육 방법의 {합리화} / 체육 환경의 {복지화}',
+    a: '다양화 / 생활화 / 합리화 / 복지화',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: 'Sport for All이란 ___, ___, ___, ___ 에 관계없이 누구나 자유 의지로 스포츠에 참가할 권리를 보장하는 개념으로, ___ 체육과 스포츠 국제 헌장에서 사용되었다.',
+    keywords: ['인종', '사회', '계급', '성별', '유네스코'],
+    wrongs: ['나이', '지역', '직업', '국적', '종교', 'IOC'],
+    answerText: '{인종}·{사회}·{계급}·{성별} 관계없이 누구나 / {유네스코} 체육과 스포츠 국제 헌장',
+    a: '인종 / 사회 / 계급 / 성별 / 유네스코',
+  },
+  {
+    part: 'PART 1 · 생활체육 기본 개념',
+    category: 'PART 1',
+    q: '웰니스(Wellness)란 질병의 ___ 를 넘어서 삶을 만족스럽게 영위할 수 있는 최적의 ___ 와 활력 상태로, 신체·정신·사회적으로 건강한 상태를 추구하는 것이다.',
+    keywords: ['유무', '건강'],
+    wrongs: ['종류', '체력', '원인'],
+    answerText: '질병의 {유무}를 넘어서 최적의 {건강}과 활력 상태',
+    a: '유무 / 건강',
+  },
+
+  // ===== PART 2 · 생활체육 기능·구성 =====
+
+  {
+    part: 'PART 2 · 생활체육 기능·구성',
+    category: 'PART 2',
+    q: '생활체육의 기능을 생리적·심리적·사회적 측면으로 설명하시오.',
+    keywords: ['신체 기능 활성화·근력·지구력', '스트레스 해소·자아존중감', '공동체 의식·소속감'],
+    wrongs: ['면역 강화', '체중 조절', '정서 안정', '경쟁력 향상', '사회 통합'],
+    answerText: '생리적: {신체 기능 활성화·근력·지구력} / 심리적: {스트레스 해소·자아존중감} / 사회적: {공동체 의식·소속감}',
+    a: '생리적: 신체 기능 활성화·근력·지구력·체중 조절 / 심리적: 스트레스 해소·자아존중감·정서적 균형 / 사회적: 공동체 의식·소속감·사회 통합',
+  },
+  {
+    part: 'PART 2 · 생활체육 기능·구성',
+    category: 'PART 2',
+    q: '생활체육의 구성 원리 5가지는 ___, ___, ___, ___, ___이다.',
+    keywords: ['목적성', '개별성', '자발성', '창조성', '평가성'],
+    wrongs: ['강제성', '획일성', '경쟁성'],
+    answerText: '{목적성} / {개별성} / {자발성} / {창조성} / {평가성}',
+    a: '목적성 / 개별성 / 자발성 / 창조성 / 평가성',
+  },
+  {
+    part: 'PART 2 · 생활체육 기능·구성',
+    category: 'PART 2',
+    q: '생활체육의 구성 요소 4가지는 ___, ___, ___, ___이다.',
+    keywords: ['프로그램', '시설', '지도자', '홍보'],
+    wrongs: ['참가자', '재정'],
+    answerText: '{프로그램} / {시설} / {지도자} / {홍보}',
+    a: '프로그램 / 시설 / 지도자 / 홍보',
+  },
+  {
+    part: 'PART 2 · 생활체육 기능·구성',
+    category: 'PART 2',
+    q: '생활체육의 영역 4가지는 ___ 체육, ___ 체육, ___ 체육, ___ 체육이다.',
+    keywords: ['가정', '직장', '지역사회', '상업'],
+    wrongs: ['학교', '공공', '국제'],
+    answerText: '{가정} 체육 / {직장} 체육 / {지역사회} 체육 / {상업} 체육',
+    a: '가정 / 직장 / 지역사회 / 상업',
+  },
+  {
+    part: 'PART 2 · 생활체육 기능·구성',
+    category: 'PART 2',
+    q: '생애주기에 따른 생활체육 지도를 설명하시오.',
+    pool: [
+      '유아기: 대근육 위주 놀이 중심 신체활동',
+      '아동기: 팀 스포츠·도구 활용 놀이',
+      '청소년기: 2차 성징 시기·뼈 성장에 도움 되는 운동',
+      '성인기(중장년기): 유산소 운동과 근력 운동 병행',
+      '노년기: 평형성 운동·사회화 레크리에이션',
+    ],
+    pickCount: 3,
+    wrongs: ['유아기: 근력 운동', '청소년기: 노화 대비 유산소', '노년기: 고강도 훈련'],
+    a: '유아기: 대근육 놀이 / 아동기: 팀 스포츠 / 청소년기: 뼈 성장 운동 / 성인기: 유산소+근력 / 노년기: 평형성·사회화',
+  },
+
+  // ===== PART 3 · 생활체육 지도자 =====
+
+  {
+    part: 'PART 3 · 생활체육 지도자',
+    category: 'PART 3',
+    q: '생활체육 지도자의 자질을 설명하시오.',
+    pool: [
+      '의사전달능력: 의사소통·지도의 선결 요건',
+      '투철한 사명감: 자발적 의지로 목표 성취',
+      '활달하고 강인한 성격: 친근감·신뢰감 형성',
+      '도덕적 품성: 원만한 인간관계 형성',
+      '칭찬의 미덕: 참가자의 긍정적 동기 유발',
+      '공정성: 모든 참가자를 평등하게 대우',
+    ],
+    pickCount: 3,
+    wrongs: ['권위주의적 태도', '성과 중심 지도', '엄격한 규율 강조'],
+    a: '의사전달능력 / 사명감 / 강인한 성격 / 도덕적 품성 / 칭찬의 미덕 / 공정성',
+  },
+  {
+    part: 'PART 3 · 생활체육 지도자',
+    category: 'PART 3',
+    q: '생활체육 지도의 원리를 설명하시오.',
+    pool: [
+      '목적의 원리: 목적 설정 및 지속적 동기부여',
+      '자발성의 원리: 자발적 참여 유도',
+      '개성화의 원리: 개인차를 고려하여 지도',
+      '사회화의 원리: 참가자들 간 유대 형성',
+      '창조의 원리: 창조적 체육활동 도모',
+      '반복연습의 원리: 반복 연습으로 목표 성취 유도',
+      '계통성의 원리: 통일된 지도·훈련',
+      '평가의 원리: 지도 결과 평가',
+    ],
+    pickCount: 3,
+    wrongs: ['강제의 원리', '획일화의 원리', '경쟁의 원리'],
+    a: '목적·자발성·개성화·사회화·창조·반복연습·계통성·평가의 원리',
+  },
+  {
+    part: 'PART 3 · 생활체육 지도자',
+    category: 'PART 3',
+    q: '생활체육지도자가 이수해야 하는 교육 4가지를 말하시오.',
+    pool: ['폭력 예방교육', '도핑방지 교육', '인성 교육', '리더십 교육'],
+    pickCount: 3,
+    wrongs: ['응급처치 교육', '심판 교육', '재정 교육'],
+    a: '성폭력 등 폭력 예방교육 / 도핑방지 교육 / 인성 교육 / 리더십 교육',
+  },
+
+  // ===== PART 4 · 생활체육 프로그램·시설 =====
+
+  {
+    part: 'PART 4 · 생활체육 프로그램·시설',
+    category: 'PART 4',
+    q: '생활체육 프로그램의 구성 요소 7가지를 말하시오.',
+    pool: ['참가자', '지도자', '시설 및 장소', '재정', '활동 종목', '홍보', '안전성'],
+    pickCount: 4,
+    wrongs: ['성적 관리', '경쟁 시스템', '포상 제도'],
+    a: '참가자 / 지도자 / 시설 및 장소 / 재정 / 활동 종목 / 홍보 / 활동의 안전성',
+  },
+  {
+    part: 'PART 4 · 생활체육 프로그램·시설',
+    category: 'PART 4',
+    q: '생활체육 프로그램의 구성 원리를 설명하시오.',
+    pool: [
+      '평등성: 모든 사람이 참여할 수 있어야 함',
+      '창조성: 창조적인 체육활동 도모',
+      '욕구반영성: 참가자의 욕구 반영',
+      '전문성: 전문가에 의해 운영·감독',
+      '다양성: 다양한 프로그램 개발',
+      '보완성: 평가 후 지속적인 수정·보완',
+      '편의성: 쉽게 참여 가능',
+      '평가성: 지속적·객관적 평가',
+    ],
+    pickCount: 3,
+    wrongs: ['획일성', '경쟁성', '강제성'],
+    a: '평등성·창조성·욕구반영성·전문성·다양성·보완성·편의성·평가성',
+  },
+  {
+    part: 'PART 4 · 생활체육 프로그램·시설',
+    category: 'PART 4',
+    q: '생활체육 프로그램 계획 과정을 설명하시오.',
+    pool: ['목적·철학 이해', '욕구 조사', '목적·목표 설정', '계획 수립', '실행', '평가', '보완'],
+    pickCount: 4,
+    wrongs: ['성적 집계', '선수 선발', '재정 삭감'],
+    a: '목적·철학 이해 → 욕구 조사 → 목적·목표 설정 → 계획 수립 → 실행 → 평가 → 보완',
+  },
+  {
+    part: 'PART 4 · 생활체육 프로그램·시설',
+    category: 'PART 4',
+    q: '생활체육 시설의 종류 4가지는 ___ 체육시설, ___ 체육시설, ___ 체육시설, ___ 체육시설이다.',
+    keywords: ['공공', '학교', '직장', '민간'],
+    wrongs: ['사설', '국공립', '국제'],
+    answerText: '{공공} / {학교} / {직장} / {민간} 체육시설',
+    a: '공공 / 학교 / 직장 / 민간',
+  },
+
+  // ===== PART 5 · 스포츠 인권 =====
+
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: '스포츠 현장에서 인권이란 스포츠 구성원들이 ___ 받지 않고 ___ 하게 스포츠를 즐길 수 있는 권리이다.',
+    keywords: ['차별', '공정'],
+    wrongs: ['비교', '평등', '자유롭', '제한'],
+    answerText: '{차별} 받지 않고 {공정}하게 스포츠를 즐길 수 있는 권리',
+    a: '차별 / 공정',
+  },
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: '체육인 인권보호 규정의 목적은 체육인의 기본적 ___ 보호와 ___ 예방에 필요한 사항을 규정하여 체육인의 인간적 존엄과 가치의 실현을 목적으로 한다.',
+    keywords: ['인권', '인권침해'],
+    wrongs: ['안전', '사고', '도핑', '복지'],
+    answerText: '체육인의 기본적 {인권} 보호와 {인권침해} 예방',
+    a: '인권 / 인권침해',
+  },
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: '체육인 인권침해 사례를 설명하시오.',
+    pool: [
+      '신체를 폭행하거나 협박하는 행위',
+      '지속·반복적인 욕설이나 폭언',
+      '다른 사람들 앞이나 온라인상에서 명예를 훼손하는 행위',
+      '합리적 이유 없이 반복적 개인 심부름·사적 용무 지시',
+      '지위를 이용하여 성적 굴욕감·혐오감을 느끼게 하는 행위',
+      '피해자·신고자에게 협박·회유로 2차 가해를 하는 행위',
+    ],
+    pickCount: 3,
+    wrongs: ['훈련 강도 조절 요청', '경기 출전 의견 제시', '영양 보충제 추천'],
+    a: '폭행·협박 / 욕설·폭언 / 명예훼손 / 사적 용무 강요 / 성적 굴욕감 유발 / 2차 가해',
+  },
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: '경기인 인권 보호를 위한 대회운영지침 3가지를 말하시오.',
+    pool: [
+      '대회 기간 중 휴식권 보장',
+      '18세 이하 주중 지양·주말 확대',
+      '인권교육으로 인권침해 방지',
+    ],
+    pickCount: 2,
+    wrongs: ['훈련 강화', '성적 평가 의무화', '도핑 검사 확대'],
+    a: '대회 기간 중 휴식권 보장 / 18세 이하 주중 지양·주말 확대(학습권 보장) / 인권교육으로 인권침해 방지 인식 제고',
+  },
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: '학습권 침해란 ___ 을 받을 수 있는 권리가 침해되는 상황으로, 수업 불참·훈련 ___ 로 학업 소홀·학교 행사 불참 등이 있다.',
+    keywords: ['교육', '피로도'],
+    wrongs: ['훈련', '성적', '휴식', '원인'],
+    answerText: '{교육}을 받을 수 있는 권리 침해 / 훈련 {피로도}로 학업 소홀 등',
+    a: '교육 / 피로도',
+  },
+  {
+    part: 'PART 5 · 스포츠 인권',
+    category: 'PART 5',
+    q: 'IOC에서 정의하는 폭력의 유형 5가지를 설명하시오.',
+    pool: [
+      '정신적 학대: 정체성·존엄성·자존감을 떨어뜨리는 행위',
+      '신체적 학대: 신체적 부상을 일으킬 수 있는 행위',
+      '성희롱: 상대방이 원하지 않는 모든 언어적·비언어적 성적 행위',
+      '성적 학대: 동의 없이 또는 동의를 강요하는 상황에서 발생하는 성적 언동',
+      '방임: 보호 의무가 있는 사람이 선수가 해를 입는 상황에서 보호하지 않는 것',
+    ],
+    pickCount: 3,
+    wrongs: ['경제적 착취', '도핑 강요', '훈련 방임'],
+    a: '정신적 학대 / 신체적 학대 / 성희롱 / 성적 학대 / 방임',
+  },
+
+  // ===== PART 6 · 스포츠 폭력 =====
+
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력이란 스포츠 참여자를 대상으로 신체적·정신적·정서적·___ 피해를 주는 폭력 행위이다.',
+    keywords: ['경제적'],
+    wrongs: ['사회적', '법적', '환경적'],
+    answerText: '신체적·정신적·정서적·{경제적} 피해를 주는 폭력 행위',
+    a: '경제적',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력의 유형(행위별)을 설명하시오.',
+    pool: [
+      '언어폭력',
+      '신체폭력',
+      '성폭력',
+      '사이버폭력·괴롭힘',
+      '일상적 통제',
+      '금품 갈취',
+      '심리적 폭력(따돌림)',
+    ],
+    pickCount: 3,
+    wrongs: ['경제적 지원 거부', '훈련 강도 조절', '포지션 변경'],
+    a: '언어폭력 / 신체폭력 / 성폭력 / 사이버폭력·괴롭힘 / 일상적 통제 / 금품 갈취 / 심리적 폭력(따돌림)',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력의 원인 2가지는 ___ 지상주의에서의 폭력 정당화와 성과 중심 훈련 방식으로 인한 지도자의 과도한 영향력(___) 이다.',
+    keywords: ['메달', '폭력의 재생산·관행적 묵인'],
+    wrongs: ['개인 성격', '시설 부족', '규칙 미비', '훈련 방식', '도핑'],
+    answerText: '{메달} 지상주의에서의 폭력 정당화 / 지도자 과도한 영향력({폭력의 재생산·관행적 묵인})',
+    a: '메달 / 폭력의 재생산·관행적 묵인',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력 예방법(지도자)을 설명하시오.',
+    pool: [
+      '경기력 향상·팀 단합을 이유로 기합이나 가혹행위 금지',
+      '선수가 감당할 수 없는 과도한 훈련 금지',
+      '특정 선수를 편애하지 않고 모든 선수를 평등하게 대하기',
+      '선수의 인격·명예를 훼손하는 언행 금지',
+      '정해진 훈련 시간 외 시간 강제 조정 금지',
+    ],
+    pickCount: 3,
+    wrongs: ['훈련 강도를 최대로 높이기', '선수 개인 정보 공유', '성적 우수 선수 우선 관리'],
+    a: '기합·가혹행위 금지 / 과도한 훈련 금지 / 평등한 대우 / 인격 훼손 금지 / 훈련 외 시간 강제 조정 금지',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력 발생 시 대처 절차: ① ___ 안전 확보(최우선) → ②응급 대응·증거 확보 → ③상황 파악 → ④___ 신고 → ⑤치료',
+    keywords: ['피해자', '수사기관'],
+    wrongs: ['가해자', '협회', '목격자'],
+    answerText: '① {피해자} 안전 확보 → ④ {수사기관} 신고',
+    a: '피해자 / 수사기관(스포츠인권센터·대한체육회)',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '폭력 행위 징계 기준: 극히 경미, 경미, 중대의 3단계와 기준을 말하시오.',
+    pool: [
+      '극히 경미: 1년 미만',
+      '경미: 1년 이상 3년 미만',
+      '중대: 3년 이상 또는 영구제명',
+    ],
+    pickCount: 2,
+    wrongs: ['경미: 6개월 미만', '중대: 1년 이상', '극히 경미: 6개월 이상 1년 미만'],
+    a: '극히 경미: 1년 미만 / 경미: 1년 이상 3년 미만 / 중대: 3년 이상 또는 영구제명',
+  },
+  {
+    part: 'PART 6 · 스포츠 폭력',
+    category: 'PART 6',
+    q: '스포츠 폭력 예방을 위한 지도방법(행동규범)을 설명하시오.',
+    pool: [
+      '정기적인 인권교육과 코칭 역량 강화 프로그램 참여',
+      '선수들과 열린 소통 채널 구축',
+      '심리상담 등 선수 지원 시스템 활용',
+      '선수 인권 보호를 위해 매뉴얼 숙지와 준수',
+    ],
+    pickCount: 3,
+    wrongs: ['훈련 강도 최대화', '성적 우수 선수 집중 관리', '훈련 외 활동 통제'],
+    a: '인권교육·코칭 역량 강화 / 열린 소통 채널 구축 / 선수 지원 시스템 활용 / 매뉴얼 숙지·준수',
+  },
+
+  // ===== PART 7 · 스포츠 성폭력·성희롱 =====
+
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성희롱·성추행·강제추행·성폭행·성폭력을 각각 설명하시오.',
+    pool: [
+      '성희롱: 성적 언행으로 굴욕감·수치심 유발',
+      '성추행: 동의 없는 간음 이외의 성적 가해',
+      '강제추행: 폭행·협박으로 강제 추행',
+      '성폭행: 폭행·협박으로 성관계 강제',
+      '성폭력: 위 네 가지를 포함하는 가장 큰 범주',
+    ],
+    pickCount: 3,
+    wrongs: ['성희롱: 신체적 폭행', '성추행: 언어적 모욕', '성폭력: 신체폭력만 포함'],
+    a: '성희롱: 굴욕감·수치심 유발 / 성추행: 동의 없는 성적 가해 / 강제추행: 폭행·협박으로 추행 / 성폭행: 폭행·협박으로 성관계 강제 / 성폭력: 위 네 가지 포함하는 가장 큰 범주',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성적 자기결정권이란 자신의 성적 ___ 을 바탕으로, 사생활 영역에서 ___ 내린 성적 결정에 따라 자기 책임 하에 성적 의사를 결정할 수 있는 권리이다.',
+    keywords: ['가치관', '스스로'],
+    wrongs: ['본능', '타인이', '경험'],
+    answerText: '자신의 성적 {가치관}을 바탕으로 {스스로} 내린 성적 결정에 따라 자기 책임 하에 결정할 수 있는 권리',
+    a: '가치관 / 스스로',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성인지 감수성이란 성별 간의 ___ 에 대한 이해와 지식을 갖춰 일상생활 속에서 성차별적 요소를 ___ 해내는 민감성이다.',
+    keywords: ['불균형', '감지'],
+    wrongs: ['차이', '제거', '무시', '갈등'],
+    answerText: '성별 간의 {불균형}에 대한 이해와 지식 / 성차별적 요소를 {감지}해내는 민감성',
+    a: '불균형 / 감지',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성 그루밍이란 상대방과 오랜 기간 ___ 을 쌓아 심리적으로 ___ 한 뒤 언어적·신체적·성적 가해 행위를 하는 것이다.',
+    keywords: ['친밀감', '지배'],
+    wrongs: ['적대감', '회유', '신뢰', '복종'],
+    answerText: '오랜 기간 {친밀감}을 쌓아 심리적으로 {지배}한 뒤 가해 행위',
+    a: '친밀감 / 지배',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '스포츠 성폭력의 원인 3가지는 ___ (신체적·심리적·사회적 권력 차이), ___ (남성 우월주의 등), ___ (성에 대한 잘못된 지식·편견)이다.',
+    keywords: ['힘의 차이', '성차별적 문화', '왜곡된 성 인식'],
+    wrongs: ['개인 성격', '시설 부족', '규칙 미비', '도핑'],
+    answerText: '{힘의 차이} / {성차별적 문화} / {왜곡된 성 인식}',
+    a: '힘의 차이 / 성차별적 문화 / 왜곡된 성 인식',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '스포츠 성폭력 피해자 대처 방법을 설명하시오.',
+    pool: [
+      '피해 상황에서 즉시 벗어나기',
+      '피해 옷차림 그대로 즉시 병원 방문',
+      '피해 사실 기록 및 증거 자료 확보',
+      '스포츠인권센터·한국성폭력상담소·수사기관·주변인에게 도움 요청',
+      '치료에 적극적으로 임하기',
+    ],
+    pickCount: 3,
+    wrongs: ['가해자에게 직접 항의', '팀 내에서 자체 해결', '옷을 즉시 세탁'],
+    a: '피해 상황 즉시 이탈 / 옷차림 그대로 즉시 병원 방문 / 증거 확보 / 관련 기관 도움 요청 / 치료',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '스포츠 성폭력 2차 피해란 피해 사실을 근거로 ___ 옹호·피해자 ___ 등 부정적 반응으로 피해자가 추가적인 정신적·사회적·경제적 불이익을 받게 되는 것이다.',
+    keywords: ['가해자', '비난·신상 유출'],
+    wrongs: ['피해자', '옹호', '지지'],
+    answerText: '{가해자} 옹호·피해자 {비난·신상 유출} 등 부정적 반응으로 추가적 불이익',
+    a: '가해자 / 비난·신상 유출',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성폭력 피해자에게 신속한 응급대처가 필요한 이유를 설명하시오.',
+    pool: [
+      '정신적 충격과 후유증 최소화로 심리적 안정 제공',
+      '신체적 외상의 진료 및 치료',
+      '법적 대응을 위한 증거 확보',
+      '성병 및 임신 예방',
+    ],
+    pickCount: 3,
+    wrongs: ['가해자를 빨리 처벌하기 위해', '언론 보도를 방지하기 위해', '팀 분위기 회복을 위해'],
+    a: '심리적 안정 제공 / 신체적 외상 치료 / 증거 확보 / 성병·임신 예방',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성폭력 2차 피해 예방 방법 4가지를 말하시오.',
+    pool: [
+      '피해자·신고자 신변 노출 금지',
+      '피해자 탓 금지',
+      '가해자 옹호 금지',
+      '가해자 보복행위 차단·피해자 보호 우선',
+    ],
+    pickCount: 3,
+    wrongs: ['피해자 즉시 팀에서 분리', '사건 빠른 공개', '피해자·가해자 직접 대면'],
+    a: '①피해자·신고자 신변 노출 금지 / ②피해자 탓 금지 / ③가해자 옹호 금지 / ④가해자 보복행위 차단·피해자 보호 우선',
+  },
+  {
+    part: 'PART 7 · 스포츠 성폭력·성희롱',
+    category: 'PART 7',
+    q: '성폭력·성추행·성희롱 징계 기준을 말하시오.',
+    pool: [
+      '성폭력: 영구제명',
+      '성추행 중대: 영구제명',
+      '성희롱 극히 경미: 1년 미만',
+    ],
+    pickCount: 2,
+    wrongs: ['성폭력: 3년 이상', '성희롱 경미: 3년 이상', '성추행 경미: 6개월 미만'],
+    a: '성폭력: 영구제명 / 성추행 중대: 영구제명 / 성희롱 극히 경미: 1년 미만',
+  },
+
+];
+
+const CATEGORIES = ['ALL', 'PART 1', 'PART 2', 'PART 3', 'PART 4', 'PART 5', 'PART 6', 'PART 7'];
+const CATEGORY_LABELS = {
+  ALL: '전체',
+  'PART 1': 'PART 1 · 생활체육 기본 개념',
+  'PART 2': 'PART 2 · 생활체육 기능·구성',
+  'PART 3': 'PART 3 · 생활체육 지도자',
+  'PART 4': 'PART 4 · 생활체육 프로그램·시설',
+  'PART 5': 'PART 5 · 스포츠 인권',
+  'PART 6': 'PART 6 · 스포츠 폭력',
+  'PART 7': 'PART 7 · 스포츠 성폭력·성희롱',
+};
+const LS_KEY = 'mentorone_wrong_sports_ethics';
+
+let currentCards = [], currentIndex = 0;
+let correctCount = 0, wrongCount = 0;
+let answeredSet = new Set(), wrongSet = new Set();
+let currentCategory = 'ALL', currentMode = 'flash';
+let blankKeywords = [], blankFilled = [], blankResults = [];
+let blankCurrentIdx = 0, blankCardCorrect = true;
+let currentAnswerText = '';
+
+// ── localStorage ──
+function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } }
+function lsSave(arr) { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+function lsClear() { if (confirm('오답노트를 초기화하시겠습니까?')) { localStorage.removeItem(LS_KEY); location.reload(); } }
+
+// ── Pool 카드 렌더링 ──
+function renderBlank(card) {
+  if (card.pool) {
+    const shuffled = [...card.pool].sort(() => Math.random() - 0.5);
+    const picked = shuffled.slice(0, card.pickCount);
+    const notPicked = card.pool.filter(x => !picked.includes(x));
+    blankKeywords = picked;
+    currentAnswerText = picked.map((_, i) => `{${i}}`).join(' / ');
+    const extraWrongs = notPicked.slice(0, Math.max(0, 4 - card.wrongs.length));
+    const allWrongs = [...card.wrongs, ...extraWrongs];
+    return { keywords: picked, answerText: currentAnswerText, wrongs: allWrongs };
+  } else {
+    blankKeywords = card.keywords;
+    currentAnswerText = card.answerText;
+    return { keywords: card.keywords, answerText: card.answerText, wrongs: card.wrongs };
+  }
+}
+
+// ── 카드 초기화 ──
+function getFilteredCards() {
+  if (currentCategory === 'ALL') return [...ALL_CARDS];
+  if (currentCategory === 'WRONG') {
+    const ids = lsGet();
+    return ALL_CARDS.filter((_, i) => ids.includes(i));
+  }
+  return ALL_CARDS.filter(c => c.category === currentCategory);
+}
+
+function initCards(cards) {
+  currentCards = cards;
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answeredSet = new Set();
+  wrongSet = new Set();
+  updateScoreBadges();
+  renderCard();
+}
+
+function shuffleCards() {
+  currentCards = [...currentCards].sort(() => Math.random() - 0.5);
+  currentIndex = 0;
+  answeredSet = new Set();
+  renderCard();
+}
+
+// ── 탭 렌더링 ──
+function renderTabs() {
+  const container = document.getElementById('categoryTabs');
+  const wrongIds = lsGet();
+  container.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat] || cat;
+    btn.onclick = () => { currentCategory = cat; renderTabs(); initCards(getFilteredCards()); };
+    container.appendChild(btn);
+  });
+  if (wrongIds.length > 0) {
+    const btn = document.createElement('button');
+    btn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+    btn.innerHTML = `오답노트 <span class="wrong-badge">${wrongIds.length}</span>`;
+    btn.onclick = () => { currentCategory = 'WRONG'; renderTabs(); initCards(getFilteredCards()); };
+    container.appendChild(btn);
+  }
+}
+
+// ── URL 파라미터: wrongnote 모드 ──
+function checkUrlMode() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('mode') === 'wrongnote') {
+    const wrongIds = lsGet();
+    if (wrongIds.length > 0) {
+      currentCategory = 'WRONG';
+      renderTabs();
+      showWrongNotePanel();
+    } else {
+      renderTabs();
+      initCards(getFilteredCards());
+    }
+  } else {
+    renderTabs();
+    initCards(getFilteredCards());
+  }
+}
+
+function showWrongNotePanel() {
+  const wrongIds = lsGet();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'block';
+  document.getElementById('wrongNoteCount').textContent = `${wrongIds.length}문제`;
+}
+
+function startWrongReview() {
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  initCards(getFilteredCards());
+}
+
+// ── 카드 렌더링 ──
+function renderCard() {
+  if (currentCards.length === 0) return;
+  const done = answeredSet.size;
+  const total = currentCards.length;
+  document.getElementById('progressLabel').textContent = `${currentCategory === 'WRONG' ? '오답 복습' : (CATEGORY_LABELS[currentCategory] || currentCategory)}`;
+  document.getElementById('progressCount').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = `${total ? (done / total) * 100 : 0}%`;
+
+  if (currentMode === 'flash') renderFlashCard();
+  else renderBlankCard();
+}
+
+function renderFlashCard() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').textContent = card.a;
+  const inner = document.getElementById('cardInner');
+  inner.classList.remove('flipped');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function flipCard() {
+  document.getElementById('cardInner').classList.toggle('flipped');
+}
+
+function renderBlankCard() {
+  const card = currentCards[currentIndex];
+  const { keywords, answerText, wrongs } = renderBlank(card);
+  blankKeywords = keywords;
+  blankFilled = new Array(keywords.length).fill(null);
+  blankResults = new Array(keywords.length).fill(null);
+  blankCurrentIdx = 0;
+  blankCardCorrect = true;
+  currentAnswerText = answerText;
+
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+
+  renderTokens();
+  renderChoices(keywords, wrongs);
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let blankIdx = 0;
+  parts.forEach(part => {
+    const m = part.match(/^\{([^}]+)\}$/);
+    if (m) {
+      const idx = blankIdx++;
+      const token = document.createElement('span');
+      if (blankResults[idx] === null) {
+        token.className = 'token token-blank' + (idx === blankCurrentIdx ? ' active' : '');
+        token.textContent = blankFilled[idx] || '　　　';
+      } else if (blankResults[idx] === true) {
+        token.className = 'token token-correct';
+        token.textContent = blankFilled[idx];
+      } else {
+        token.className = 'token token-wrong';
+        token.textContent = blankFilled[idx];
+      }
+      container.appendChild(token);
+    } else if (part.trim()) {
+      const sep = document.createElement('span');
+      sep.className = 'token token-sep';
+      sep.textContent = part;
+      container.appendChild(sep);
+    }
+  });
+}
+
+function renderChoices(keywords, wrongs) {
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  const correct = keywords[blankCurrentIdx];
+  const pool = [correct, ...wrongs].sort(() => Math.random() - 0.5).slice(0, 4);
+  if (!pool.includes(correct)) { pool[0] = correct; pool.sort(() => Math.random() - 0.5); }
+  pool.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice;
+    btn.onclick = () => handleChoice(choice, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function handleChoice(choice, correct, btn) {
+  const isCorrect = (choice === correct);
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  btn.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
+  if (!isCorrect) {
+    blankCardCorrect = false;
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+  }
+  blankFilled[blankCurrentIdx] = choice;
+  blankResults[blankCurrentIdx] = isCorrect;
+  renderTokens();
+
+  setTimeout(() => {
+    blankCurrentIdx++;
+    if (blankCurrentIdx < blankKeywords.length) {
+      renderTokens();
+      renderChoices(blankKeywords, currentCards[currentIndex].wrongs || []);
+    } else {
+      answeredSet.add(currentIndex);
+      if (!blankCardCorrect) {
+        wrongSet.add(currentIndex);
+        wrongCount++;
+        saveWrong(currentIndex);
+      } else {
+        correctCount++;
+        removeWrong(currentIndex);
+      }
+      updateScoreBadges();
+      renderCard();
+      document.getElementById('blankNextArea').style.display = 'flex';
+    }
+  }, 600);
+}
+
+// ── 플래시카드 정답/오답 ──
+function markCard(isCorrect) {
+  answeredSet.add(currentIndex);
+  if (isCorrect) {
+    correctCount++;
+    removeWrong(currentIndex);
+  } else {
+    wrongCount++;
+    wrongSet.add(currentIndex);
+    saveWrong(currentIndex);
+  }
+  updateScoreBadges();
+  renderCard();
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+}
+
+// ── 오답 저장 ──
+function saveWrong(idx) {
+  const globalIdx = ALL_CARDS.indexOf(currentCards[idx]);
+  if (globalIdx === -1) return;
+  const arr = lsGet();
+  if (!arr.includes(globalIdx)) { arr.push(globalIdx); lsSave(arr); }
+}
+function removeWrong(idx) {
+  const globalIdx = ALL_CARDS.indexOf(currentCards[idx]);
+  if (globalIdx === -1) return;
+  const arr = lsGet().filter(i => i !== globalIdx);
+  lsSave(arr);
+}
+
+// ── 네비게이션 ──
+function nextCard() {
+  if (answeredSet.size === currentCards.length) { showComplete(); return; }
+  do { currentIndex = (currentIndex + 1) % currentCards.length; }
+  while (answeredSet.has(currentIndex) && answeredSet.size < currentCards.length);
+  renderCard();
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function prevCard() {
+  currentIndex = (currentIndex - 1 + currentCards.length) % currentCards.length;
+  renderCard();
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+// ── 완료 화면 ──
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  document.getElementById('completeSub').textContent = `총 ${currentCards.length}문제 완료!`;
+  const btn = document.getElementById('btnWrongOnly');
+  btn.style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() {
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  initCards(getFilteredCards());
+}
+
+function reviewWrong() {
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  const wrongCards = [...wrongSet].map(i => currentCards[i]);
+  initCards(wrongCards);
+}
+
+// ── 모드 전환 ──
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  renderCard();
+}
+
+// ── 점수 배지 ──
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+checkUrlMode();
+</script>
+</body>
+</html>
