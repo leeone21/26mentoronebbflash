@@ -445,6 +445,17 @@
       </div>
     </a>
 
+    <a class="subject-card" href="sports_ethics.html" style="--accent:#9B7FD4;--accent-bg:rgba(155,127,212,0.08);opacity:1;cursor:pointer;">
+      <span class="subject-icon">🤝</span>
+      <div class="subject-tag">Part 08</div>
+      <div class="subject-name">생활스포츠&스포츠윤리</div>
+      <div class="subject-desc">생활체육 기본 개념·지도자<br>스포츠 인권·폭력·성폭력</div>
+      <div class="subject-meta">
+        <span class="subject-count" id="count-sports_ethics">-- 문제</span>
+        <span class="subject-arrow">→</span>
+      </div>
+    </a>
+
   </div>
 
   <!-- 푸터 -->
@@ -467,6 +478,7 @@ const WRONG_NOTE_KEYS = {
   regulation: 'mentorone_wrong_regulation',
   doping: 'mentorone_wrong_doping',
   first_aid: 'mentorone_wrong_first_aid',
+  sports_ethics: 'mentorone_wrong_sports_ethics',
 };
 
 // 각 과목 총 카드 수
@@ -478,6 +490,7 @@ const TOTAL_COUNTS = {
   regulation: 162,
   doping: 33,
   first_aid: 39,
+  sports_ethics: 43,
 };
 
 function loadWrongCount(key) {
@@ -495,6 +508,7 @@ function updateUI() {
   document.getElementById('count-regulation').textContent = `${TOTAL_COUNTS.regulation}문제`;
   document.getElementById('count-doping').textContent = `${TOTAL_COUNTS.doping}문제`;
   document.getElementById('count-first_aid').textContent = `${TOTAL_COUNTS.first_aid}문제`;
+  document.getElementById('count-sports_ethics').textContent = `${TOTAL_COUNTS.sports_ethics}문제`;
 
   // 전체 오답 수 합산
   const total = Object.values(WRONG_NOTE_KEYS).reduce((sum, key) => {
@@ -529,6 +543,7 @@ function goWrongNote() {
     regulation: 'regulation.html',
     doping: 'doping.html',
     first_aid: 'first_aid.html',
+    sports_ethics: 'sports_ethics.html',
   };
 
   window.location.href = urls[top.subject] + '?mode=wrongnote';
