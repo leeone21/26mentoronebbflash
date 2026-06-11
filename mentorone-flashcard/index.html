@@ -279,6 +279,44 @@
     margin-top: 4px;
   }
 
+  /* 유료 전용 안내 배너 */
+  .promo-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--navy-light);
+    border: 1px solid rgba(197,150,58,0.3);
+    border-radius: 14px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+  }
+
+  .promo-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: -0.2px;
+    line-height: 1.5;
+  }
+
+  .promo-btn {
+    flex-shrink: 0;
+    display: inline-block;
+    text-decoration: none;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    padding: 9px 18px;
+    border-radius: 100px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .promo-btn:hover { background: var(--gold-light); }
+
   /* 오답노트 전체 배너 */
   .wrong-note-banner {
     display: flex;
@@ -358,6 +396,8 @@
     .hero-title { font-size: 24px; }
     .subject-grid { grid-template-columns: 1fr; gap: 12px; }
     .subject-card { padding: 22px 20px; }
+    .promo-banner { flex-direction: column; text-align: center; }
+    .promo-btn { width: 100%; padding: 11px; }
   }
 </style>
 </head>
@@ -376,6 +416,12 @@
     <div class="hero-title">과목별로 공부하고<br><em>확실하게 합격하자</em></div>
     <div class="hero-by">by <strong>멘토원</strong></div>
     <div class="hero-sub">플래시카드로 핵심 개념을 반복 학습<br>오답은 자동 저장 → 내 약점만 집중 복습</div>
+  </div>
+
+  <!-- 유료 전용 안내 배너 -->
+  <div class="promo-banner">
+    <span class="promo-text">본 자료는 멘토원 유료 수강생/멤버십 전용입니다</span>
+    <a class="promo-btn" href="https://bit.ly/4xEALaL" target="_blank" rel="noopener">유료강의 신청하기</a>
   </div>
 
   <!-- 오답노트 배너 -->
