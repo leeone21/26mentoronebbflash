@@ -29,7 +29,6 @@
     overflow-x: hidden;
   }
 
-  /* 배경 그라디언트 — 기능해부학과 동일 */
   body::before {
     content: '';
     position: fixed;
@@ -122,163 +121,6 @@
     line-height: 1.7;
   }
 
-  /* 대분류 섹션 */
-  .section-block { margin-bottom: 36px; }
-
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .section-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: var(--white);
-    letter-spacing: -0.3px;
-  }
-
-  .section-score {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--gold);
-    letter-spacing: 0.5px;
-  }
-
-  /* 과목 그리드 */
-  .subject-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .subject-card {
-    position: relative;
-    display: block;
-    text-decoration: none;
-    border-radius: 20px;
-    padding: 28px 24px;
-    background: var(--navy-light);
-    border: 1px solid rgba(255,255,255,0.08);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    cursor: pointer;
-  }
-
-  .subject-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 20px;
-    opacity: 0;
-    transition: opacity 0.25s;
-  }
-
-  .subject-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(197,150,58,0.35);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
-  }
-
-  .subject-card:hover::before { opacity: 1; }
-
-  .subject-card:active { transform: translateY(-1px); }
-
-  /* 과목별 포인트 컬러 */
-  .subject-card.anatomy  { --accent: #C5963A; --accent-bg: rgba(197,150,58,0.08); }
-  .subject-card.physio   { --accent: #4E9FD4; --accent-bg: rgba(78,159,212,0.08); }
-  .subject-card.training { --accent: #6DBF8A; --accent-bg: rgba(109,191,138,0.08); }
-  .subject-card.nutrition{ --accent: #C97B5A; --accent-bg: rgba(201,123,90,0.08); }
-
-  .subject-card::before {
-    background: var(--accent-bg);
-  }
-
-  .subject-icon {
-    font-size: 32px;
-    margin-bottom: 16px;
-    display: block;
-  }
-
-  .subject-tag {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .subject-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--white);
-    margin-bottom: 8px;
-    line-height: 1.3;
-  }
-
-  .subject-desc {
-    font-size: 12px;
-    color: var(--gray);
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-
-  .subject-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .subject-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    background: var(--accent-bg);
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-    padding: 4px 10px;
-    border-radius: 100px;
-  }
-
-  .subject-arrow {
-    font-size: 14px;
-    color: var(--gray);
-    transition: transform 0.2s, color 0.2s;
-  }
-
-  .subject-card:hover .subject-arrow {
-    transform: translateX(4px);
-    color: var(--accent);
-  }
-
-  /* 준비중 카드 */
-  .subject-card.coming-soon {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .subject-card.coming-soon:hover {
-    transform: none;
-    border-color: rgba(255,255,255,0.08);
-    box-shadow: none;
-  }
-
-  .coming-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--gray);
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 3px 8px;
-    border-radius: 100px;
-    margin-top: 4px;
-  }
-
   /* 유료 전용 안내 배너 */
   .promo-banner {
     display: flex;
@@ -289,7 +131,7 @@
     border: 1px solid rgba(197,150,58,0.3);
     border-radius: 14px;
     padding: 12px 20px;
-    margin-bottom: 16px;
+    margin-bottom: 32px;
   }
 
   .promo-text {
@@ -317,59 +159,219 @@
 
   .promo-btn:hover { background: var(--gold-light); }
 
-  /* 오답노트 전체 배너 */
-  .wrong-note-banner {
+  /* 메인 카드 목록 */
+  .main-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .main-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(184,50,50,0.08);
-    border: 1px solid rgba(184,50,50,0.2);
-    border-radius: 14px;
-    padding: 18px 22px;
-    margin-bottom: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
     text-decoration: none;
+    border-radius: 20px;
+    padding: 26px 28px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
   }
 
-  .wrong-note-banner:hover {
-    background: rgba(184,50,50,0.14);
-    border-color: rgba(184,50,50,0.35);
+  .main-card:active { transform: scale(0.99); }
+
+  /* ① 기출문제 카드 */
+  .card-kichul {
+    background: linear-gradient(135deg, rgba(192,57,43,0.18) 0%, rgba(192,57,43,0.06) 100%);
+    border-color: rgba(192,57,43,0.3);
   }
 
-  .wrong-note-left {
+  .card-kichul:hover {
+    background: linear-gradient(135deg, rgba(192,57,43,0.26) 0%, rgba(192,57,43,0.10) 100%);
+    border-color: rgba(192,57,43,0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(192,57,43,0.2);
+  }
+
+  /* ② 과목별 학습 카드 */
+  .card-subjects {
+    background: linear-gradient(135deg, rgba(197,150,58,0.14) 0%, rgba(197,150,58,0.04) 100%);
+    border-color: rgba(197,150,58,0.3);
+  }
+
+  .card-subjects:hover {
+    background: linear-gradient(135deg, rgba(197,150,58,0.22) 0%, rgba(197,150,58,0.08) 100%);
+    border-color: rgba(197,150,58,0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(197,150,58,0.15);
+  }
+
+  /* ③ 전체 오답노트 카드 */
+  .card-wrongnote {
+    background: linear-gradient(135deg, rgba(184,50,50,0.12) 0%, rgba(184,50,50,0.04) 100%);
+    border-color: rgba(184,50,50,0.2);
+  }
+
+  .card-wrongnote:hover {
+    background: linear-gradient(135deg, rgba(184,50,50,0.2) 0%, rgba(184,50,50,0.08) 100%);
+    border-color: rgba(184,50,50,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(184,50,50,0.15);
+  }
+
+  .card-left {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 20px;
+    flex: 1;
+    min-width: 0;
   }
 
-  .wrong-note-icon {
-    font-size: 24px;
+  .card-icon {
+    font-size: 36px;
+    flex-shrink: 0;
   }
 
-  .wrong-note-title {
-    font-size: 15px;
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-label {
+    font-size: 10px;
     font-weight: 700;
-    color: var(--white);
-    margin-bottom: 2px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
   }
 
-  .wrong-note-sub {
+  .card-kichul .card-label { color: #FF8080; }
+  .card-subjects .card-label { color: var(--gold); }
+  .card-wrongnote .card-label { color: #E07070; }
+
+  .card-title {
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .card-sub {
     font-size: 12px;
     color: var(--gray);
+    line-height: 1.5;
   }
 
-  .wrong-note-count {
+  /* 기출 카드 오른쪽 뱃지 영역 */
+  .card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .new-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #FF8080;
+    background: rgba(192,57,43,0.2);
+    border: 1px solid rgba(192,57,43,0.4);
+    padding: 4px 9px 4px 7px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .new-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FF8080;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .date-chip {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,128,128,0.8);
+    background: rgba(192,57,43,0.12);
+    border: 1px solid rgba(192,57,43,0.25);
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .card-arrow {
+    font-size: 16px;
+    color: var(--gray);
+    transition: transform 0.2s, color 0.2s;
+    margin-left: 4px;
+  }
+
+  .card-kichul:hover .card-arrow   { transform: translateX(4px); color: #FF8080; }
+  .card-subjects:hover .card-arrow { transform: translateX(4px); color: var(--gold); }
+  .card-wrongnote:hover .card-arrow { transform: translateX(4px); color: #E07070; }
+
+  /* 과목별 학습 카드 오른쪽 필 */
+  .category-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .category-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    background: rgba(197,150,58,0.12);
+    border: 1px solid rgba(197,150,58,0.3);
+    padding: 5px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* 오답노트 카드 오른쪽 숫자 */
+  .wrong-count-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .wrong-count-num {
     font-family: 'DM Mono', monospace;
-    font-size: 22px;
+    font-size: 32px;
     font-weight: 500;
     color: #E07070;
+    line-height: 1;
+  }
+
+  .wrong-count-label {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 3px;
   }
 
   /* 푸터 */
   .footer {
     text-align: center;
-    margin-top: 48px;
     padding-top: 24px;
     border-top: 1px solid rgba(255,255,255,0.06);
   }
@@ -394,10 +396,12 @@
   /* 모바일 */
   @media (max-width: 480px) {
     .hero-title { font-size: 24px; }
-    .subject-grid { grid-template-columns: 1fr; gap: 12px; }
-    .subject-card { padding: 22px 20px; }
     .promo-banner { flex-direction: column; text-align: center; }
     .promo-btn { width: 100%; padding: 11px; }
+    .main-card { padding: 20px 20px; }
+    .card-icon { font-size: 28px; }
+    .card-title { font-size: 16px; }
+    .wrong-count-num { font-size: 26px; }
   }
 </style>
 </head>
@@ -424,126 +428,60 @@
     <a class="promo-btn" href="https://bit.ly/4xEALaL" target="_blank" rel="noopener">유료강의 신청하기</a>
   </div>
 
-  <!-- 오답노트 배너 -->
-  <div class="wrong-note-banner" id="wrongNoteBanner" onclick="goWrongNote()">
-    <div class="wrong-note-left">
-      <div class="wrong-note-icon">📋</div>
-      <div>
-        <div class="wrong-note-title">전체 오답노트</div>
-        <div class="wrong-note-sub" id="wrongNoteSub">모든 과목의 오답을 모아서 복습</div>
+  <!-- 메인 카드 3개 -->
+  <div class="main-cards">
+
+    <!-- ① 기출문제 -->
+    <a class="main-card card-kichul" href="kichul_2026.html">
+      <div class="card-left">
+        <div class="card-icon">📝</div>
+        <div class="card-body">
+          <div class="card-label">Past Exam · 기출문제</div>
+          <div class="card-title">'26년 실기 구술<br>기출문제</div>
+          <div class="card-sub">실제 시험 출제 문제로 최종 점검</div>
+        </div>
+      </div>
+      <div class="card-right">
+        <span class="new-badge"><span class="new-dot"></span>NEW</span>
+        <span class="date-chip">6월 13일</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- ② 과목별 학습 -->
+    <a class="main-card card-subjects" href="subjects.html">
+      <div class="card-left">
+        <div class="card-icon">📚</div>
+        <div class="card-body">
+          <div class="card-label">Subject Study · 과목별 학습</div>
+          <div class="card-title">과목별 학습</div>
+          <div class="card-sub">규정 + 지도방법 8과목 전체</div>
+        </div>
+      </div>
+      <div class="category-pills">
+        <div class="category-pill">규정 4과목</div>
+        <div class="category-pill">지도방법 4과목</div>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- ③ 전체 오답노트 -->
+    <div class="main-card card-wrongnote" onclick="goWrongNote()" style="cursor:pointer;">
+      <div class="card-left">
+        <div class="card-icon">📋</div>
+        <div class="card-body">
+          <div class="card-label">Wrong Note · 오답노트</div>
+          <div class="card-title">전체 오답노트</div>
+          <div class="card-sub" id="wrongNoteSub">모든 과목의 오답을 모아서 복습</div>
+        </div>
+      </div>
+      <div class="wrong-count-display">
+        <div class="wrong-count-num" id="totalWrongCount">0</div>
+        <div class="wrong-count-label">오답 누적</div>
+        <span class="card-arrow">→</span>
       </div>
     </div>
-    <div class="wrong-note-count" id="totalWrongCount">0</div>
-  </div>
 
-  <!-- 대분류 1 · 규정 -->
-  <div class="section-block">
-    <div class="section-header">
-      <div class="section-title">규정</div>
-      <div class="section-score">50점 · 4과목</div>
-    </div>
-    <div class="subject-grid">
-
-      <a class="subject-card" href="regulation.html" style="--accent:#A07BE0;--accent-bg:rgba(160,123,224,0.08);opacity:1;cursor:pointer;">
-        <span class="subject-icon">📋</span>
-        <div class="subject-tag">Part 01</div>
-        <div class="subject-name">보디빌딩 규정</div>
-        <div class="subject-desc">IFBB 일반규정·종목별 규정<br>등록·심판 규정</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-regulation">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card" href="doping.html" style="--accent:#E07070;--accent-bg:rgba(224,112,112,0.08);opacity:1;cursor:pointer;">
-        <span class="subject-icon">🚫</span>
-        <div class="subject-tag">Part 02</div>
-        <div class="subject-name">도핑방지</div>
-        <div class="subject-desc">금지약물·금지방법·TUE<br>도핑 검사 절차·제재 규정</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-doping">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card" href="first_aid.html" style="--accent:#5ABFB0;--accent-bg:rgba(90,191,176,0.08);opacity:1;cursor:pointer;">
-        <span class="subject-icon">🩹</span>
-        <div class="subject-tag">Part 03</div>
-        <div class="subject-name">응급처치</div>
-        <div class="subject-desc">CPR·AED·하임리히법<br>외상처치·RICE·PRICES</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-first_aid">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card" href="sports_ethics.html" style="--accent:#9B7FD4;--accent-bg:rgba(155,127,212,0.08);opacity:1;cursor:pointer;">
-        <span class="subject-icon">🤝</span>
-        <div class="subject-tag">Part 04</div>
-        <div class="subject-name">생활스포츠&스포츠윤리</div>
-        <div class="subject-desc">생활체육 기본 개념·지도자<br>스포츠 인권·폭력·성폭력</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-sports_ethics">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-    </div>
-  </div>
-
-  <!-- 대분류 2 · 지도방법 -->
-  <div class="section-block">
-    <div class="section-header">
-      <div class="section-title">지도방법</div>
-      <div class="section-score">50점 · 4과목</div>
-    </div>
-    <div class="subject-grid">
-
-      <a class="subject-card training" href="training.html" style="opacity:1;cursor:pointer;">
-        <span class="subject-icon">🏋️</span>
-        <div class="subject-tag">Part 05</div>
-        <div class="subject-name">트레이닝방법론</div>
-        <div class="subject-desc">트레이닝 원리·처방<br>체력 요소와 측정</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-training">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card anatomy" href="anatomy.html">
-        <span class="subject-icon">🦴</span>
-        <div class="subject-tag">Part 06</div>
-        <div class="subject-name">기능해부학</div>
-        <div class="subject-desc">근육·관절·인대<br>신체 면과 방향 용어</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-anatomy">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card physio" href="physiology.html">
-        <span class="subject-icon">❤️</span>
-        <div class="subject-tag">Part 07</div>
-        <div class="subject-name">운동생리학</div>
-        <div class="subject-desc">에너지 시스템·심폐기능<br>근육 생리와 적응</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-physio">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-      <a class="subject-card nutrition" href="nutrition.html" style="opacity:1;cursor:pointer;">
-        <span class="subject-icon">🥗</span>
-        <div class="subject-tag">Part 08</div>
-        <div class="subject-name">운동영양학</div>
-        <div class="subject-desc">3대 영양소·보충제<br>운동 전후 영양 전략</div>
-        <div class="subject-meta">
-          <span class="subject-count" id="count-nutrition">-- 문제</span>
-          <span class="subject-arrow">→</span>
-        </div>
-      </a>
-
-    </div>
   </div>
 
   <!-- 푸터 -->
@@ -555,30 +493,16 @@
 </div>
 
 <script>
-// ============================
-// localStorage 키 목록 (각 과목 파일과 동일하게 맞출 것)
-// ============================
 const WRONG_NOTE_KEYS = {
-  anatomy:   'mentorone_wrong_anatomy',
-  physio:    'mentorone_wrong_physiology',
-  training:  'mentorone_wrong_training',
-  nutrition: 'mentorone_wrong_nutrition',
-  regulation: 'mentorone_wrong_regulation',
-  doping: 'mentorone_wrong_doping',
-  first_aid: 'mentorone_wrong_first_aid',
+  anatomy:       'mentorone_wrong_anatomy',
+  physio:        'mentorone_wrong_physiology',
+  training:      'mentorone_wrong_training',
+  nutrition:     'mentorone_wrong_nutrition',
+  regulation:    'mentorone_wrong_regulation',
+  doping:        'mentorone_wrong_doping',
+  first_aid:     'mentorone_wrong_first_aid',
   sports_ethics: 'mentorone_wrong_sports_ethics',
-};
-
-// 각 과목 총 카드 수
-const TOTAL_COUNTS = {
-  anatomy: 60,
-  physio: 44,
-  training: 65,
-  nutrition: 43,
-  regulation: 114,
-  doping: 33,
-  first_aid: 39,
-  sports_ethics: 43,
+  kichul_0613:   'mentorone_wrong_kichul_2026_0613',
 };
 
 function loadWrongCount(key) {
@@ -588,17 +512,6 @@ function loadWrongCount(key) {
 }
 
 function updateUI() {
-  // 완성된 과목 카드 수 표시
-  document.getElementById('count-anatomy').textContent = `${TOTAL_COUNTS.anatomy}문제`;
-  document.getElementById('count-physio').textContent = `${TOTAL_COUNTS.physio}문제`;
-  document.getElementById('count-training').textContent = `${TOTAL_COUNTS.training}문제`;
-  document.getElementById('count-nutrition').textContent = `${TOTAL_COUNTS.nutrition}문제`;
-  document.getElementById('count-regulation').textContent = `${TOTAL_COUNTS.regulation}문제`;
-  document.getElementById('count-doping').textContent = `${TOTAL_COUNTS.doping}문제`;
-  document.getElementById('count-first_aid').textContent = `${TOTAL_COUNTS.first_aid}문제`;
-  document.getElementById('count-sports_ethics').textContent = `${TOTAL_COUNTS.sports_ethics}문제`;
-
-  // 전체 오답 수 합산
   const total = Object.values(WRONG_NOTE_KEYS).reduce((sum, key) => {
     return sum + loadWrongCount(key);
   }, 0);
@@ -611,8 +524,6 @@ function updateUI() {
 }
 
 function goWrongNote() {
-  // 전체 오답노트는 추후 wrong-note.html로 분리 가능
-  // 현재는 가장 오답이 많은 과목으로 이동
   const counts = Object.entries(WRONG_NOTE_KEYS).map(([subject, key]) => ({
     subject, count: loadWrongCount(key)
   }));
@@ -624,14 +535,15 @@ function goWrongNote() {
   }
 
   const urls = {
-    anatomy:   'anatomy.html',
-    physio:    'physiology.html',
-    training:  'training.html',
-    nutrition: 'nutrition.html',
-    regulation: 'regulation.html',
-    doping: 'doping.html',
-    first_aid: 'first_aid.html',
+    anatomy:       'anatomy.html',
+    physio:        'physiology.html',
+    training:      'training.html',
+    nutrition:     'nutrition.html',
+    regulation:    'regulation.html',
+    doping:        'doping.html',
+    first_aid:     'first_aid.html',
     sports_ethics: 'sports_ethics.html',
+    kichul_0613:   'kichul_2026_0613.html',
   };
 
   window.location.href = urls[top.subject] + '?mode=wrongnote';
