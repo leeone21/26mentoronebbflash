@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6/14 기출 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(255,80,80,.06) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:#C0392B; color:var(--white); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:#E07070; color:#E07070; }
+  .tab.active { background:#C0392B; border-color:#C0392B; color:var(--white); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:#E07070; }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,#C0392B,#E07070); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:#C0392B; text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(192,57,43,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:#E07070; text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:#C0392B; text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#FFF0F0; border:2px dashed #E07070; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#E07070} 50%{border-color:#C0392B} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:#C0392B; color:var(--white); font-weight:700; }
+  .btn-next:hover { background:#E04030; }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(192,57,43,.2); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(192,57,43,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:#C0392B; color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:#E04030; }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="kichul_2026.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='#E07070'" onmouseout="this.style.color='var(--gray)'">← 기출목록</a>
+    <div class="header-title">📝 26년 6/14 기출</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // ── 운동생리학 ──
+  { part:'운동생리학 · ATP', category:'운동생리학',
+    q:'ATP란 무엇인가?',
+    keywords:['아데노신 삼인산','인산기 3개','가수분해'],
+    wrongs:['아데노신 이인산','인산기 2개','산화'],
+    answerText:'ATP({아데노신 삼인산}): 아데노신 1분자에 {인산기 3개}가 고에너지 결합. 세 번째 인산기 {가수분해} 시 에너지 방출→근수축에 사용',
+    a:'ATP(아데노신 삼인산): 아데노신 1분자에 인산기 3개가 고에너지 결합으로 연결된 구조. 인산기가 분리될 때 에너지 방출→근수축에 사용. 세 번째 인산기의 결합이 가장 불안정하여 가수분해 시 에너지 방출. 근육 속 ATP는 소량이므로 지속적인 재합성 필요.' },
+
+  { part:'운동생리학 · 근수축', category:'운동생리학',
+    q:'근수축 종류 3가지는?',
+    keywords:['등장성 수축','등척성 수축','등속성 수축'],
+    wrongs:['폭발성 수축','탄성 수축','수동성 수축'],
+    answerText:'{등장성 수축}: 길이 변화(단축성·신장성) / {등척성 수축}: 길이 변화 없이 버팀(플랭크) / {등속성 수축}: 일정 속도 유지(재활)',
+    a:'① 등장성 수축: 근육 길이가 변하면서 힘을 발휘(단축성·신장성) ② 등척성 수축: 길이 변화 없이 버티는 수축(플랭크) ③ 등속성 수축: 일정한 속도를 유지하며 수축(주로 재활에 사용)' },
+
+  { part:'운동생리학 · 아세틸콜린', category:'운동생리학',
+    q:'운동 시 아세틸콜린이란?',
+    keywords:['신경전달물질','신경근 접합부','근수축'],
+    wrongs:['호르몬','신경세포체','근이완'],
+    answerText:'{신경전달물질}. 운동 신경 말단→{신경근 접합부}에서 분비→근육 세포막 수용체 결합→{근수축} 시작',
+    a:'운동 신경 말단에서 분비되는 신경전달물질. 신경근 접합부에서 분비되어 근육 세포막에 수축 신호를 전달하는 메커니즘으로 인해 근수축이 시작됨' },
+
+  { part:'운동생리학 · 근육피로', category:'운동생리학',
+    q:'근육피로의 원인 3가지는?',
+    pool:['수소 이온 축적(근육 산성화)','무기 인산염(Pi) 축적','ATP-PCr 고갈','글리코겐 고갈','신경 피로'],
+    pickCount:3,
+    wrongs:['산소 과다','체온 저하','수분 과다'],
+    a:'① 수소 이온 축적으로 인한 근육 산성화 ② 무기 인산염(Pi) 축적 ③ ATP-PCr 고갈' },
+
+  { part:'운동생리학 · 젖산', category:'운동생리학',
+    q:'젖산 생성 이유와 제거 방법은?',
+    keywords:['고강도 무산소','정리 운동','코리 회로'],
+    wrongs:['저강도 유산소','준비 운동','크렙스 회로'],
+    answerText:'생성: {고강도 무산소} 운동 시 산소 부족→피루브산→젖산 전환. 제거: {정리 운동}으로 유산소 대사 촉진 / 간에서 {코리 회로}로 포도당 재합성',
+    a:'생성 이유: 고강도 무산소 운동 시 산소 부족으로 포도당이 완전히 산화되지 못할 때 생성. 제거: ① 정리 운동(유산소 대사 촉진) ② 간에서 코리 회로로 포도당 재합성' },
+
+  { part:'운동생리학 · EPOC', category:'운동생리학',
+    q:'초과산소 섭취량(EPOC)이란?',
+    keywords:['초과산소 섭취량','안정 시보다 더 많은 산소','ATP-PCr 재합성'],
+    wrongs:['최대산소 섭취량','운동 중 산소 소비','ATP-PCr 생성'],
+    answerText:'EPOC({초과산소 섭취량}): 운동 종료 후 {안정 시보다 더 많은 산소}를 소비하는 상태. 원인: 체온 상승/젖산 제거/{ATP-PCr 재합성}',
+    a:'운동 후 초과산소 섭취량. 운동 종료 후 신체가 정상 상태로 회복되는 과정에서 안정 시보다 더 많은 산소 소비. 원인: 체온 상승 유지·젖산 제거·ATP-PCr 재합성' },
+
+  { part:'운동생리학 · 세컨드 윈드', category:'운동생리학',
+    q:'세컨드 윈드(Second Wind)란?',
+    keywords:['사점(Dead Point)','유산소 대사 시스템','산소 공급'],
+    wrongs:['정점','무산소 대사 시스템','에너지 고갈'],
+    answerText:'운동 초반 {사점(Dead Point)} 이후 갑자기 편안해지는 현상. {유산소 대사 시스템}이 완전히 가동되면서 {산소 공급}과 에너지 생성이 안정화',
+    a:'운동 초반 호흡 곤란과 피로감이 지속되다가 일정 시점 이후 갑자기 편안해지는 현상. 유산소 대사 시스템이 완전히 가동되면서 산소 공급과 에너지 생성이 안정화되기 때문' },
+
+  { part:'운동생리학 · 기초대사량', category:'운동생리학',
+    q:'기초대사량이란?',
+    keywords:['생명 유지','최소한의 에너지량','60~70%'],
+    wrongs:['운동 유지','최대 에너지량','30~40%'],
+    answerText:'{생명 유지}를 위해 아무것도 안 해도 소비되는 {최소한의 에너지량}. 심장 박동·호흡·체온 유지에 사용. 일일 에너지 소비량의 약 {60~70%}',
+    a:'생명 유지를 위해 아무것도 하지 않아도 소비되는 최소한의 에너지량. 심장 박동·호흡·체온 유지 등 기본 생리 기능에 사용. 전체 일일 에너지 소비량의 약 60~70%' },
+
+  { part:'운동생리학 · TDEE', category:'운동생리학',
+    q:'일일 에너지 소비량(TDEE) 구성 4가지는?',
+    pool:['기초대사량','활동대사량','식이성 발열 효과(TEF)','적응 대사량'],
+    pickCount:3,
+    wrongs:['수면대사량','호르몬대사량','감정대사량'],
+    a:'① 기초대사량 ② 활동대사량 ③ 식이성 발열 효과(TEF, 약 10%) ④ 적응 대사량. 네 가지의 합 = 하루 총 에너지 소비량(TDEE)' },
+
+  { part:'운동생리학 · 과호흡', category:'운동생리학',
+    q:'운동 중 과호흡 발생 시 생리적 반응은?',
+    keywords:['이산화탄소(CO₂)','호흡성 알칼리증','어지러움'],
+    wrongs:['산소(O₂)','호흡성 산증','활력 증가'],
+    answerText:'이산화탄소 과다 배출→혈중 {이산화탄소(CO₂)} 농도 저하→{호흡성 알칼리증}. 결과: {어지러움}·손발 저림·근육 경련',
+    a:'이산화탄소 과다 배출→혈중 CO₂ 농도 저하→혈액이 알칼리성으로 변하는 호흡성 알칼리증 발생. 결과: 어지러움·손발 저림·근육 경련' },
+
+  { part:'운동생리학 · 스포츠 심장', category:'운동생리학',
+    q:'스포츠 심장이란?',
+    keywords:['심실 용적','1회 박출량','서맥'],
+    wrongs:['심방 용적','심박수','빈맥'],
+    answerText:'장기간 지속 훈련으로 심장이 구조적으로 적응. {심실 용적} 커지고 {1회 박출량} 증가. 안정 시 심박수 낮아지는 {서맥} 현상',
+    a:'장기간 지속적인 훈련으로 인해 심장이 구조적으로 적응한 상태. 심실 용적이 커지고 1회 박출량이 증가. 안정 시 심박수가 낮아지는 서맥 현상이 나타남' },
+
+  { part:'운동생리학 · 심장 전도계', category:'운동생리학',
+    q:'심장 전도계를 설명하시오',
+    keywords:['동방결절','방실결절','퍼킨제 섬유'],
+    wrongs:['심방결절','심실결절','히스 섬유'],
+    answerText:'{동방결절}(페이스메이커)→{방실결절}(0.1초 지연)→히스속·좌우각→{퍼킨제 섬유}(심실 전체). 심방·심실 순차 수축',
+    a:'심장 전도계: 동방결절→방실결절→히스속→퍼킨제 섬유 순서로 전달. 심방과 심실이 순차적으로 수축' },
+
+  { part:'운동생리학 · 심폐계', category:'운동생리학',
+    q:'심폐계를 설명하시오',
+    keywords:['산소 흡수','전신으로 운반','가스 교환'],
+    wrongs:['이산화탄소 흡수','폐로 운반','영양소 합성'],
+    answerText:'호흡계({산소 흡수}) + 심혈관계({전신으로 운반}) 협력 시스템. 역할: {가스 교환}·영양소 운반·노폐물 제거',
+    a:'심폐계: 호흡계(폐에서 산소 흡수)와 심혈관계(산소를 전신으로 운반)가 협력하는 시스템. 역할: 가스 교환·영양소 운반·노폐물 제거' },
+
+  { part:'운동생리학 · 테스토스테론', category:'운동생리학',
+    q:'남성호르몬(테스토스테론)이란?',
+    keywords:['콜레스테롤','단백질 합성','근육량 증가'],
+    wrongs:['포도당','단백질 분해','근육량 감소'],
+    answerText:'{콜레스테롤}을 기반으로 합성되는 남성 스테로이드 호르몬. 동화 작용으로 {단백질 합성} 촉진. 효과: {근육량 증가}·근력 향상·회복 속도 향상',
+    a:'콜레스테롤을 기반으로 합성되는 남성 스테로이드 호르몬. 강력한 동화 작용으로 단백질 합성 촉진. 효과: 근육량 증가·근력 향상·회복 속도 향상' },
+
+  { part:'운동생리학 · 글루카곤', category:'운동생리학',
+    q:'운동 중 글루카곤의 기능은?',
+    keywords:['알파세포','글리코겐을 포도당으로','혈당 상승'],
+    wrongs:['베타세포','포도당을 글리코겐으로','혈당 저하'],
+    answerText:'췌장 {알파세포} 분비. 혈당 저하 시 간의 {글리코겐을 포도당으로} 분해→{혈당 상승}→운동 중 에너지 공급',
+    a:'장시간 운동 중 혈당이 저하될 시 췌장 알파세포에서 분비. 간의 글리코겐을 포도당으로 분해→혈당 상승→운동 중 에너지 공급' },
+
+  { part:'운동생리학 · 카보로딩', category:'운동생리학',
+    q:'카보로딩이란?',
+    keywords:['글리코겐 저장량','고탄수화물 식단','경기 중 에너지'],
+    wrongs:['단백질 저장량','저탄수화물 식단','경기 전 에너지'],
+    answerText:'시합 전 근육·간의 {글리코겐 저장량} 최대화 전략. {고탄수화물 식단}으로 글리코겐 과잉 저장. 효과: {경기 중 에너지} 지속 공급',
+    a:'시합 전 근육과 간의 글리코겐 저장량을 최대화하는 식이 전략. 고탄수화물 식단으로 글리코겐 과잉 저장. 효과: 경기 중 에너지 지속 공급' },
+
+  // ── 기능해부학 ──
+  { part:'기능해부학 · 인체 면', category:'기능해부학',
+    q:'인체의 3가지 가상 면(Plane)을 설명하시오',
+    keywords:['시상면','관상면','수평면'],
+    wrongs:['전두면','종단면','횡단면'],
+    answerText:'{시상면}: 좌우 분리·굴곡·신전 / {관상면}: 전후 분리·외전·내전 / {수평면}: 상하 분리·회전 동작',
+    a:'① 시상면: 신체를 좌우로 나누는 면(굴곡·신전) ② 관상면: 신체를 전후로 나누는 면(외전·내전) ③ 수평면: 신체를 상하로 나누는 면(회전 동작)' },
+
+  { part:'기능해부학 · 해부학적 자세', category:'기능해부학',
+    q:'해부학적 자세와 일반 서있는 자세의 차이는?',
+    keywords:['전완 회외(Supination)','손바닥이 앞을 향함','기준점'],
+    wrongs:['전완 회내','손바닥이 뒤를 향함','참고점'],
+    answerText:'해부학적 자세: 정면 응시·양발 모음·{전완 회외(Supination)} 상태. 핵심: {손바닥이 앞을 향함}. 모든 신체 움직임의 {기준점}',
+    a:'해부학적 자세: 정면 응시·양발 모음·손바닥 앞을 향한 표준 기준 자세. 핵심 차이: 전완이 회외(supination) 상태→손바닥이 앞을 향함. 모든 신체 움직임의 기준점' },
+
+  { part:'기능해부학 · 결합 구조', category:'기능해부학',
+    q:'골격/근육/건/인대를 설명하시오',
+    keywords:['건: 근육과 뼈 연결','인대: 뼈와 뼈 연결','골격: 신체 지지'],
+    wrongs:['건: 뼈와 뼈 연결','인대: 근육과 뼈 연결','골격: 에너지 생성'],
+    answerText:'{골격: 신체 지지}·장기 보호 / 근육: 수축·이완으로 움직임 / {건: 근육과 뼈 연결} / {인대: 뼈와 뼈 연결}·관절 안정성',
+    a:'골격: 신체 지지·장기 보호. 근육: 수축·이완으로 움직임 생성. 건: 근육과 뼈를 연결. 인대: 뼈와 뼈를 연결하여 관절 안정성 유지' },
+
+  { part:'기능해부학 · 골절', category:'기능해부학',
+    q:'피부 연부조직과 관련된 골절 종류는?',
+    keywords:['폐쇄형 골절','개방형 골절','감염'],
+    wrongs:['단순 골절','복합 골절','염증'],
+    answerText:'{폐쇄형 골절}: 피부 손상 없이 뼈만 부러짐 / {개방형 골절}: 뼈가 피부를 뚫고 외부 노출 → {감염} 위험 높음',
+    a:'폐쇄형 골절: 피부 손상 없이 뼈만 부러진 경우. 개방형 골절: 골절된 뼈가 피부를 뚫고 외부로 노출된 경우. 개방형 골절은 감염 위험이 높아 즉각적인 처치 필요' },
+
+  { part:'기능해부학 · 슬개골', category:'기능해부학',
+    q:'슬개골을 설명하시오',
+    keywords:['종자골','대퇴사두근','신전 효율'],
+    wrongs:['종말뼈','햄스트링','굴곡 효율'],
+    answerText:'무릎 앞쪽 밤알 모양의 {종자골}. {대퇴사두근}의 수축력을 경골로 전달하는 지렛대. 무릎 {신전 효율} 향상·관절 보호',
+    a:'무릎 앞쪽에 위치한 밤알 모양의 종자골. 대퇴사두근의 수축력을 경골로 전달하는 지렛대 역할. 무릎 신전 효율을 높이고 관절을 보호' },
+
+  { part:'기능해부학 · 회전근개', category:'기능해부학',
+    q:'회전근개(Rotator Cuff)를 설명하시오',
+    pool:['극상근(외전)','극하근(외회전)','소원근(외회전)','견갑하근(내회전)'],
+    pickCount:3,
+    wrongs:['대원근','삼각근','능형근'],
+    a:'4가지: 극상근(외전)·극하근(외회전)·소원근(외회전)·견갑하근(내회전). 상완골두를 관절와에 고정하여 어깨 안정성 유지 + 회전 동작 가능' },
+
+  { part:'기능해부학 · 흉쇄유돌근', category:'기능해부학',
+    q:'흉쇄유돌근(SCM) 동작을 설명하시오',
+    keywords:['목을 앞으로 굽힘','같은 쪽으로 측굴','반대쪽으로 회전'],
+    wrongs:['목을 뒤로 신전','반대쪽으로 측굴','같은 쪽으로 회전'],
+    answerText:'흉골·쇄골→유양돌기 부착. 양측 수축: {목을 앞으로 굽힘}. 한쪽 수축: {같은 쪽으로 측굴} + {반대쪽으로 회전}',
+    a:'흉골·쇄골→유양돌기에 부착. 양측 수축: 목을 앞으로 굽힘. 한쪽 수축: 같은 쪽으로 측굴 + 반대쪽으로 회전' },
+
+  { part:'기능해부학 · 배측 굴곡', category:'기능해부학',
+    q:'배측 굴곡(Dorsiflexion)이란?',
+    keywords:['발등을 정강이 쪽','전경골근','발을 들어올림'],
+    wrongs:['발끝을 아래로','비복근','발을 내림'],
+    answerText:'{발등을 정강이 쪽}으로 당기는 동작. 주동근: {전경골근}. 보행 시 발끝이 걸리지 않도록 {발을 들어올림}',
+    a:'발등을 정강이 쪽으로 당기는 동작. 주동근: 전경골근. 보행 시 발끝이 지면에 걸리지 않도록 발을 들어올리는 역할' },
+
+  { part:'기능해부학 · 저측굴곡', category:'기능해부학',
+    q:'저측굴곡(Plantarflexion)이란?',
+    keywords:['발끝을 아래로','비복근과 가자미근','추진력'],
+    wrongs:['발등을 위로','전경골근','제동력'],
+    answerText:'{발끝을 아래로} 향하는 동작. 주동근: {비복근과 가자미근}. 점프·달리기의 {추진력}과 까치발 동작에 핵심',
+    a:'발끝을 아래로 향하는 동작(Plantarflexion). 주동근: 비복근과 가자미근. 점프·달리기의 추진력과 까치발 동작에 핵심적으로 사용' },
+
+  { part:'기능해부학 · 내전근', category:'기능해부학',
+    q:'엉덩관절 내전 근육과 역할은?',
+    pool:['대내전근','장내전근','단내전근','박근','치골근'],
+    pickCount:3,
+    wrongs:['대퇴직근','봉공근','비복근'],
+    a:'다리를 몸 중심선 쪽으로 모으는 동작. 주동근: 대내전근·장내전근·단내전근·박근·치골근. 다리를 안으로 모으고 골반 안정성 유지' },
+
+  { part:'기능해부학 · 척추 심부 안정', category:'기능해부학',
+    q:'데드리프트 시 척추 심부 안정 근육 4가지는?',
+    pool:['횡격막','복횡근','다열근','골반기저근'],
+    pickCount:3,
+    wrongs:['척추기립근','대둔근','광배근'],
+    a:'4가지: 횡격막·복횡근·다열근·골반기저근. 4개 근육이 복강 내압을 높여 척추를 보호→고중량 리프팅 시 부상 방지' },
+
+  { part:'기능해부학 · 허리 주동근', category:'기능해부학',
+    q:'데드리프트 시 허리를 세우는 주동근 2가지는?',
+    keywords:['척추기립근','대둔근','복강 내압'],
+    wrongs:['복직근','광배근','흉압'],
+    answerText:'{척추기립근}: 척추 신전. {대둔근}: 고관절 신전으로 상체 일으킴. {복강 내압}을 높여 척추 보호',
+    a:'2가지: 척추기립근(척추 신전)·대둔근(고관절 신전으로 상체 일으킴). 두 근육의 협력으로 올바른 리프팅 자세 유지' },
+
+  // ── 트레이닝방법론 ──
+  { part:'트레이닝방법론 · Set/Rep', category:'트레이닝방법론',
+    q:'Set/Rep이란?',
+    keywords:['렙(Rep)','셋(Set)','10렙 3셋'],
+    wrongs:['블록(Block)','라운드(Round)','10셋 3렙'],
+    answerText:'{렙(Rep)}: 동작 한 번 반복 횟수. {셋(Set)}: 렙의 묶음 단위. 예) {10렙 3셋} = 10회 반복을 3번 수행',
+    a:'렙(Rep): 동작을 한 번 수행하는 반복 횟수. 셋(Set): 렙의 묶음 단위. 예) 10렙 3셋 = 동작을 10회 반복하는 것을 3번 수행' },
+
+  { part:'트레이닝방법론 · 분할 운동', category:'트레이닝방법론',
+    q:'분할 운동이란?',
+    keywords:['신체 부위를 나누어','집중적으로 자극','과훈련 방지'],
+    wrongs:['전신을 동시에','분산하여 자극','오버트레이닝 유도'],
+    answerText:'{신체 부위를 나누어} 요일별로 훈련하는 방식. 목표 근육을 {집중적으로 자극}하고 충분한 회복 시간 확보. {과훈련 방지}',
+    a:'신체 부위를 나누어 요일별로 훈련하는 방식. 목표 근육을 집중적으로 자극하고 충분한 회복 시간 확보. 과훈련을 방지하고 근성장 효율을 높임' },
+
+  { part:'트레이닝방법론 · 오버트레이닝', category:'트레이닝방법론',
+    q:'오버트레이닝이란?',
+    keywords:['회복 능력 초과','만성 피로','퍼포먼스 저하'],
+    wrongs:['회복 능력 미달','일시적 피로','퍼포먼스 향상'],
+    answerText:'신체의 {회복 능력 초과}한 훈련으로 {만성 피로}와 {퍼포먼스 저하}가 지속. 충분한 휴식·영양 없으면 부상 위험 증가·근성장 저하',
+    a:'신체의 회복 능력을 초과한 과도한 훈련으로 인해 만성 피로와 퍼포먼스 저하가 지속되는 상태. 충분한 휴식과 영양 보충이 없을 경우 부상 위험 증가·근성장 저하' },
+
+  { part:'트레이닝방법론 · 치팅/스트릭팅', category:'트레이닝방법론',
+    q:'치팅과 스트릭팅의 차이는?',
+    keywords:['스트릭팅','치팅','고급 기술'],
+    wrongs:['바운싱','네거티브','초보 기술'],
+    answerText:'{스트릭팅}: 정확한 자세로 목표 근육 고립(초보자 기본). {치팅}: 반동·보조 근육으로 한계 이상 자극. 치팅은 근신경계 발달한 상급자에게 적합한 {고급 기술}',
+    a:'스트릭팅: 정확한 자세로 목표 근육을 고립시켜 수행(초보자 기본 원칙). 치팅: 반동이나 보조 근육을 이용해 한계 이상의 자극을 주는 방식. 치팅은 상급자에게 적합한 고급 기술' },
+
+  { part:'트레이닝방법론 · 그립', category:'트레이닝방법론',
+    q:'운동 기구를 잡는 그립의 종류는?',
+    keywords:['오버핸드·언더핸드·뉴트럴','스탠다드·와이드·내로우','썸리스·얼터네이트·훅'],
+    wrongs:['슈퍼셋·점퍼셋','쇼트·미들·롱','싱글·더블·트리플'],
+    answerText:'방향: {오버핸드·언더핸드·뉴트럴} / 너비: {스탠다드·와이드·내로우} / 특수: {썸리스·얼터네이트·훅}',
+    a:'방향: 오버핸드·언더핸드·뉴트럴 그립. 너비: 스탠다드·와이드·내로우 그립. 특수: 썸리스·얼터네이트·훅 그립' },
+
+  { part:'트레이닝방법론 · 덤벨/바벨', category:'트레이닝방법론',
+    q:'덤벨과 바벨 운동의 차이는?',
+    keywords:['바벨: 고중량','덤벨: 좌우 독립','가동 범위'],
+    wrongs:['바벨: 저중량','덤벨: 좌우 연동','제한적 범위'],
+    answerText:'{바벨: 고중량}: 양손 고정→근력·협응력. {덤벨: 좌우 독립}: 균형 발달·불균형 교정. {가동 범위} 더 넓고 안정화 근육 추가 발달',
+    a:'바벨: 양손 고정→고중량 훈련·전신 협응력 강화. 덤벨: 양손 독립→균형 발달·가동 범위 확보·좌우 불균형 교정. 핵심: 바벨=근력 향상 / 덤벨=안정화 근육 강화' },
+
+  { part:'트레이닝방법론 · 최대 무게', category:'트레이닝방법론',
+    q:'최대 무게 운동 시 주의사항 4가지는?',
+    pool:['정확한 자세 먼저 확보','보조자(스포터) 반드시 배치','발살바 호흡 시 혈압 상승 주의','점진적으로 접근'],
+    pickCount:3,
+    wrongs:['바로 최대 중량 시작','혼자 운동','자세 무시'],
+    a:'① 정확한 자세 먼저 확보 ② 보조자 반드시 배치 ③ 발살바 호흡 시 과도한 혈압 상승 주의 ④ 점진적으로 접근(급격한 중량 증가 금지)' },
+
+  { part:'트레이닝방법론 · 기초대사량 운동', category:'트레이닝방법론',
+    q:'기초대사량 부족한 사람을 위한 운동은?',
+    keywords:['근육량 증가','웨이트 트레이닝','복합관절 운동'],
+    wrongs:['지방량 증가','유산소 운동만','단순관절 운동'],
+    answerText:'{근육량 증가} 원칙 기반. {웨이트 트레이닝}: 대근육 위주 {복합관절 운동}(스쿼트·데드리프트·벤치프레스). 근육량↑→기초대사량↑',
+    a:'근육량 증가 원칙 기반으로 웨이트 트레이닝 적용. 대근육 위주의 복합관절 운동: 스쿼트·데드리프트·벤치프레스. 근육량 증가→안정 시 에너지 소비량 증가→기초대사량 상승' },
+
+  { part:'트레이닝방법론 · 척추기립근 운동', category:'트레이닝방법론',
+    q:'척추기립근 운동 3가지는?',
+    keywords:['데드리프트','백 익스텐션','굿모닝 엑서사이즈'],
+    wrongs:['레그프레스','레그컬','케이블 크런치'],
+    answerText:'척추기립근 대표 운동: {데드리프트} / {백 익스텐션} / {굿모닝 엑서사이즈}',
+    a:'척추기립근 대표 운동 3가지: 데드리프트·백 익스텐션·굿모닝 엑서사이즈' },
+
+  { part:'트레이닝방법론 · 레그프레스', category:'트레이닝방법론',
+    q:'레그프레스 시 주로 사용되는 근육은?',
+    keywords:['대퇴사두근','발 위치 높이면 둔근','발 위치 낮추면 대퇴사두근'],
+    wrongs:['햄스트링','발 위치 높이면 종아리','발 위치 낮추면 둔근'],
+    answerText:'주동근: {대퇴사두근}. {발 위치 높이면 둔근} 자극 강화. {발 위치 낮추면 대퇴사두근} 자극 강화',
+    a:'주동근: 대퇴사두근. 발 위치를 높이면 둔근 자극 강화·낮추면 대퇴사두근 자극 강화' },
+
+  { part:'트레이닝방법론 · 이두근 운동', category:'트레이닝방법론',
+    q:'상완이두근 발달 운동은?',
+    pool:['스탠딩 바벨 컬','스탠딩 덤벨 컬','얼터네이트 덤벨 컬','덤벨 해머컬','컨센트레이션 덤벨 컬','스탠딩 리버스 바벨 컬'],
+    pickCount:3,
+    wrongs:['벤치프레스','레그프레스','숄더프레스'],
+    a:'팔꿈치 굴곡 동작 기반. 스탠딩 바벨 컬·리버스 바벨 컬·덤벨 컬·얼터네이트 덤벨 컬·해머컬·컨센트레이션 덤벨 컬. 완전 가동 범위·수축 시 이두근 의식적으로 쥐어짜기' },
+
+  { part:'트레이닝방법론 · 팔 운동 3부위', category:'트레이닝방법론',
+    q:'프리웨이트 팔 운동 3부위는?',
+    keywords:['상완이두근','상완삼두근','전완근'],
+    wrongs:['어깨','가슴','등'],
+    answerText:'{상완이두근}: 바벨 컬·덤벨 컬 / {상완삼두근}: 오버헤드 트라이셉스·킥백·벤치 딥스 / {전완근}: 바벨·덤벨 리스트 컬',
+    a:'3부위: ① 상완이두근(바벨 컬·덤벨 컬) ② 상완삼두근(오버헤드 트라이셉스 익스텐션·킥백·벤치 딥스) ③ 전완근(바벨·덤벨 리스트 컬·리버스 리스트 컬)' },
+
+  // ── 스포츠영양학 ──
+  { part:'스포츠영양학 · 에너지원', category:'스포츠영양학',
+    q:'주요 에너지원 3가지 및 유·무산소 운동 시 사용 영양소는?',
+    keywords:['탄수화물','지방','단백질'],
+    wrongs:['비타민','무기질','수분'],
+    answerText:'주요 에너지원: {탄수화물}·{지방}·{단백질}. 무산소: 탄수화물 주원료. 유산소: 지방 주원료. {단백질}은 극단적 에너지 부족 시 보조',
+    a:'주요 에너지원: 탄수화물·지방·단백질. 무산소 운동: 탄수화물이 주원료. 유산소 운동: 지방이 주원료. 단백질은 극단적 에너지 부족 상황에서 보조적으로 사용' },
+
+  { part:'스포츠영양학 · 탄수화물', category:'스포츠영양학',
+    q:'고강도 운동 시 탄수화물 사용 형태는?',
+    keywords:['혈액 속 글루코스','근육과 간의 글리코겐','무산소성 해당 과정'],
+    wrongs:['혈액 속 지방산','피하지방','유산소 TCA 회로'],
+    answerText:'{혈액 속 글루코스}(포도당) + {근육과 간의 글리코겐}. 두 가지가 {무산소성 해당 과정}의 주원료로 빠르게 ATP 생성',
+    a:'2가지 형태: 혈액 속 글루코스(포도당)·근육과 간에 저장된 글리코겐. 두 가지가 무산소성 해당 과정의 주원료로 빠르게 ATP 생성' },
+
+  { part:'스포츠영양학 · 글리코겐', category:'스포츠영양학',
+    q:'글리코겐의 운동 시 역할은?',
+    keywords:['포도당이 저장된 형태','근육과 간','ATP 생성'],
+    wrongs:['지방이 저장된 형태','심장과 폐','단백질 생성'],
+    answerText:'{포도당이 저장된 형태}. 주로 {근육과 간}에 저장. 운동 시 분해→{ATP 생성}. 고강도 운동 시 운동 수행 능력 유지에 핵심',
+    a:'글리코겐: 포도당이 체내에 저장된 형태. 주로 근육과 간에 저장. 운동 시 글리코겐이 분해되어 ATP 생성에 사용. 고강도 운동 시 포도당으로 분해→ATP 생성' },
+
+  { part:'스포츠영양학 · 단백질', category:'스포츠영양학',
+    q:'단백질 과다 섭취 시 단점 3가지는?',
+    pool:['간·신장 부담 증가','소변 배출 증가로 탈수','잉여 단백질→지방으로 전환','소화불량'],
+    pickCount:3,
+    wrongs:['근육 손실','혈당 저하','면역 강화'],
+    a:'3가지: ① 질소 노폐물 처리로 간·신장 부담 증가 ② 소변 배출 증가로 탈수 유발 ③ 잉여 단백질은 지방으로 전환되어 저장' },
+
+  { part:'스포츠영양학 · 지방', category:'스포츠영양학',
+    q:'지방에 대해 설명하시오',
+    keywords:['9kcal','지용성 비타민 운반','저강도 장시간 유산소'],
+    wrongs:['7kcal','수용성 비타민 운반','고강도 단시간 무산소'],
+    answerText:'1g당 {9kcal} 고효율 에너지원. 역할: 에너지 저장·장기 보호·체온 유지·{지용성 비타민 운반}. {저강도 장시간 유산소} 운동 시 주에너지원',
+    a:'지방: 1g당 9kcal를 생산하는 고효율 에너지원. 역할: 에너지 저장·장기 보호·체온 유지·지용성 비타민 운반. 저강도 장시간 유산소 운동 시 주에너지원' },
+
+  { part:'스포츠영양학 · 필수지방산', category:'스포츠영양학',
+    q:'필수지방산이란?',
+    keywords:['체내 합성 불가','오메가3','오메가6'],
+    wrongs:['체내 합성 가능','오메가9','오메가12'],
+    answerText:'{체내 합성 불가}하여 음식으로 섭취 필수. 대표: {오메가3}(EPA·DHA·항염증) / {오메가6}(리놀레산·세포막). 역할: 세포막 구성·호르몬 생성·면역 기능',
+    a:'체내에서 합성이 불가능하여 반드시 음식으로 섭취해야 하는 지방산. 대표: 오메가3(EPA·DHA)·오메가6. 역할: 세포막 구성·호르몬 생성·면역 기능 조절·성장 및 발달' },
+
+  { part:'스포츠영양학 · 피하/내장지방', category:'스포츠영양학',
+    q:'피하지방과 내장지방이란?',
+    keywords:['피하지방: 피부 아래','내장지방: 복강 내','내장지방이 건강 위험도 높음'],
+    wrongs:['피하지방: 복강 내','내장지방: 근육 사이','피하지방이 건강 위험도 높음'],
+    answerText:'{피하지방: 피부 아래}: 체온 유지·충격 완화. {내장지방: 복강 내}: 과축적 시 성인병 위험. 핵심: {내장지방이 건강 위험도 높음}',
+    a:'피하지방: 피부 아래 위치→체온 유지·충격 완화. 내장지방: 복강 내 장기 사이 위치→과축적 시 성인병 위험 증가. 핵심 차이: 내장지방이 건강 위험도가 더 높음' },
+
+  { part:'스포츠영양학 · 콜레스테롤', category:'스포츠영양학',
+    q:'HDL 콜레스테롤이란?',
+    keywords:['고밀도 지단백','혈관 콜레스테롤을 간으로 회수','심혈관 질환 예방'],
+    wrongs:['저밀도 지단백','콜레스테롤을 혈관에 운반','심혈관 질환 유발'],
+    answerText:'{고밀도 지단백}(High Density Lipoprotein). {혈관 콜레스테롤을 간으로 회수}·분해(혈관 청소부). 수치 높을수록 {심혈관 질환 예방}',
+    a:'HDL(고밀도 지단백): 혈관 내 콜레스테롤을 간으로 회수하여 분해. 혈관 청소부 역할. 수치가 높을수록 심혈관 질환 예방에 유리. LDL(저밀도 지단백): 과도 시 혈관벽 축적→동맥경화' },
+
+  { part:'스포츠영양학 · 적혈구 비타민', category:'스포츠영양학',
+    q:'적혈구 생성에 중요한 비타민 2가지는?',
+    keywords:['비타민 B12(코발라민)','엽산(비타민 B9)','빈혈 유발'],
+    wrongs:['비타민 A','비타민 C','감기 유발'],
+    answerText:'적혈구 생성 비타민: {비타민 B12(코발라민)} / {엽산(비타민 B9)}. 두 가지 결핍 시 적혈구 성숙 불가→{빈혈 유발}',
+    a:'2가지: 비타민 B12(코발라민)·엽산(비타민 B9). 두 가지 결핍 시 적혈구가 정상적으로 성숙하지 못해 빈혈 유발' },
+
+  { part:'스포츠영양학 · 비타민 B군', category:'스포츠영양학',
+    q:'비타민 B군의 특징은?',
+    keywords:['수용성','에너지 대사 조효소','8가지 종류'],
+    wrongs:['지용성','에너지 저장','4가지 종류'],
+    answerText:'{수용성} 비타민. 총 {8가지 종류}. 핵심 역할: {에너지 대사 조효소}(탄수화물·단백질·지방→ATP 전환). 체내 저장 불가→매일 섭취 필수',
+    a:'수용성 비타민으로 8가지 종류(티아민·리보플라빈·니아신·B6·판토텐산·비오틴·엽산·B12). 에너지 대사의 조효소 역할. 고강도 운동 시 필요량 증가. B9·B12는 적혈구 생성에 관여' },
+
+  { part:'스포츠영양학 · 보조제', category:'스포츠영양학',
+    q:'운동 시 대표적인 영양 보조제 3가지는?',
+    keywords:['단백질 보충제','크레아틴','BCAA'],
+    wrongs:['탄수화물 보충제','카페인','비타민 C'],
+    answerText:'{단백질 보충제}: 근손실 방지·근합성 / {크레아틴}: ATP-PCr 효율 향상·폭발적 근력 / {BCAA}: 운동 중 근손실 방지 분지사슬 아미노산',
+    a:'3가지: 단백질 보충제(근손실 방지·근합성 촉진)·크레아틴(ATP-PCr 시스템 효율 향상→폭발적 근력 강화)·BCAA(운동 중 근손실 방지하는 분지사슬 아미노산)' },
+
+  { part:'스포츠영양학 · 크레아틴', category:'스포츠영양학',
+    q:'보디빌더의 크레아틴 섭취 이유는?',
+    keywords:['ATP-PCr 시스템','크레아틴 인산 저장량','폭발적 근력 향상'],
+    wrongs:['유산소 시스템','글리코겐 저장량','지구력 향상'],
+    answerText:'{ATP-PCr 시스템}의 에너지 재합성을 돕는 질소 화합물. 근육 내 {크레아틴 인산 저장량} 증가→{폭발적 근력 향상}·고반복 훈련 능력↑·근육 내 수분 보유로 부피 증대',
+    a:'크레아틴: ATP-PCr 시스템의 에너지 재합성을 돕는 질소 화합물. 근육 내 크레아틴 인산 저장량 증가→폭발적 근력 향상·고반복 훈련 능력 증가·근육 내 수분 보유로 부피 증대' },
+
+  { part:'스포츠영양학 · 체지방/제지방', category:'스포츠영양학',
+    q:'체지방과 제지방의 차이는?',
+    keywords:['체지방: 총 지방량','제지방: 지방 제외 나머지','제지방량이 높을수록 근육질'],
+    wrongs:['체지방: 총 체중','제지방: 지방만','체지방이 높을수록 근육질'],
+    answerText:'{체지방: 총 지방량}. {제지방: 지방 제외 나머지}(근육·뼈·수분). 보디빌딩: {제지방량이 높을수록 근육질} / 체지방률 감소가 컨디셔닝 핵심',
+    a:'체지방: 신체의 총 지방량. 제지방: 체중에서 지방을 제외한 나머지(근육·뼈·수분 등). 보디빌딩에서 제지방량이 높을수록 근육질 체형. 체지방률 감소가 컨디셔닝 핵심 지표' },
+
+  // ── 응급처치 ──
+  { part:'응급처치 · CPR', category:'응급처치',
+    q:'심폐소생술(CPR) 절차는?',
+    pool:['① 의식 확인','② 119 신고·AED 요청','③ 호흡 확인','④ 가슴 압박 30회','⑤ 인공호흡 2회'],
+    pickCount:3,
+    wrongs:['체온 확인','혈압 측정','맥박 확인'],
+    a:'① 의식 확인 ② 119 신고·AED 요청 ③ 호흡 확인 ④ 가슴 압박 30회 ⑤ 인공호흡 2회. 이후 30:2 비율로 반복' },
+
+  { part:'응급처치 · 가슴압박', category:'응급처치',
+    q:'심폐소생술 시 가슴압박을 하는 이유는?',
+    keywords:['심장을 대신해','혈액을 인공적으로 순환','4~6분 이내 뇌 손상'],
+    wrongs:['폐를 대신해','산소를 직접 공급','10분 이내 뇌 손상'],
+    answerText:'심장이 멈춘 상황에서 {심장을 대신해} {혈액을 인공적으로 순환}. 뇌·주요 장기 산소 공급. {4~6분 이내 뇌 손상} 시작',
+    a:'심장이 멈춘 상황에서 심장을 대신해 혈액을 인공적으로 순환시키기 위해 실시. 뇌와 주요 장기에 산소를 공급하여 비가역적 손상 방지. 심정지 후 4~6분 이내 뇌 손상이 시작' },
+
+  { part:'응급처치 · AED', category:'응급처치',
+    q:'AED 사용 순서는?',
+    pool:['① 전원 켜기','② 2개의 패드 부착','③ 심장 리듬 분석(접촉 금지)','④ 제세동 시행(전기 충격)','⑤ 즉시 CPR 재시행'],
+    pickCount:3,
+    wrongs:['패드 제거','체온 측정','산소 투여'],
+    a:'5단계: ① 전원 켜기 ② 2개의 패드 부착(오른쪽 빗장뼈 아래·왼쪽 젖꼭지 아래 중간겨드랑선) ③ 심장 리듬 분석(접촉 금지) ④ 제세동 시행 ⑤ 즉시 CPR 재시행' },
+
+  { part:'응급처치 · 하임리히법', category:'응급처치',
+    q:'기도폐쇄 확인 방법 및 하임리히법은?',
+    keywords:['초킹 사인','등 두드리기 5회·복부 밀어내기 5회','의식 잃으면 CPR'],
+    wrongs:['손을 흔드는 신호','인공호흡만 실시','의식 잃어도 계속 하임리히'],
+    answerText:'확인: {초킹 사인}(목 감싸기). 성인: {등 두드리기 5회·복부 밀어내기 5회} 번갈아 반복. {의식 잃으면 CPR}로 전환',
+    a:'기도폐쇄 확인: 목을 양손으로 감싸는 초킹 사인. 성인: 등 두드리기 5회+복부 밀어내기 5회 번갈아. 영아: 가슴 밀어내기. 의식을 잃으면 즉시 CPR로 전환' },
+
+  { part:'응급처치 · PRICE', category:'응급처치',
+    q:'PRICE 원칙을 설명하시오',
+    pool:['Protection(보호)','Rest(안정)','Ice(냉찜질)','Compression(압박)','Elevation(거상)'],
+    pickCount:3,
+    wrongs:['Heat(열찜질)','Movement(움직임)','Bandage(붕대)'],
+    a:'PRICE: Protection(보호)·Rest(안정)·Ice(냉찜질)·Compression(압박)·Elevation(거상). 이 원칙 적용 시 초기 부종·통증 최소화·회복 촉진' },
+
+  { part:'응급처치 · 출혈', category:'응급처치',
+    q:'출혈 발생 시 응급처치 3단계는?',
+    pool:['직접 압박으로 지혈','출혈 부위를 심장보다 높게 거상','압박 붕대로 고정','혈액 접촉 차단(장갑)'],
+    pickCount:3,
+    wrongs:['간접 압박','심장보다 낮게','냉찜질만'],
+    a:'3단계: ① 직접 압박으로 출혈 부위 지혈 ② 출혈 부위를 심장보다 높게 거상 ③ 압박 붕대로 고정. 장갑 등으로 혈액 접촉 반드시 차단' },
+
+  { part:'응급처치 · 드레싱', category:'응급처치',
+    q:'드레싱을 하는 이유는?',
+    pool:['상처 보호','지혈','세균 감염 예방','분비물 흡수'],
+    pickCount:3,
+    wrongs:['뼈 접합','근육 강화','열 공급'],
+    a:'드레싱: 상처 부위를 멸균 재료로 덮는 처치. 목적 4가지: 상처 보호·지혈·세균 감염 예방·분비물 흡수' },
+
+  { part:'응급처치 · 2도 화상', category:'응급처치',
+    q:'2도 화상 증상 및 응급처치는?',
+    keywords:['표피와 진피','물집','15~20분 냉각'],
+    wrongs:['표피만','괴사','1~2분 냉각'],
+    answerText:'2도 화상: {표피와 진피}까지 손상→{물집}과 극심한 통증. 응급처치: 찬물로 {15~20분 냉각} 후 물집 터뜨리지 않고 보호',
+    a:'2도 화상: 표피와 진피까지 손상→물집과 극심한 통증이 특징. 응급처치: 찬물로 15~20분 냉각 후 물집을 터뜨리지 않고 보호. 물집을 터뜨리면 감염 위험이 높아지므로 반드시 보존' },
+
+  { part:'응급처치 · 화상 4단계', category:'응급처치',
+    q:'화상 응급처치 4단계는?',
+    pool:['① 찬물로 냉각','② 시계·반지 등 장신구 제거','③ 물집 보존(터뜨리지 않음)','④ 화상 전용 거즈로 피복'],
+    pickCount:3,
+    wrongs:['얼음 직접 대기','물집 터뜨리기','연고 즉시 바르기'],
+    a:'4단계: ① 찬물로 냉각 ② 시계·반지 등 장신구 제거 ③ 물집 보존(터뜨리지 않음) ④ 화상 전용 거즈로 피복. 얼음은 직접 사용하지 않음' },
+
+  { part:'응급처치 · 쇼크', category:'응급처치',
+    q:'쇼크의 종류 3가지는?',
+    keywords:['심장성 쇼크','저혈량성 쇼크','분포성 쇼크'],
+    wrongs:['호흡성 쇼크','감염성 쇼크','신경성 쇼크'],
+    answerText:'{심장성 쇼크}: 심장 기능 저하. {저혈량성 쇼크}: 출혈·탈수로 혈액량 감소. {분포성 쇼크}: 아나필락시스 등 혈관 확장→혈압 저하',
+    a:'3가지: 심장성 쇼크(심장 기능 저하)·저혈량성 쇼크(출혈·탈수로 혈액량 감소)·분포성 쇼크(아나필락시스 등 혈관 확장→혈압 저하)' },
+
+  // ── 도핑 ──
+  { part:'도핑 · WADA 설립', category:'도핑',
+    q:'세계도핑방지기구(WADA) 설립 이유와 기능은?',
+    keywords:['1999년','금지 약물 목록','도핑방지기구 감독'],
+    wrongs:['2003년','허용 약물 목록','올림픽 규정 감독'],
+    answerText:'WADA: 스포츠 공정성·선수 건강 보호 위해 {1999년} 설립. 매년 {금지 약물 목록} 개정·발표. 각국 {도핑방지기구 감독}',
+    a:'WADA: 스포츠 공정성 확보와 선수 건강 보호를 위해 1999년 설립된 국제기구. 매년 금지 약물 목록 개정·발표. 각국 도핑방지기구의 검사와 제재 감독' },
+
+  { part:'도핑 · WADA 구성요소', category:'도핑',
+    q:'WADA 구성요소 4가지는?',
+    pool:['금지목록 관리','도핑 검사 기준 수립','결과 관리 및 제재','교육 및 연구 프로그램 운영'],
+    pickCount:3,
+    wrongs:['경기 결과 판정','선수 선발','훈련 프로그램 제공'],
+    a:'4가지: 금지목록 관리·도핑 검사 기준 수립·결과 관리 및 제재·교육 및 연구 프로그램 운영. 위원회: 의료전문가·법률가·분석전문가·체육행정가·선수대표 등 5~9인 구성' },
+
+  { part:'도핑 · WADA vs KADA', category:'도핑',
+    q:'WADA와 KADA의 차이는?',
+    keywords:['WADA: 국제 기준 수립','KADA: 국내 집행','세계도핑방지규약(WADC)'],
+    wrongs:['WADA: 국내 기준','KADA: 국제 기준','한국체육진흥법'],
+    answerText:'{WADA: 국제 기준 수립}: 전 세계 도핑방지 정책·{세계도핑방지규약(WADC)} 개발·이행 감독. {KADA: 국내 집행}: 한국도핑방지위원회, 국내 검사 실시',
+    a:'WADA: 전 세계 종목·국가의 도핑방지 정책 개발·조화·조정. 세계도핑방지규약(WADC) 이행 감독. KADA: 국내 스포츠 환경에 적용하는 한국도핑방지위원회. 핵심: WADA=국제 기준 수립/KADA=국내 집행' },
+
+  { part:'도핑 · 검사 종류', category:'도핑',
+    q:'도핑 검사 시기에 따른 종류는?',
+    keywords:['경기 기간 중 검사','경기 기간 외 검사','불시 검사'],
+    wrongs:['훈련 기간 중 검사','준비 기간 검사','사전 통보 검사'],
+    answerText:'시기에 따라 2가지: {경기 기간 중 검사}(대회 전날부터 시료 채취 종료까지) / {경기 기간 외 검사}(사전 통보 없는 {불시 검사})',
+    a:'도핑 검사 2가지: 경기 기간 중 검사(대회 전날부터 시료 채취 종료까지)·경기 기간 외 검사(사전 통보 없이 실시하는 불시 검사)' },
+
+  { part:'도핑 · 선수 의무', category:'도핑',
+    q:'도핑 검사시 선수의 의무',
+    pool:['도핑검사관 직접 관찰 수용','동성 검사관에 의한 시료 제공','신분증 제시','즉시 도핑관리실 도착'],
+    pickCount:3,
+    wrongs:['검사 거부 권리','대리인 대신 시료 제공','익명 시료 제공'],
+    a:'의무: 통지시점부터 검사관 직접 관찰 수용·동성 검사관 관찰 하 시료 제공·신분증 제시·도핑관리실 위치 확인·즉시 도착(합당한 사유 예외)·절차 준수(거부 시 제재)' },
+
+  { part:'도핑 · TUE', category:'도핑',
+    q:'TUE란?',
+    keywords:['치료목적사용면책','금지 약물','사전 승인'],
+    wrongs:['도핑 목적 사용','허용 약물','사후 신고'],
+    answerText:'TUE({치료목적사용면책}): 질병 치료 위해 불가피하게 {금지 약물} 사용 시, {사전 승인}을 받아 도핑 제재를 면제받는 제도',
+    a:'TUE(치료목적사용면책): 질병 치료를 위해 불가피하게 금지 약물을 사용해야 하는 경우, 사전에 승인을 받아 도핑 제재를 면제받는 제도' },
+
+  { part:'도핑 · TUE 승인 조건', category:'도핑',
+    q:'TUE 승인 조건은?',
+    pool:['미사용 시 건강에 심각한 문제','경기력 향상 효과 없음','합리적 대안 치료 없음','과거 금지약물 사용에 기인하지 않음'],
+    pickCount:3,
+    wrongs:['선수가 원함','비용이 저렴','코치가 권장'],
+    a:'4가지 모두 충족: ① 미사용 시 건강에 심각한 문제 ② 경기력 향상 효과 없음 ③ 합리적 대안 치료 없음 ④ 과거 금지약물 사용에 기인하지 않음' },
+
+  // ── 스포츠윤리·생활체육 ──
+  { part:'스포츠윤리 · 생활체육', category:'스포츠윤리',
+    q:'생활체육이란?',
+    keywords:['자발적','일상적','건강과 체력 증진'],
+    wrongs:['강제적','비정기적','경기력 향상'],
+    answerText:'{건강과 체력 증진}을 위한 {자발적}이고 {일상적}인 체육활동. 승패보다 참여와 건강을 목적으로 함',
+    a:'생활체육: 건강과 체력 증진을 위하여 행하는 자발적이고 일상적인 체육활동. 엘리트 스포츠와 달리 승패보다 참여와 건강을 목적으로 함' },
+
+  { part:'스포츠윤리 · 생활체육 구성요소', category:'스포츠윤리',
+    q:'생활체육 구성 요소 3가지는?',
+    keywords:['프로그램','시설','지도자'],
+    wrongs:['경기','관중','심판'],
+    answerText:'{프로그램}: 신체활동을 체계적으로 조직한 지도 계획. {시설}: 안전한 활동 공간. {지도자}: 전문적 지식으로 안전하고 효과적으로 지도',
+    a:'3가지: 프로그램(신체활동을 체계적으로 조직한 지도 계획)·시설(안전한 활동 공간을 제공하는 공간적 기반)·지도자(전문적 지식으로 참가자를 안전하고 효과적으로 지도하는 인적 자원)' },
+
+  { part:'스포츠윤리 · 생활체육 기능', category:'스포츠윤리',
+    q:'생활체육의 신체적·정신적·사회적 기능은?',
+    keywords:['생리적 기능','심리적 기능','사회적 기능'],
+    wrongs:['경제적 기능','정치적 기능','문화적 기능'],
+    answerText:'{생리적 기능}: 신체 기능 활성화·체력 증진. {심리적 기능}: 스트레스 해소·정서적 균형. {사회적 기능}: 공동체 의식·사회 통합',
+    a:'3가지: 생리적 기능(신체 기능 활성화·체력 증진)·심리적 기능(스트레스 해소·정서적 균형 유지)·사회적 기능(공동체 의식 함양·사회 통합 증진)' },
+
+  { part:'스포츠윤리 · 지도사 필요성', category:'스포츠윤리',
+    q:'생활체육지도사 필요성 4가지는?',
+    pool:['맞춤형 프로그램 제공','시설 활용 극대화와 운영 효율성','전문 지식으로 안전한 운동 지도','스포츠 복지 제공으로 사회적 가치 창출'],
+    pickCount:3,
+    wrongs:['경기 결과 판정','체육 시설 청소','선수 스카우트'],
+    a:'4가지: 다양한 욕구에 부응한 맞춤형 프로그램 제공·시설 활용 극대화와 운영 효율성·전문 지식으로 정확하고 안전한 운동 지도·스포츠 복지 제공을 통한 사회적 가치 창출' },
+
+  { part:'스포츠윤리 · 인권침해', category:'스포츠윤리',
+    q:'스포츠 인권침해란?',
+    keywords:['체육인으로서의 권리','폭력·성폭력','권력 불균형'],
+    wrongs:['체육인으로서의 의무','훈련과 지도','경기력 차이'],
+    answerText:'체육인으로서 마땅히 누려야 할 {체육인으로서의 권리}를 부당하게 빼앗는 모든 행동. {폭력·성폭력}뿐 아니라 불합리한 강요·차별도 해당. {권력 불균형}이 주요 원인',
+    a:'체육인으로서 마땅히 누려야 할 권리를 부당하게 빼앗는 모든 행동. 폭력·성폭력뿐만 아니라 불합리한 강요·차별까지 모두 해당. 지도자와 선수 간 권력 불균형이 주요 발생 원인' },
+
+  { part:'스포츠윤리 · 보편성·불가분', category:'스포츠윤리',
+    q:'보편성·불가분 원리를 스포츠에 적용하는 방법은?',
+    pool:['보편성: 모든 선수는 동등한 인권','비차별성: 어떤 이유로도 차별받지 않음','불가분성: 신체적·정신적 권리는 분리 불가','상호의존성: 권리 실현이 다른 권리 전제'],
+    pickCount:3,
+    wrongs:['특수성','차별성','독립성'],
+    a:'보편성: 모든 선수는 국적·성별·나이에 관계없이 동등한 인권. 불가분: 신체적 권리와 정신적 권리는 분리될 수 없음. 적용: 차별 없는 훈련 환경 + 신체·정신적 권리 동시 보호' },
+
+  { part:'스포츠윤리 · 신체 접촉', category:'스포츠윤리',
+    q:'트레이닝 지도 시 신체 접촉 인권침해 방지 방법 4가지는?',
+    pool:['신체 접촉 전 사전 동의 획득','필요 최소한의 접촉만 실시','개방된 공간에서 지도','접촉 목적과 방법을 명확하게 설명'],
+    pickCount:3,
+    wrongs:['동의 없이 접촉','과도한 신체 접촉','밀폐된 공간에서 지도'],
+    a:'4가지: 신체 접촉 전 반드시 사전 동의 획득·필요 최소한의 접촉만 실시·제3자가 볼 수 있는 개방된 공간에서 지도·접촉 목적과 방법을 명확하게 설명' },
+
+  { part:'스포츠윤리 · SNS', category:'스포츠윤리',
+    q:'SNS 비포에프터 사진 게시 시 인권침해 유의사항은?',
+    keywords:['서면 동의','초상권·개인정보 침해','명예훼손'],
+    wrongs:['구두 동의','저작권 침해','사생활 보호'],
+    answerText:'반드시 {서면 동의} 필요. 동의 없는 신체 사진 게시 = {초상권·개인정보 침해}. 신체 과도 노출·비교 게시 = {명예훼손}',
+    a:'반드시 서면 동의 필요. 동의 없는 신체 사진 게시=초상권·개인정보 침해. 신체를 과도하게 노출하거나 비교·평가하는 방식 게시=명예훼손' },
+
+  { part:'스포츠윤리 · 스포츠 폭력', category:'스포츠윤리',
+    q:'스포츠 폭력이란?',
+    keywords:['신체적·정신적·금전적 피해','구타·인격 모독','훈련 목적 빙자'],
+    wrongs:['신체적 피해만','칭찬과 격려','정당한 훈련'],
+    answerText:'스포츠 영역에서 스포츠인에게 {신체적·정신적·금전적 피해}를 가하는 모든 행위. {구타·인격 모독}·감금·위협·강요 포함. {훈련 목적 빙자}한 폭력도 해당',
+    a:'스포츠 영역에서 스포츠인을 대상으로 신체적·정신적·금전적 피해를 가하는 모든 행위. 구타·인격 모독·감금·위협·강요·갈취·따돌림 등 포함. 훈련 목적을 빙자한 폭력도 해당' },
+
+  { part:'스포츠윤리 · 폭력 유형', category:'스포츠윤리',
+    q:'스포츠 폭력의 유형 7가지는?',
+    pool:['언어폭력','신체폭력','성희롱·성폭력','디지털·사이버 성범죄','사이버 폭력','일상적 통제','2차 피해'],
+    pickCount:4,
+    wrongs:['경기 규정 위반','훈련 거부','성적 부진'],
+    a:'7가지: 언어폭력·신체폭력·성희롱·성폭력·디지털·사이버 성범죄·사이버 폭력·일상적 통제·2차 피해' },
+
+  { part:'스포츠윤리 · 2차 가해', category:'스포츠윤리',
+    q:'스포츠 폭력 2차 가해란?',
+    keywords:['피해자 비난','소문 유포','가해자 두둔'],
+    wrongs:['피해자 보호','사실 공개','피해자 지원'],
+    answerText:'폭력 사건 발생 후 피해자를 {피해자 비난}하거나 {소문 유포}하여 정신적 고통을 다시 입히는 행위. {가해자 두둔}하거나 신고를 막는 행위도 2차 가해',
+    a:'폭력 사건 발생 후 피해자를 비난하거나 소문을 유포하고 불이익을 주는 등 피해자에게 정신적 고통을 다시 입히는 행위. 가해자를 두둔하거나 피해자의 신고를 막는 행위도 2차 가해' },
+
+  { part:'스포츠윤리 · 폭력 예방 역할', category:'스포츠윤리',
+    q:'스포츠 폭력 예방 지도자 역할 4가지는?',
+    pool:['기합·가혹행위 금지','모든 선수를 평등하게 대우','인격·명예 훼손 언행 금지','폭력 발생 시 피해자 지원'],
+    pickCount:3,
+    wrongs:['경기력 위해 폭력 허용','주전 선수 우대','가해자 보호'],
+    a:'4가지: 경기력·팀 단합을 이유로 한 기합·가혹행위 금지·모든 선수를 평등하게 대우·선수의 인격·명예를 훼손하는 언행 금지·폭력 발생 시 적극적으로 피해자 지원' },
+
+  { part:'스포츠윤리 · 폭력 예방 지침', category:'스포츠윤리',
+    q:'폭력 예방 행동 지침 4가지는?',
+    pool:['기합·가혹행위 금지','과도한 훈련 금지','모든 선수를 평등하게 대우','인격·명예 훼손 언행 금지'],
+    pickCount:3,
+    wrongs:['주전 선수 특별 대우','경기력 위한 폭력 허용','가혹 행위 용인'],
+    a:'지도자 폭력 예방: 기합·가혹행위 금지·과도한 훈련 금지·모든 선수 평등 대우·인격·명예 훼손 언행 금지·훈련 시간 외 강제 조정 금지. 거시적 대책: 예방 정책 수립·예방 교육·지도자 자격 검증·대처 매뉴얼·현장 점검' },
+
+  { part:'스포츠윤리 · 성폭력', category:'스포츠윤리',
+    q:'스포츠 성폭력이란?',
+    keywords:['성희롱·성추행·성폭행','언어적·시각적 성희롱','가장 넓은 범주'],
+    wrongs:['신체 폭행만','언어적 폭력만','가장 좁은 범주'],
+    answerText:'스포츠 활동 과정에서 발생하는 모든 성적 폭력. {성희롱·성추행·성폭행} 포함. 신체 접촉뿐 아니라 {언어적·시각적 성희롱}도 해당. {가장 넓은 범주}',
+    a:'지도자·선수·심판 등 스포츠 활동 과정에서 발생하는 모든 성희롱·성추행·성폭행 등의 성적 폭력. 신체 접촉뿐 아니라 언어적·시각적 성희롱도 포함. 가장 넓은 범주' },
+
+  { part:'스포츠윤리 · 성폭력 예방', category:'스포츠윤리',
+    q:'스포츠 성폭력 예방법 5가지는?',
+    pool:['훈련·상담은 공적인 공간에서 진행','신체·외모 성적 언급 금지','신체 접촉 최소화·동의 구하기','밀폐 공간 개별 면담 금지','불필요한 탈의 강요 금지'],
+    pickCount:3,
+    wrongs:['밀폐 공간에서 상담','신체 평가 허용','탈의 요구 허용'],
+    a:'5가지(지도자): 훈련·상담은 공적인 공간에서 진행·신체·외모에 대한 성적 언급 금지·신체 접촉 최소화 및 동의 구하기·밀폐 공간 개별 면담 금지·훈련 명목 불필요한 탈의 강요 금지' },
+
+  { part:'스포츠윤리 · 2차 성폭행 방지', category:'스포츠윤리',
+    q:'2차 성폭행(가해) 방지 방법 4가지는?',
+    pool:['피해자·신고자 신변 기밀 유지','피해자를 탓하는 행위 금지','가해자 옹호 행위 금지','가해자 보복행위 차단·피해자 보호 최우선'],
+    pickCount:3,
+    wrongs:['피해자 신원 공개','가해자 옹호','피해자 소문 유포'],
+    a:'4가지: 피해자·신고자 신변 기밀 유지·피해자를 탓하는 행위 금지·가해자 옹호 행위 금지·가해자 보복행위 차단+피해자 보호 조치 최우선' },
+
+  { part:'스포츠윤리 · 합숙 예방', category:'스포츠윤리',
+    q:'합숙·일상생활 성폭력 예방 주의사항 4가지는?',
+    pool:['선수 숙소에 동의 없이 방문 금지','이성 선수 숙소 출입 금지','단체 채팅방 음란물 공유 예방','위계 관계를 이용한 부적절한 접근 차단'],
+    pickCount:3,
+    wrongs:['동의 없이 방문 허용','이성 숙소 자유 출입','음란물 공유 허용'],
+    a:'4가지: 선수 숙소에 동의 없이 방문 금지·이성 선수 숙소 출입 금지·단체 채팅방 음란물 공유 등 디지털 성범죄 예방·위계 관계를 이용한 부적절한 접근 차단' },
+
+  // ── IFBB 규정 ──
+  { part:'IFBB 규정 · 남자 피지크 복장', category:'IFBB 규정',
+    q:'남자 피지크 복장 규정은?',
+    keywords:['불투명 루즈핏 보드 반바지','슬개골까지','타이트하거나 투명한 소재 불가'],
+    wrongs:['투명 타이트 반바지','허벅지까지','얇고 밀착 소재 허용'],
+    answerText:'{불투명 루즈핏 보드 반바지}. 길이: 무릎 위 {슬개골까지} 내려와야 함. {타이트하거나 투명한 소재 불가}',
+    a:'남자 피지크 복장: 불투명 루즈핏 보드 반바지. 길이: 무릎 위 슬개골까지 내려와야 함. 타이트하거나 투명한 소재는 허용 불가' },
+
+  { part:'IFBB 규정 · 클래식 피지크 복장', category:'IFBB 규정',
+    q:'클래식 피지크 복장 규정은?',
+    keywords:['단색 불투명 체조용 반바지','측면 폭 15cm 이상','대둔근 전체와 전면을 완전히'],
+    wrongs:['다색 투명 반바지','측면 폭 10cm 이상','대둔근 일부만'],
+    answerText:'{단색 불투명 체조용 반바지}. {측면 폭 15cm 이상}. {대둔근 전체와 전면을 완전히} 가려야 함',
+    a:'클래식 피지크 복장: 단색 불투명 체조용 반바지. 측면 폭: 15cm 이상. 대둔근 전체와 전면을 완전히 가려야 함' },
+
+  { part:'IFBB 규정 · 탄·브론저·컬러링', category:'IFBB 규정',
+    q:'IFBB 탄·브론저·컬러링 규정은?',
+    keywords:['지워지는 탄과 브론저 금지','인공 착색·셀프 태닝 허용','반짝이는 금속 펄·광택 금지'],
+    wrongs:['지워지는 탄 허용','인공 착색 금지','반짝이는 효과 허용'],
+    answerText:'{지워지는 탄과 브론저 금지}. {인공 착색·셀프 태닝 허용}(에어브러시·캐빈 스프레이 포함). {반짝이는 금속 펄·광택 금지}',
+    a:'지워지는 탄과 브론저 사용 금지. 인공 착색·셀프 태닝 제품 허용. 에어브러시·캐빈 스프레이 태닝 허용. 반짝이는 금속 펄·광택 효과 제품 금지' },
+
+  { part:'IFBB 규정 · 남자 피지크 쿼터턴', category:'IFBB 규정',
+    q:'남자 피지크 쿼터턴 4가지는?',
+    pool:['① 프론트 포지션','② 쿼터턴 라이트(좌측면)','③ 쿼터턴 백','④ 쿼터턴 라이트(우측면)'],
+    pickCount:3,
+    wrongs:['사이드 체스트','백 더블 바이셉스','크랩 포즈'],
+    a:'4가지: ① 프론트 포지션 ② 쿼터턴 라이트(좌측면 방향) ③ 쿼터턴 백 ④ 쿼터턴 라이트(우측면 방향)' },
+
+  { part:'IFBB 규정 · 사이드 트라이셉스', category:'IFBB 규정',
+    q:'남자 보디빌딩 사이드 트라이셉스 지도는?',
+    keywords:['반대쪽 손목을 잡아','팔꿈치 신전 최대화','삼두근 수축'],
+    wrongs:['같은쪽 손목을 잡아','팔꿈치 굴곡 최대화','이두근 수축'],
+    answerText:'{반대쪽 손목을 잡아} 팔꿈치 완전히 펴서 {삼두근 수축}. 옆에서 {팔꿈치 신전 최대화}하여 삼두근 분리도 표현',
+    a:'한 손으로 반대쪽 손목을 잡아 팔꿈치를 완전히 펴서 삼두근을 강하게 수축. 옆에서 삼두근의 분리도와 근육 발달이 명확하게 보이도록 팔꿈치 신전을 최대화' },
+
+  { part:'IFBB 규정 · 남자 피지크 백 포징', category:'IFBB 규정',
+    q:'남자 피지크 백 포징을 설명하시오',
+    keywords:['한 손을 허리에','반대쪽 다리를 측면으로','역삼각형 라인'],
+    wrongs:['양손을 허리에','다리를 정면으로','사각형 라인'],
+    answerText:'후면에서 {한 손을 허리에} 지지하고 {반대쪽 다리를 측면으로} 뻗으면서 광배근 최대 확장. {역삼각형 라인}과 허리 라인 강조',
+    a:'후면에서 한 손을 허리에 지지하고 반대쪽 다리를 측면으로 뻗으면서 광배근 최대 확장. 역삼각형 라인과 허리 라인 강조가 핵심' },
+
+  { part:'IFBB 규정 · 여자 피지크 규정포즈', category:'IFBB 규정',
+    q:'여자 피지크 규정포즈 4가지는?',
+    pool:['① 프론트 더블 바이셉스','② 사이드 체스트','③ 백 더블 바이셉스','④ 사이드 트라이셉스'],
+    pickCount:3,
+    wrongs:['백 랫 스프레드','압도미널스&타이즈','크랩 포즈'],
+    a:'4가지: ① 프론트 더블 바이셉스 ② 사이드 체스트 ③ 백 더블 바이셉스 ④ 사이드 트라이셉스' },
+
+  { part:'IFBB 규정 · 여자 피지크 쿼터턴 라이트', category:'IFBB 규정',
+    q:'여자 피지크 쿼터턴 라이트 지도방법은?',
+    keywords:['오른쪽으로 90도 회전','좌측면을 심사위원에게','광배근 확장'],
+    wrongs:['왼쪽으로 90도 회전','우측면을 심사위원에게','광배근 수축'],
+    answerText:'{오른쪽으로 90도 회전}→{좌측면을 심사위원에게} 보임. 양발 적절히 벌리고 {광배근 확장}. 몸의 라인을 심사위원 방향으로 맞춤',
+    a:'오른쪽으로 90도 회전→좌측면을 심사위원에게 보임. 양발을 적절히 벌리고 광배근 확장. 몸의 라인을 심사위원 방향으로 정확히 맞춤' },
+
+  { part:'IFBB 규정 · 여자 비키니 프론트', category:'IFBB 규정',
+    q:'여자 비키니 프론트 포지션을 설명하시오',
+    keywords:['한 손을 허리 복직근에','한 발을 옆으로 뻗어','S라인'],
+    wrongs:['양손을 허리에','발을 앞으로 내밀어','V라인'],
+    answerText:'정면 응시, {한 손을 허리 복직근에} 얹으며 {한 발을 옆으로 뻗어} {S라인} 강조. 자신감 있고 여성스러운 전신 라인 표현',
+    a:'정면 응시, 한 손을 허리 복직근에 얹으며 한 발을 옆으로 뻗어 S라인 강조. 자신감 있고 여성스러운 전신 라인을 표현하는 것이 핵심' },
+
+  { part:'IFBB 규정 · 여자 비키니 쿼터턴 백', category:'IFBB 규정',
+    q:'여자 비키니 쿼터턴 백 지도는?',
+    keywords:['한 손을 허리에 얹고','척추 전만','둔근 강조'],
+    wrongs:['양손을 내리고','척추 후만','광배근 강조'],
+    answerText:'후면에서 {한 손을 허리에 얹고} {척추 전만} 자세로 {둔근 강조}. 당당하고 균형 잡힌 등 라인 유지',
+    a:'후면에서 한 손을 허리에 얹고 척추 전만 자세로 둔근 강조. 당당하고 균형 잡힌 등 라인 유지. 둔근의 발달과 라인을 심사위원에게 명확하게 표현' },
+
+  { part:'IFBB 규정 · 보디피트니스 쿼터턴', category:'IFBB 규정',
+    q:'여자 보디피트니스 쿼터턴 라이트 지도방법은?',
+    keywords:['우향우로 90도 회전','양발을 30도 각도로','T-라인 밸런스'],
+    wrongs:['좌향좌로 90도 회전','양발을 60도 각도로','V-라인 밸런스'],
+    answerText:'{우향우로 90도 회전}. {양발을 30도 각도로} 벌리고 손바닥 오므려 내림. {T-라인 밸런스} 강조. 시선은 정면 유지',
+    a:'우향우로 90도 회전. 양발을 30도 각도로 벌리고 손바닥을 몸쪽으로 오므려 내림. T-라인 밸런스 강조. 시선은 정면 유지' },
+
+  { part:'IFBB 규정 · 클래식 보디빌딩 경기 순서', category:'IFBB 규정',
+    q:'클래식 보디빌딩 경기 순서는?',
+    keywords:['예선 라운드: 규정포즈 4개','결선 제2라운드: 규정포즈 7개×2·포즈다운','결선 제3라운드: 자유 포즈 60초'],
+    wrongs:['준비 라운드','제2라운드: 규정포즈 4개','제3라운드: 30초'],
+    answerText:'{예선 라운드: 규정포즈 4개} → 예선 제1라운드: 4개+7개 비교심사 → {결선 제2라운드: 규정포즈 7개×2·포즈다운} → {결선 제3라운드: 자유 포즈 60초}',
+    a:'예선 라운드: 규정포즈 4개. 예선 제1라운드: 규정포즈 4개+7개 비교 심사. 결선 제2라운드: 규정포즈 7개×2+포즈다운. 결선 제3라운드: 개인 자유 포즈 60초' },
+
+  { part:'IFBB 규정 · 클래식 피지크 예결선', category:'IFBB 규정',
+    q:'클래식 피지크 예선·결선 진행 방식은?',
+    keywords:['예선 제1라운드: 4개+7개','결선 제2라운드: 7개×2+포즈다운','결선 제3라운드: 60초'],
+    wrongs:['예선: 7개','결선 제2라운드: 4개+포즈다운','결선 제3라운드: 30초'],
+    answerText:'{예선 제1라운드: 4개+7개} 비교심사. {결선 제2라운드: 7개×2+포즈다운}. {결선 제3라운드: 60초} 개인 자유 포즈',
+    a:'예선 라운드: 규정포즈 4개. 예선 제1라운드: 4개+7개 비교 심사. 결선 제2라운드: 7개×2+포즈다운. 결선 제3라운드: 개인 자유 포즈 60초' },
+
+  { part:'IFBB 규정 · 여자 피지크 예결선', category:'IFBB 규정',
+    q:'여자 피지크 예·결선 라운드 진행은?',
+    keywords:['예선 라운드: 쿼터턴 4가지','결선 제2라운드: 포즈다운','결선 제3라운드: 60초'],
+    wrongs:['예선 라운드: 자유 포즈','결선 제2라운드: 비교심사만','결선 제3라운드: 30초'],
+    answerText:'{예선 라운드: 쿼터턴 4가지} → 제1라운드: 규정포즈 4개+쿼터턴 비교심사 → {결선 제2라운드: 포즈다운} → {결선 제3라운드: 60초} 자유 포즈',
+    a:'예선 라운드: 쿼터턴 4가지. 예선 제1라운드: 규정포즈 4개+쿼터턴 비교 심사. 결선 제2라운드: 쿼터턴 개인·비교 심사+포즈다운. 결선 제3라운드: 개인 자유 포즈(60초)' },
+
+  { part:'IFBB 규정 · 여자 비키니 경기 순서', category:'IFBB 규정',
+    q:'여자 비키니 경기 순서는?',
+    keywords:['예선 라운드: 쿼터턴','결선 제2라운드: 아이 워킹','쿼터턴×2'],
+    wrongs:['예선 라운드: 자유 포즈','결선: 규정포즈','규정포즈×7'],
+    answerText:'{예선 라운드: 쿼터턴} → 예선 제1라운드: 쿼터턴+비교심사 → {결선 제2라운드: 아이 워킹} 개인 프레젠테이션 + {쿼터턴×2}',
+    a:'예선 라운드: 쿼터턴. 예선 제1라운드: 쿼터턴+쿼터턴 비교 심사. 결선 제2라운드: 아이 워킹 개인 프레젠테이션+쿼터턴×2' },
+
+  { part:'IFBB 규정 · 여자 비키니/보디피트니스 예결선', category:'IFBB 규정',
+    q:'여자 비키니/보디피트니스 예선·결선 진행 순서는?',
+    keywords:['예선: 쿼터턴','제1라운드: 개인+비교 심사','결선: 아이 워킹'],
+    wrongs:['예선: 규정포즈','제1라운드: 자유포즈','결선: 포즈다운'],
+    answerText:'{예선: 쿼터턴} → {제1라운드: 개인+비교 심사} → {결선: 아이 워킹}+쿼터턴×2',
+    a:'예선 라운드: 쿼터턴. 예선 제1라운드: 쿼터턴 개인+비교 심사. 결선 제2라운드: 아이 워킹+쿼터턴×2' },
+
+  { part:'IFBB 규정 · 데피니션/세퍼레이션', category:'IFBB 규정',
+    q:'데피니션·세퍼레이션을 설명하시오',
+    keywords:['데피니션: 근육의 선명도','세퍼레이션: 근육 간 분리도','체지방이 적을수록'],
+    wrongs:['데피니션: 근육의 크기','세퍼레이션: 근육의 두께','체지방이 많을수록'],
+    answerText:'{데피니션: 근육의 선명도}: 체지방 적어 근육이 선명하게 보임. {세퍼레이션: 근육 간 분리도}: 경계선이 명확하게 드러남. {체지방이 적을수록} 향상',
+    a:'데피니션: 근육의 선명도(적은 체지방으로 근육이 선명하게 보이는 것). 세퍼레이션: 근육과 근육 사이의 분리도(경계선이 얼마나 명확하게 드러나는지)' },
+];
+
+const CATEGORIES = ['ALL','운동생리학','기능해부학','트레이닝방법론','스포츠영양학','응급처치','도핑','스포츠윤리','IFBB 규정'];
+const CATEGORY_LABELS = {
+  ALL:'전체 (104문제)',
+  '운동생리학':'운동생리학',
+  '기능해부학':'기능해부학',
+  '트레이닝방법론':'트레이닝방법론',
+  '스포츠영양학':'스포츠영양학',
+  '응급처치':'응급처치',
+  '도핑':'도핑',
+  '스포츠윤리':'스포츠윤리',
+  'IFBB 규정':'IFBB 규정'
+};
+const LS_KEY = 'mentorone_wrong_kichul_2026_0614';
+
+let currentCards = [], currentIndex = 0;
+let correctCount = 0, wrongCount = 0;
+let answeredSet = new Set(), wrongSet = new Set();
+let currentCategory = 'ALL', currentMode = 'flash';
+let blankKeywords = [], blankFilled = [], blankResults = [];
+let blankCurrentIdx = 0, blankCardCorrect = true;
+let currentAnswerText = '';
+
+function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
+function lsSave(cards) { try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); } catch {} }
+function lsAddWrong(card) { const list = lsLoad(); if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); } buildTabs(); }
+function lsRemoveWrong(q) { lsSave(lsLoad().filter(c => c.q !== q)); buildTabs(); }
+function lsClear() { if (!confirm('오답노트를 초기화할까요?')) return; localStorage.removeItem(LS_KEY); buildTabs(); loadCategory('ALL'); }
+
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wb = document.createElement('button');
+  wb.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wb.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wb.onclick = () => loadWrongNote();
+  el.appendChild(wb);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG'; buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set(); updateScoreBadges();
+}
+
+function renderCard() { if (!currentCards.length) return; if (currentMode === 'flash') renderFlash(); else renderBlank(); updateProgress(); }
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1); const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active'; span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank'; span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) { const span = document.createElement('span'); span.className = 'token token-sep'; span.textContent = line; container.appendChild(span); }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]); const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn'; btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true; blankResults[blankCurrentIdx] = 'correct'; blankCurrentIdx++;
+    setTimeout(() => { if (blankCurrentIdx >= blankKeywords.length) finishBlankCard(); else { renderTokens(); renderChoices(); } }, 400);
+  } else {
+    blankCardCorrect = false; btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => { if (b.textContent === correct) b.classList.add('flash-correct'); });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true; blankResults[blankCurrentIdx] = 'wrong'; blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard(); else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) { currentIndex++; renderCard(); }
+  else { if (answeredSet.size >= currentCards.length) showComplete(); else { currentIndex = 0; renderCard(); } }
+}
+function prevCard() { if (currentIndex > 0) { currentIndex--; renderCard(); } }
+function shuffleCards() { shuffle(currentCards); resetState(); renderCard(); }
+function shuffle(arr) { for (let i = arr.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+function updateProgress() {
+  const total = currentCards.length;
+  document.getElementById('progressFill').style.width = total ? ((currentIndex+1)/total*100).toFixed(0)+'%' : '0%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+function updateScoreBadges() { document.getElementById('correctCount').textContent = correctCount; document.getElementById('wrongCount').textContent = wrongCount; }
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  document.getElementById('completeSub').textContent = `정답률 ${Math.round(correctCount/currentCards.length*100)}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+function restartAll() { loadCategory(currentCategory); }
+function reviewWrong() { currentCards = [...wrongSet].map(i => currentCards[i]); resetState(); document.getElementById('completeScreen').classList.remove('show'); document.getElementById('mainCardArea').style.display = 'block'; renderCard(); }
+
+init();
+</script>
+</body>
+</html>
