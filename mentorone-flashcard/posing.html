@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포징지도방법 플래시카드 | 멘토원</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A; --navy-light: #243660;
+    --gold: #C5963A; --gold-light: #E8B84B;
+    --white: #FFFFFF; --gray: #8A8F9E;
+    --card-radius: 20px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--navy); min-height:100vh; color:var(--white); overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 60% 40% at 80% 20%,rgba(197,150,58,.08) 0%,transparent 60%), radial-gradient(ellipse 50% 60% at 10% 80%,rgba(36,54,96,.6) 0%,transparent 60%); pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 20px 60px; }
+
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .logo { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
+  .logo span { color:var(--gray); font-weight:300; }
+  .header-title { font-size:13px; color:var(--gray); }
+
+  .mode-toggle { display:flex; background:rgba(255,255,255,.06); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .mode-btn { flex:1; padding:8px 0; border:none; border-radius:7px; background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; }
+  .mode-btn.active { background:var(--gold); color:var(--navy); font-weight:700; }
+
+  .category-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:100px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-size:12px; font-weight:500; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+  .tab:hover { border-color:var(--gold); color:var(--gold-light); }
+  .tab.active { background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:700; }
+
+  .progress-bar-wrap { margin-bottom:16px; }
+  .progress-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; color:var(--gray); }
+  .progress-count { font-family:'DM Mono',monospace; font-size:13px; color:var(--gold); }
+  .progress-track { height:3px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:99px; transition:width .4s ease; }
+
+  .score-badges { display:flex; gap:10px; margin-bottom:24px; }
+  .badge { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'DM Mono',monospace; }
+  .badge-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.3); color:#5EC49A; }
+  .badge-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.25); color:#E07070; }
+  .badge-dot { width:6px; height:6px; border-radius:50%; }
+  .badge-correct .badge-dot { background:#5EC49A; }
+  .badge-wrong .badge-dot { background:#E07070; }
+
+  .card-container { perspective:1200px; margin-bottom:20px; }
+  .card-inner { position:relative; width:100%; min-height:260px; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+  .card-inner.flipped { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:var(--card-radius); padding:32px 36px; display:flex; flex-direction:column; min-height:260px; }
+  .card-front { background:var(--white); color:var(--navy); }
+  .card-front .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .card-front .card-question { font-size:19px; font-weight:700; color:var(--navy); line-height:1.5; flex:1; display:flex; align-items:center; }
+  .card-back { background:var(--navy-light); border:1px solid rgba(197,150,58,.25); transform:rotateY(180deg); overflow-y:auto; }
+  .card-back .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .card-back .answer-label { font-size:11px; color:var(--gray); margin-bottom:10px; letter-spacing:1px; }
+  .card-back .card-answer { font-size:15px; font-weight:500; line-height:1.8; color:var(--white); flex:1; }
+
+  .blank-card { background:var(--white); border-radius:var(--card-radius); padding:32px 36px; margin-bottom:20px; min-height:220px; display:flex; flex-direction:column; }
+  .blank-card .card-part { font-size:10px; font-weight:700; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; }
+  .blank-card .card-question { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:24px; line-height:1.5; }
+  .answer-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1; }
+  .token { display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; min-width:70px; text-align:center; line-height:1.4; }
+  .token-blank { background:#F0F2F8; color:transparent; border:2px dashed #C8CCE0; min-width:90px; }
+  .token-blank.active { background:#EBF0FF; border:2px dashed #7B96E8; animation:pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{border-color:#7B96E8} 50%{border-color:#3A5FD4} }
+  .token-correct { background:rgba(45,122,95,.12); color:#1A6647; border:2px solid rgba(45,122,95,.35); }
+  .token-wrong { background:rgba(184,50,50,.1); color:#8B1A1A; border:2px solid rgba(184,50,50,.3); }
+  .token-sep { background:transparent; color:var(--navy); font-size:15px; font-weight:400; padding:4px; min-width:auto; }
+
+  .choices-area { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .choice-btn { padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:var(--white); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .18s; }
+  .choice-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); transform:translateY(-1px); }
+  .choice-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .choice-btn.flash-wrong { background:rgba(184,50,50,.25); border-color:rgba(184,50,50,.5); color:#E07070; }
+  .choice-btn.flash-correct { background:rgba(45,122,95,.2); border-color:rgba(45,122,95,.5); color:#5EC49A; }
+
+  .action-area { display:flex; gap:12px; margin-bottom:16px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn:active { transform:scale(.97); }
+  .btn-wrong { background:rgba(184,50,50,.12); border:1px solid rgba(184,50,50,.3); color:#E07070; }
+  .btn-wrong:hover { background:rgba(184,50,50,.2); }
+  .btn-correct { background:rgba(45,122,95,.15); border:1px solid rgba(45,122,95,.35); color:#5EC49A; }
+  .btn-correct:hover { background:rgba(45,122,95,.25); }
+  .btn-next { background:var(--gold); color:var(--navy); font-weight:700; }
+  .btn-next:hover { background:var(--gold-light); }
+
+  .nav-area { display:flex; gap:10px; justify-content:center; }
+  .btn-nav { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--gray); font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; }
+  .btn-nav:hover { border-color:rgba(255,255,255,.3); color:var(--white); }
+  .btn-shuffle { padding:10px 16px; border-radius:10px; border:1px solid rgba(197,150,58,.2); background:transparent; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
+  .btn-shuffle:hover { background:rgba(197,150,58,.1); }
+
+  .complete-screen { display:none; text-align:center; padding:48px 20px; }
+  .complete-screen.show { display:block; }
+  .complete-icon { font-size:48px; margin-bottom:16px; }
+  .complete-title { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .complete-sub { color:var(--gray); font-size:14px; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-box { padding:20px; border-radius:14px; text-align:center; }
+  .result-box-correct { background:rgba(45,122,95,.12); border:1px solid rgba(45,122,95,.25); }
+  .result-box-wrong { background:rgba(184,50,50,.1); border:1px solid rgba(184,50,50,.2); }
+  .result-num { font-family:'DM Mono',monospace; font-size:36px; font-weight:500; margin-bottom:4px; }
+  .result-box-correct .result-num { color:#5EC49A; }
+  .result-box-wrong .result-num { color:#E07070; }
+  .result-label { font-size:12px; color:var(--gray); }
+  .btn-restart { padding:14px 32px; border-radius:12px; border:none; background:var(--gold); color:var(--navy); font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-right:10px; }
+  .btn-restart:hover { background:var(--gold-light); }
+  .btn-wrong-only { padding:14px 24px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-wrong-only:hover { background:rgba(184,50,50,.1); }
+
+  .tab.tab-wrong { border-color: rgba(184,50,50,.3); color: #E07070; }
+  .tab.tab-wrong:hover { border-color: rgba(184,50,50,.6); color: #E07070; }
+  .tab.tab-wrong.active { background: #B83232; border-color: #B83232; color: var(--white); }
+  .wrong-badge { display:inline-flex; align-items:center; justify-content:center; background:#B83232; color:var(--white); font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; margin-left:4px; vertical-align:middle; }
+  .tab.tab-wrong.active .wrong-badge { background:rgba(255,255,255,.3); }
+
+  .wrong-note-card { background:var(--white); border-radius:var(--card-radius); padding:40px 36px; text-align:center; margin-bottom:20px; }
+  .wrong-note-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:16px; }
+  .wrong-note-count { font-size:28px; font-weight:900; color:#B83232; margin-bottom:12px; }
+  .wrong-note-desc { font-size:13px; color:var(--gray); line-height:1.7; margin-bottom:28px; }
+  .wrong-note-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-clear-wrong { padding:13px 20px; border-radius:12px; border:1px solid rgba(184,50,50,.3); background:transparent; color:#E07070; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-clear-wrong:hover { background:rgba(184,50,50,.1); }
+
+  @media(max-width:480px){
+    .card-face,.blank-card{padding:24px 20px;}
+    .card-front .card-question,.blank-card .card-question{font-size:16px;}
+    .token{font-size:13px;padding:7px 10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray)'">← 홈</a>
+    <div class="header-title">포징지도방법 플래시카드</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeFlash" onclick="setMode('flash')">📋 플래시카드</button>
+    <button class="mode-btn" id="modeBlank" onclick="setMode('blank')">✏️ 빈칸 채우기</button>
+  </div>
+
+  <div class="category-tabs" id="categoryTabs"></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label" id="progressLabel"></span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="score-badges">
+    <div class="badge badge-correct"><div class="badge-dot"></div><span id="correctCount">0</span> 정답</div>
+    <div class="badge badge-wrong"><div class="badge-dot"></div><span id="wrongCount">0</span> 오답</div>
+  </div>
+
+  <div id="mainCardArea">
+    <div id="flashMode">
+      <div class="card-container">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="card-part" id="cardPart"></div>
+            <div class="card-question" id="cardQuestion"></div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-part" id="cardPartBack"></div>
+            <div class="answer-label">ANSWER</div>
+            <div class="card-answer" id="cardAnswer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area" id="flashActionArea">
+        <button class="btn btn-wrong" onclick="markCard(false)">✗ 모르겠어요</button>
+        <button class="btn btn-correct" onclick="markCard(true)">✓ 알겠어요</button>
+      </div>
+      <div class="action-area" id="flashNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div id="blankMode" style="display:none;">
+      <div class="blank-card">
+        <div class="card-part" id="blankPart"></div>
+        <div class="card-question" id="blankQuestion"></div>
+        <div class="answer-tokens" id="answerTokens"></div>
+      </div>
+      <div class="choices-area" id="choicesArea"></div>
+      <div class="action-area" id="blankNextArea" style="display:none;">
+        <button class="btn btn-next" onclick="nextCard()">다음으로 →</button>
+      </div>
+    </div>
+
+    <div class="nav-area">
+      <button class="btn-nav" onclick="prevCard()">← 이전</button>
+      <button class="btn-shuffle" onclick="shuffleCards()">🔀 섞기</button>
+      <button class="btn-nav" onclick="nextCard()">다음 →</button>
+    </div>
+  </div>
+
+  <div id="wrongNotePanel" style="display:none;">
+    <div class="wrong-note-card">
+      <div class="wrong-note-title">📕 오답노트</div>
+      <div class="wrong-note-count" id="wrongNoteCount">불러오는 중...</div>
+      <div class="wrong-note-desc">틀린 문제들이 자동으로 저장됩니다.<br>맞힌 문제는 자동으로 제거돼요.</div>
+      <div class="wrong-note-btns">
+        <button class="btn btn-next" id="btnStartWrongReview" onclick="startWrongReview()">복습 시작 →</button>
+        <button class="btn-clear-wrong" id="btnClearWrong" onclick="lsClear()">🗑 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎯</div>
+    <div class="complete-title">완료!</div>
+    <div class="complete-sub" id="completeSub"></div>
+    <div class="result-grid">
+      <div class="result-box result-box-correct"><div class="result-num" id="finalCorrect">0</div><div class="result-label">정답</div></div>
+      <div class="result-box result-box-wrong"><div class="result-num" id="finalWrong">0</div><div class="result-label">오답</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">처음부터</button>
+    <button class="btn-wrong-only" id="btnWrongOnly" onclick="reviewWrong()">오답만 복습</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+
+  // ===== PART 1 · 남자 보디빌딩 =====
+
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Front Double Biceps 포징 지도법을 설명하시오.',
+    keywords: ['한 발 반(40~50cm)', '전완근', '앞쪽 근육 전체'],
+    wrongs: ['한 발(20cm)', '광배근', '뒤쪽 근육 전체'],
+    answerText: '① 하체: 정면을 보고 서서, 한쪽 발을 바깥쪽으로 {한 발 반(40~50cm)} 내딛어 주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 들어 올리고 팔꿈치를 구부려주세요.\n③ 큐잉: 주먹을 꽉 쥐고 아래를 향하게 하면서 {전완근}을 수축해주세요.\n④ 전신: 머리부터 발끝까지 {앞쪽 근육 전체}를 수축하는 느낌으로 자세를 완성해주세요.',
+    a: '① 하체: 정면을 보고 서서, 한쪽 발을 바깥쪽으로 한 발 반(40~50cm) 내딛어 주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 들어 올리고 팔꿈치를 구부려주세요.\n③ 큐잉: 주먹을 꽉 쥐고 아래를 향하게 하면서 전완근을 수축해주세요. 자연스럽게 이두에도 힘이 들어갑니다.\n④ 전신: 머리부터 발끝까지 앞쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Front Lat Spread 포징 지도법을 설명하시오.',
+    keywords: ['15cm', '복사근', '광배근'],
+    wrongs: ['30cm', '허리 위', '삼각근'],
+    answerText: '① 하체: 정면을 보고 서서, 다리와 발의 안쪽 라인을 {15cm} 정도 벌려주세요.\n② 상체/팔: 손을 펼치거나 주먹을 쥔 상태로 허리 아래 또는 {복사근}에 위치시켜주세요.\n③ 큐잉: 팔꿈치를 바깥쪽으로 밀어내는 느낌으로 {광배근}을 최대한 펼쳐주세요.\n④ 전신: 머리부터 발끝까지 앞쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+    a: '① 하체: 정면을 보고 서서, 다리와 발의 안쪽 라인을 15cm 정도 벌려주세요.\n② 상체/팔: 손을 펼치거나 주먹을 쥔 상태로 허리 아래 또는 복사근에 위치시켜주세요.\n③ 큐잉: 팔꿈치를 바깥쪽으로 밀어내는 느낌으로 광배근을 최대한 펼쳐주세요.\n④ 전신: 머리부터 발끝까지 앞쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Side Chest 포징 지도법을 설명하시오.',
+    keywords: ['발가락으로 지탱', '직각', '이두근'],
+    wrongs: ['발바닥 전체', '직각보다 넓게', '삼두근'],
+    answerText: '① 하체: 옆으로 서서, 심판 쪽에 가까운 다리의 무릎을 구부리고 {발가락으로 지탱}해주세요.\n② 상체/팔: 고개와 상체를 정면 쪽으로 틀고, 가까운 쪽 팔을 {직각}으로 구부린 후 반대 손으로 손목을 잡아주세요.\n③ 큐잉: 배를 넣고 가슴을 살짝 들고, 팔을 위로 밀어 올리는 압력으로 {이두근}을 수축해주세요.\n④ 전신: 가슴과 팔 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+    a: '① 하체: 옆으로 서서, 심판 쪽에 가까운 다리의 무릎을 구부리고 발가락으로 지탱해주세요.\n② 상체/팔: 고개와 상체를 정면 쪽으로 틀고, 가까운 쪽 팔을 직각으로 구부린 후 반대 손으로 손목을 잡아주세요.\n③ 큐잉: 배를 넣고 가슴을 살짝 들고, 직각으로 구부린 팔을 위로 밀어 올리는 압력으로 이두근을 수축해주세요.\n④ 전신: 가슴과 팔 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Back Double Biceps 포징 지도법을 설명하시오.',
+    keywords: ['발가락으로 지탱', '어깨와 수평', '비복근'],
+    wrongs: ['발바닥 전체', '어깨보다 높게', '삼각근'],
+    answerText: '① 하체: 뒷모습이 정면을 향하도록 서서, 한 발을 뒤로 빼서 {발가락으로 지탱}해주세요.\n② 상체/팔: 두 팔을 들어 {어깨와 수평}한 위치에서 팔꿈치를 구부려주세요.\n③ 큐잉: 어깨, 이두근, 삼두근, 등 상하부, 둔근, 허벅지, {비복근}까지 전체를 수축시켜주세요.\n④ 전신: 뒤쪽에서 보이는 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+    a: '① 하체: 뒷모습이 정면을 향하도록 서서, 한 발을 뒤로 빼서 발가락으로 지탱해주세요.\n② 상체/팔: 두 팔을 들어 어깨와 수평한 위치에서 팔꿈치를 구부려주세요.\n③ 큐잉: 어깨, 이두근, 삼두근, 등 상하부, 둔근, 허벅지, 비복근까지 전체를 수축시켜주세요.\n④ 전신: 뒤쪽에서 보이는 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Back Lat Spread 포징 지도법을 설명하시오.',
+    keywords: ['최대 15cm', '허리 위', '광배근'],
+    wrongs: ['최대 30cm', '가슴 위', '대흉근'],
+    answerText: '① 하체: 뒷모습이 정면을 향하도록 서서, 다리와 발의 안쪽 라인을 {최대 15cm}까지 벌려주세요.\n② 상체/팔: 양손을 {허리 위}에 올려주세요.\n③ 큐잉: 팔꿈치를 바깥쪽으로 밀어내는 느낌으로 {광배근}을 최대한 펼쳐주세요.\n④ 전신: 머리부터 발끝까지 뒤쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+    a: '① 하체: 뒷모습이 정면을 향하도록 서서, 다리와 발의 안쪽 라인을 최대 15cm까지 벌려주세요.\n② 상체/팔: 양손을 허리 위에 올려주세요.\n③ 큐잉: 팔꿈치를 바깥쪽으로 밀어내는 느낌으로 광배근을 최대한 펼쳐주세요.\n④ 전신: 머리부터 발끝까지 뒤쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Side Triceps 포징 지도법을 설명하시오.',
+    keywords: ['깍지', '앞쪽 팔', '삼두근'],
+    wrongs: ['손목을 잡아', '뒤쪽 팔', '이두근'],
+    answerText: '① 하체: 옆으로 서서, 앞쪽 다리는 발바닥을 바닥에 붙이고 무릎을 구부리고, 뒤쪽 다리는 무릎을 구부리고 발가락으로 지탱해주세요.\n② 상체/팔: 두 팔을 등 뒤에 놓고 {깍지}를 끼거나 앞쪽 팔의 손목을 잡아주세요.\n③ 큐잉: {앞쪽 팔}에 압력을 가해 {삼두근}을 수축시켜주세요.\n④ 전신: 삼두근이 선명하게 드러나도록 긴장을 유지해주세요.',
+    a: '① 하체: 옆으로 서서, 앞쪽 다리는 발바닥을 바닥에 붙이고 무릎을 구부리고, 뒤쪽 다리는 무릎을 구부리고 발가락으로 지탱해주세요.\n② 상체/팔: 두 팔을 등 뒤에 놓고 깍지를 끼거나 앞쪽 팔의 손목을 잡아주세요.\n③ 큐잉: 앞쪽 팔에 압력을 가해 삼두근을 수축시켜주세요.\n④ 전신: 삼두근이 선명하게 드러나도록 긴장을 유지해주세요.',
+  },
+  {
+    part: 'PART 1 · 남자 보디빌딩',
+    category: 'PART 1',
+    q: '남자 보디빌딩 Abdominal & Thighs 포징 지도법을 설명하시오.',
+    keywords: ['발가락으로 지탱', '크런칭', '하체 전면'],
+    wrongs: ['발바닥 전체', '트위스팅', '하체 후면'],
+    answerText: '① 하체: 정면을 보고 서서, 한쪽 발을 앞에 놓고 {발가락으로 지탱}해주세요.\n② 상체/팔: 두 팔을 머리 뒤에 놓고 숨을 들이마셔주세요.\n③ 큐잉: 몸통을 약간 앞으로 보내며 {크런칭} 자세로 복부를 수축해주세요.\n④ 전신: 동시에 {하체 전면} 근육도 함께 수축해주세요.',
+    a: '① 하체: 정면을 보고 서서, 한쪽 발을 앞에 놓고 발가락으로 지탱해주세요.\n② 상체/팔: 두 팔을 머리 뒤에 놓고 숨을 들이마셔주세요.\n③ 큐잉: 몸통을 약간 앞으로 보내며 크런칭 자세로 복부를 수축해주세요.\n④ 전신: 동시에 하체 전면 근육도 함께 수축해주세요.',
+  },
+
+  // ===== PART 2 · 남자 피지크 쿼터턴 =====
+
+  {
+    part: 'PART 2 · 남자 피지크 쿼터턴',
+    category: 'PART 2',
+    q: '남자 피지크 쿼터턴 Front Position 지도법을 설명하시오.',
+    keywords: ['네 손가락을 앞으로', '복근과 광배근', '몸에서 약간 떨어지게'],
+    wrongs: ['엄지를 앞으로', '삼두근과 대흉근', '몸에 밀착되게'],
+    answerText: '① 하체: 긴장을 유지하고 바르게 서서, 한 다리를 약간 옆으로 뻗어주세요.\n② 상체/팔: {네 손가락을 앞으로} 둔 채 한 손을 허리에 얹어주세요. 다른 손은 {몸에서 약간 떨어지게} 하고 팔꿈치를 살짝 구부려 손가락을 정렬해주세요.\n③ 큐잉: {복근과 광배근}을 살짝 수축해주세요.\n④ 시선: 고개를 들고 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+    a: '① 하체: 긴장을 유지하고 바르게 서서, 한 다리를 약간 옆으로 뻗어주세요.\n② 상체/팔: 네 손가락을 앞으로 둔 채 한 손을 허리에 얹어주세요. 다른 손은 몸에서 약간 떨어지게 하고, 팔꿈치를 살짝 구부린 후 손바닥을 곧게 펴서 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 복근과 광배근을 살짝 수축해주세요.\n④ 시선: 고개를 들고 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+  },
+  {
+    part: 'PART 2 · 남자 피지크 쿼터턴',
+    category: 'PART 2',
+    q: '남자 피지크 쿼터턴 Quarter Turn Right(왼쪽 측면) 지도법을 설명하시오.',
+    keywords: ['왼편이 앞을 향하게', '왼손은 왼쪽 허리', '측면 라인'],
+    wrongs: ['오른편이 앞을 향하게', '오른손은 오른쪽 허리', '후면 라인'],
+    answerText: '① 하체: {왼편이 앞을 향하게} 서서, 왼쪽 다리의 무릎을 약간 구부리고 발은 바닥에 붙여주세요. 오른쪽 다리는 뒤로 빼고 발가락으로 지탱해주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. {왼손은 왼쪽 허리}에 얹고, 오른팔은 몸 중심선보다 약간 앞에 두고 팔꿈치를 구부려 손가락을 정렬해주세요.\n③ 큐잉: {측면 라인}이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 왼편이 앞을 향하게 서서, 왼쪽 다리의 무릎을 약간 구부리고 발은 바닥에 딱 붙여주세요. 오른쪽 다리는 무릎을 구부려 뒤쪽으로 빼고 발가락으로 지탱해주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. 왼손은 왼쪽 허리에 얹고, 오른팔은 몸의 중심선보다 약간 앞에 두고 팔꿈치를 약간 구부린 채 손바닥을 펴서 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+  {
+    part: 'PART 2 · 남자 피지크 쿼터턴',
+    category: 'PART 2',
+    q: '남자 피지크 쿼터턴 Quarter Turn Back 지도법을 설명하시오.',
+    keywords: ['뒷모습이 앞을 향하도록', '한 손은 허리', '등 근육 전체'],
+    wrongs: ['정면이 앞을 향하도록', '두 손을 허리', '복근 전체'],
+    answerText: '① 하체: {뒷모습이 앞을 향하도록} 바르게 서서, 한 다리를 약간 옆으로 뻗어주세요.\n② 상체/팔: {한 손은 허리}에 얹고, 다른 손은 몸에서 약간 떨어지게 하고 팔꿈치를 살짝 구부려 손가락을 정렬해주세요.\n③ 큐잉: {등 근육 전체}가 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+    a: '① 하체: 뒷모습이 앞을 향하도록 바르게 서서, 한 다리를 약간 옆으로 뻗어주세요.\n② 상체/팔: 한 손은 허리에 얹고, 다른 손은 몸을 따라 아래로 내리되 몸에서 약간 떨어지게 하고, 팔꿈치를 살짝 구부린 후 손바닥을 곧게 펴서 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 등 근육 전체가 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+  },
+  {
+    part: 'PART 2 · 남자 피지크 쿼터턴',
+    category: 'PART 2',
+    q: '남자 피지크 쿼터턴 Quarter Turn Right(오른쪽 측면) 지도법을 설명하시오.',
+    keywords: ['오른편이 앞을 향하게', '오른손은 오른쪽 허리', '왼팔'],
+    wrongs: ['왼편이 앞을 향하게', '왼손은 왼쪽 허리', '오른팔'],
+    answerText: '① 하체: {오른편이 앞을 향하게} 서서, 오른쪽 다리의 무릎을 약간 구부리고 발은 바닥에 붙여주세요. 왼쪽 다리는 뒤로 빼고 발가락으로 지탱해주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. {오른손은 오른쪽 허리}에 얹고, {왼팔}은 몸 중심선보다 약간 앞에 두고 팔꿈치를 구부려 손가락을 정렬해주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 오른편이 앞을 향하게 서서, 오른쪽 다리의 무릎을 약간 구부리고 발은 바닥에 딱 붙여주세요. 왼쪽 다리는 무릎을 구부려 뒤쪽으로 빼고 발가락으로 지탱해주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. 오른손은 오른쪽 허리에 얹고, 왼팔은 몸의 중심선보다 약간 앞에 두고 팔꿈치를 약간 구부린 채 손바닥을 펴서 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+
+  // ===== PART 3 · 여자 피지크 규정포즈 =====
+
+  {
+    part: 'PART 3 · 여자 피지크 규정포즈',
+    category: 'PART 3',
+    q: '여자 피지크 규정포즈 Front Double Biceps 지도법을 설명하시오.',
+    keywords: ['일직선', '손가락이 하늘을 향하게', '이두근과 전완근'],
+    wrongs: ['45도 각도', '손가락이 아래를 향하게', '광배근과 복근'],
+    answerText: '① 하체: 정면을 보고 서서, 한쪽 다리를 바깥쪽으로 빼고 다리와 발을 {일직선}에 두어주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 들어 올리고 팔꿈치를 구부려주세요. 손은 편 상태에서 {손가락이 하늘을 향하게} 해주세요.\n③ 큐잉: {이두근과 전완근}에 힘을 주어 수축해주세요.\n④ 전신: 머리부터 발끝까지 앞쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+    a: '① 하체: 정면을 보고 서서, 한쪽 다리를 바깥쪽으로 빼고 다리와 발을 일직선에 두어주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 들어 올리고 팔꿈치를 구부려주세요. 손은 편 상태에서 손가락이 하늘을 향하게 해주세요.\n③ 큐잉: 이두근과 전완근에 힘을 주어 수축해주세요.\n④ 전신: 머리부터 발끝까지 앞쪽 근육 전체를 수축하는 느낌으로 자세를 완성해주세요.',
+  },
+  {
+    part: 'PART 3 · 여자 피지크 규정포즈',
+    category: 'PART 3',
+    q: '여자 피지크 규정포즈 Side Chest 지도법을 설명하시오.',
+    keywords: ['먼 쪽 다리', '깍지', '대퇴사두근'],
+    wrongs: ['가까운 쪽 다리', '주먹을 쥐고', '광배근'],
+    answerText: '① 하체: 옆으로 서서, {먼 쪽 다리}는 발바닥을 땅에 붙이고 무릎을 약간 구부리고, 가까운 쪽 다리는 곧게 펴서 앞으로 뻗어 발가락으로 지탱해주세요.\n② 상체/팔: 고개와 상체를 정면 쪽으로 틀고, 양 팔을 몸 앞쪽에 위치시키고 {깍지}를 끼거나 한 손을 다른 손 위에 포개어 손바닥이 아래를 향하게 해주세요.\n③ 큐잉: 가슴근육, 삼두근, {대퇴사두근}, 대퇴이두근, 비복근을 수축해주세요.\n④ 전신: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.',
+    a: '① 하체: 옆으로 서서, 먼 쪽 다리는 발바닥을 땅에 붙이고 무릎을 약간 구부리고, 가까운 쪽 다리는 곧게 펴서 앞으로 뻗어 발가락으로 지탱해주세요.\n② 상체/팔: 고개와 상체를 정면 쪽으로 틀고, 양 팔을 몸 앞쪽에 위치시키고 깍지를 끼거나 한 손을 다른 손 위에 포개어 손바닥이 아래를 향하게 해주세요.\n③ 큐잉: 가슴근육, 삼두근, 대퇴사두근, 대퇴이두근, 비복근을 수축해주세요.\n④ 전신: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.',
+  },
+  {
+    part: 'PART 3 · 여자 피지크 규정포즈',
+    category: 'PART 3',
+    q: '여자 피지크 규정포즈 Back Double Biceps 지도법을 설명하시오.',
+    keywords: ['발가락으로 지탱', '손가락이 하늘을 향하게', '둔근'],
+    wrongs: ['발바닥 전체', '손가락이 아래를 향하게', '복근'],
+    answerText: '① 하체: 뒷모습이 정면을 향하도록 서서, 한쪽 발을 뒤로 빼서 {발가락으로 지탱}해주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 올리고 팔꿈치를 구부리며, 두 손은 펴서 {손가락이 하늘을 향하게} 해주세요.\n③ 큐잉: 어깨, 등 상하부, 대퇴이두근, {둔근}, 비복근 후면 전체를 수축해주세요.\n④ 전신: 뒤쪽에서 보이는 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+    a: '① 하체: 뒷모습이 정면을 향하도록 서서, 한쪽 발을 뒤로 빼서 발가락으로 지탱해주세요.\n② 상체/팔: 두 팔을 어깨 높이까지 올리고 팔꿈치를 구부리며, 두 손은 펴서 손가락이 하늘을 향하게 해주세요.\n③ 큐잉: 어깨, 등 상하부, 대퇴이두근, 둔근, 비복근 후면 전체를 수축해주세요.\n④ 전신: 뒤쪽에서 보이는 근육 전체가 선명하게 드러나도록 긴장을 유지해주세요.',
+  },
+  {
+    part: 'PART 3 · 여자 피지크 규정포즈',
+    category: 'PART 3',
+    q: '여자 피지크 규정포즈 Side Triceps 지도법을 설명하시오.',
+    keywords: ['먼 쪽 다리', '엄지와 나머지 손가락을 모아', '삼두근'],
+    wrongs: ['가까운 쪽 다리', '깍지를 끼어', '이두근'],
+    answerText: '① 하체: 옆으로 서서, {먼 쪽 다리}는 발바닥을 지면에 붙이고 무릎을 약간 구부리고, 가까운 쪽 다리는 곧게 앞으로 뻗어 발가락으로 체중을 지탱해주세요.\n② 상체/팔: 두 팔을 등 뒤에 위치시키고, 가까운 쪽 팔을 곧게 펴고 {엄지와 나머지 손가락을 모아} 손바닥이 지면을 향하게 해주세요. 뒤쪽 손으로 앞쪽 손목을 잡아주세요.\n③ 큐잉: 앞쪽 팔에 압력을 가해 {삼두근}을 수축시켜주세요.\n④ 전신: 삼두근이 선명하게 드러나도록 긴장을 유지해주세요.',
+    a: '① 하체: 옆으로 서서, 먼 쪽 다리는 발바닥을 지면에 붙이고 무릎을 약간 구부리고, 가까운 쪽 다리는 곧게 앞으로 뻗어 발가락으로 체중을 지탱해주세요.\n② 상체/팔: 두 팔을 등 뒤에 위치시키고, 가까운 쪽 팔을 곧게 펴고 엄지와 나머지 손가락을 모아 손바닥이 지면을 향하게 해주세요. 뒤쪽 손으로 앞쪽 손목을 잡아주세요.\n③ 큐잉: 앞쪽 팔에 압력을 가해 삼두근을 수축시켜주세요.\n④ 전신: 삼두근이 선명하게 드러나도록 긴장을 유지해주세요.',
+  },
+
+  // ===== PART 4 · 여자 피지크/보디피트니스 쿼터턴 =====
+
+  {
+    part: 'PART 4 · 여자 피지크/보디피트니스 쿼터턴',
+    category: 'PART 4',
+    q: '여자 피지크/보디피트니스 쿼터턴 Front Position 지도법을 설명하시오.',
+    keywords: ['발뒤꿈치를 모아', '30도', '손바닥이 몸통을 바라보게'],
+    wrongs: ['발끝을 모아', '45도', '손바닥이 앞을 향하게'],
+    answerText: '① 하체: {발뒤꿈치를 모아}둔 상태에서 양발을 바깥쪽 {30도} 각도로 벌리고 바르게 서주세요. 양 무릎을 붙인 채로 펴주세요.\n② 상체/팔: 배는 안으로 집어넣고, 가슴을 내밀고, 어깨를 뒤로 젖혀주세요. 두 팔을 옆으로 내리고 팔꿈치를 약간 구부린 채, {손바닥이 몸통을 바라보게} 하고 손을 살짝 오므려주세요.\n③ 큐잉: 전신 긴장을 유지하며 자세를 잡아주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+    a: '① 하체: 발뒤꿈치를 모은 상태에서 양발을 바깥쪽 30도 각도로 벌리고 바르게 서주세요. 양 무릎을 붙인 채로 펴주세요.\n② 상체/팔: 배는 안으로 집어넣고, 가슴을 내밀고, 어깨를 뒤로 젖혀주세요. 두 팔을 옆으로 내리고 팔꿈치를 약간 구부린 채, 손바닥이 몸통을 바라보게 하고 손을 살짝 오므려주세요.\n③ 큐잉: 전신 긴장을 유지하며 자세를 잡아주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+  },
+  {
+    part: 'PART 4 · 여자 피지크/보디피트니스 쿼터턴',
+    category: 'PART 4',
+    q: '여자 피지크/보디피트니스 쿼터턴 Quarter Turn Right(왼쪽 측면) 지도법을 설명하시오.',
+    keywords: ['30도', '왼팔은 몸 중심선보다 약간 뒤로', '오른팔'],
+    wrongs: ['45도', '오른팔은 몸 중심선보다 약간 뒤로', '왼팔'],
+    answerText: '① 하체: 양발을 바깥쪽 {30도} 각도로 벌리고 서서, 무릎을 펴주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. {왼팔은 몸 중심선보다 약간 뒤로} 두고, {오른팔}은 몸 앞에 위치시켜 팔꿈치를 살짝 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 양발을 바깥쪽 30도 각도로 벌리고 서서, 무릎을 펴주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. 왼팔은 몸 중심선보다 약간 뒤로 두고, 오른팔은 몸 앞에 위치시켜 팔꿈치를 살짝 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+  {
+    part: 'PART 4 · 여자 피지크/보디피트니스 쿼터턴',
+    category: 'PART 4',
+    q: '여자 피지크/보디피트니스 쿼터턴 Quarter Turn Back 지도법을 설명하시오.',
+    keywords: ['발뒤꿈치를 모아', '30도', '등 근육 전체'],
+    wrongs: ['발끝을 모아', '45도', '복근 전체'],
+    answerText: '① 하체: {발뒤꿈치를 모아}둔 상태에서 양발을 바깥쪽 {30도} 각도로 벌리고 바르게 서주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. 두 팔을 옆으로 내리고 팔꿈치를 약간 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: {등 근육 전체}가 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+    a: '① 하체: 발뒤꿈치를 모은 상태에서 양발을 바깥쪽 30도 각도로 벌리고 바르게 서주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. 두 팔을 옆으로 내리고 팔꿈치를 약간 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: 등 근육 전체가 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 머리와 눈이 몸과 같은 방향을 향하게 해주세요.',
+  },
+  {
+    part: 'PART 4 · 여자 피지크/보디피트니스 쿼터턴',
+    category: 'PART 4',
+    q: '여자 피지크/보디피트니스 쿼터턴 Quarter Turn Right(오른쪽 측면) 지도법을 설명하시오.',
+    keywords: ['30도', '오른팔은 몸 중심선보다 약간 뒤로', '왼팔'],
+    wrongs: ['45도', '왼팔은 몸 중심선보다 약간 뒤로', '오른팔'],
+    answerText: '① 하체: 양발을 바깥쪽 {30도} 각도로 벌리고 서서, 무릎을 펴주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. {오른팔은 몸 중심선보다 약간 뒤로} 두고, {왼팔}은 몸 앞에 위치시켜 팔꿈치를 살짝 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 양발을 바깥쪽 30도 각도로 벌리고 서서, 무릎을 펴주세요.\n② 상체/팔: 배는 안으로, 가슴은 내밀고, 어깨는 뒤로 젖혀주세요. 오른팔은 몸 중심선보다 약간 뒤로 두고, 왼팔은 몸 앞에 위치시켜 팔꿈치를 살짝 구부린 채 손을 살짝 오므려주세요.\n③ 큐잉: 측면 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+
+  // ===== PART 5 · 여자 비키니 쿼터턴 =====
+
+  {
+    part: 'PART 5 · 여자 비키니 쿼터턴',
+    category: 'PART 5',
+    q: '여자 비키니 쿼터턴 Front Position 지도법을 설명하시오.',
+    keywords: ['한 발을 약간 옆으로', '한 손을 허리', '가슴은 내밀고'],
+    wrongs: ['한 발을 크게 앞으로', '두 손을 허리', '배를 내밀고'],
+    answerText: '① 하체: 바르게 서서, {한 발을 약간 옆으로} 뻗어주세요. 무릎은 펴주세요.\n② 상체/팔: {한 손을 허리}에 얹고, 다른 손은 몸에서 약간 떨어지게 손바닥을 펴서 손가락을 정렬해주세요. 배는 집어넣고, {가슴은 내밀고}, 어깨는 뒤로 편 자세를 유지해주세요.\n③ 큐잉: 전신 긴장을 유지하며 자세를 잡아주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 바르게 서서, 한 발을 약간 옆으로 뻗어주세요. 무릎은 펴주세요.\n② 상체/팔: 한 손을 허리에 얹고, 다른 손은 몸을 따라 아래로 내리되 몸에서 약간 떨어지게 하고 손바닥을 곧게 펴서 손가락을 가지런히 정렬해주세요. 배는 집어넣고, 가슴은 내밀고, 어깨는 뒤로 편 자세를 유지해주세요.\n③ 큐잉: 전신 긴장을 유지하며 자세를 잡아주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+  {
+    part: 'PART 5 · 여자 비키니 쿼터턴',
+    category: 'PART 5',
+    q: '여자 비키니 쿼터턴 Quarter Turn Right(왼쪽 측면) 지도법을 설명하시오.',
+    keywords: ['왼쪽 엉덩이를 약간 올리고', '오른손은 오른쪽 허리', '왼팔은 몸 중심선보다 약간 뒤로'],
+    wrongs: ['오른쪽 엉덩이를 약간 올리고', '왼손은 왼쪽 허리', '오른팔은 몸 중심선보다 약간 뒤로'],
+    answerText: '① 하체: 왼편이 앞을 향하게 서서, {왼쪽 엉덩이를 약간 올리고} 왼쪽 무릎을 약간 구부려주세요. 왼발은 몸의 중심선 가까이에 두고 발가락으로 지탱하고, 오른쪽 다리는 곧게 펴주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. {오른손은 오른쪽 허리}에 얹고, {왼팔은 몸 중심선보다 약간 뒤로} 내리고 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인과 엉덩이 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 왼편이 앞을 향하게 서서, 왼쪽 엉덩이를 약간 올리고 왼쪽 무릎을 약간 구부려주세요. 왼발은 몸의 중심선 가까이에 두고 발가락으로 지탱하고, 오른쪽 다리는 곧게 펴주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. 오른손은 오른쪽 허리에 얹고, 왼팔은 몸 중심선보다 약간 뒤로 내리고 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인과 엉덩이 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+  {
+    part: 'PART 5 · 여자 비키니 쿼터턴',
+    category: 'PART 5',
+    q: '여자 비키니 쿼터턴 Quarter Turn Back 지도법을 설명하시오.',
+    keywords: ['뒷모습이 앞을 향하도록', '척추전만', '둔근'],
+    wrongs: ['정면이 앞을 향하도록', '척추후만', '대퇴이두근만'],
+    answerText: '① 하체: {뒷모습이 앞을 향하도록} 바르게 서서, 한 다리를 옆으로 살짝 뻗어주세요. 무릎은 펴주세요.\n② 상체/팔: 한 손은 허리에 얹고, 다른 손은 몸을 따라 아래로 내리되 손가락을 가지런히 정렬해주세요. 허리 아랫부분은 자연스러운 {척추전만} 형태를 유지해주세요.\n③ 큐잉: {둔근}과 뒤쪽 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 뒷모습이 앞을 향하도록 바르게 서서, 한 다리를 옆으로 살짝 뻗어주세요. 무릎은 펴주세요.\n② 상체/팔: 한 손은 허리에 얹고, 다른 손은 몸을 따라 아래로 내리되 손가락을 가지런히 정렬해주세요. 허리 아랫부분은 자연스러운 척추전만 형태를 유지하고, 등 위쪽은 곧게 펴고 고개를 들어주세요.\n③ 큐잉: 둔근과 뒤쪽 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+  {
+    part: 'PART 5 · 여자 비키니 쿼터턴',
+    category: 'PART 5',
+    q: '여자 비키니 쿼터턴 Quarter Turn Right(오른쪽 측면) 지도법을 설명하시오.',
+    keywords: ['오른쪽 엉덩이를 약간 올리고', '왼손은 왼쪽 허리', '오른팔은 몸 중심선보다 약간 뒤로'],
+    wrongs: ['왼쪽 엉덩이를 약간 올리고', '오른손은 오른쪽 허리', '왼팔은 몸 중심선보다 약간 뒤로'],
+    answerText: '① 하체: 오른편이 앞을 향하게 서서, {오른쪽 엉덩이를 약간 올리고} 오른쪽 무릎을 약간 구부려주세요. 오른발은 몸의 중심선 가까이에 두고 발가락으로 지탱하고, 왼쪽 다리는 곧게 펴주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. {왼손은 왼쪽 허리}에 얹고, {오른팔은 몸 중심선보다 약간 뒤로} 내리고 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인과 엉덩이 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+    a: '① 하체: 오른편이 앞을 향하게 서서, 오른쪽 엉덩이를 약간 올리고 오른쪽 무릎을 약간 구부려주세요. 오른발은 몸의 중심선 가까이에 두고 발가락으로 지탱하고, 왼쪽 다리는 곧게 펴주세요.\n② 상체/팔: 상체를 약간 정면 쪽으로 돌려주세요. 왼손은 왼쪽 허리에 얹고, 오른팔은 몸 중심선보다 약간 뒤로 내리고 손가락을 가지런히 정렬해주세요.\n③ 큐잉: 측면 라인과 엉덩이 라인이 선명하게 보이도록 긴장을 유지해주세요.\n④ 시선: 정면을 향해주세요.',
+  },
+
+];
+
+const CATEGORIES = ['ALL', 'PART 1', 'PART 2', 'PART 3', 'PART 4', 'PART 5'];
+const CATEGORY_LABELS = {
+  'ALL': '전체',
+  'PART 1': '남자 보디빌딩',
+  'PART 2': '남자 피지크',
+  'PART 3': '여자 피지크',
+  'PART 4': '여자 피지크/보디피트니스',
+  'PART 5': '여자 비키니',
+};
+const LS_KEY = 'mentorone_wrong_posing';
+
+let currentCards = [], currentIndex = 0;
+let correctCount = 0, wrongCount = 0;
+let answeredSet = new Set(), wrongSet = new Set();
+let currentCategory = 'ALL', currentMode = 'flash';
+let blankKeywords = [], blankFilled = [], blankResults = [];
+let blankCurrentIdx = 0, blankCardCorrect = true;
+let currentAnswerText = '';
+
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; }
+}
+function lsSave(arr) {
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+function lsAddWrong(card) {
+  const list = lsLoad();
+  if (!list.find(c => c.q === card.q)) { list.push(card); lsSave(list); }
+}
+function lsRemoveWrong(q) {
+  lsSave(lsLoad().filter(c => c.q !== q));
+  buildTabs();
+}
+function lsClear() {
+  if (!confirm('오답노트를 초기화할까요?')) return;
+  localStorage.removeItem(LS_KEY);
+  buildTabs();
+  loadCategory('ALL');
+}
+
+function init() { buildTabs(); loadCategory('ALL'); }
+
+function buildTabs() {
+  const el = document.getElementById('categoryTabs');
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (cat === currentCategory ? ' active' : '');
+    btn.textContent = CATEGORY_LABELS[cat];
+    btn.onclick = () => loadCategory(cat);
+    el.appendChild(btn);
+  });
+  const wc = lsLoad().length;
+  const wrongBtn = document.createElement('button');
+  wrongBtn.className = 'tab tab-wrong' + (currentCategory === 'WRONG' ? ' active' : '');
+  wrongBtn.innerHTML = `📕 오답노트 ${wc > 0 ? `<span class="wrong-badge">${wc}</span>` : ''}`;
+  wrongBtn.onclick = () => loadWrongNote();
+  el.appendChild(wrongBtn);
+}
+
+function loadCategory(cat) {
+  currentCategory = cat;
+  buildTabs();
+  currentCards = cat === 'ALL' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function loadWrongNote() {
+  currentCategory = 'WRONG';
+  buildTabs();
+  const list = lsLoad();
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.remove('show');
+  const panel = document.getElementById('wrongNotePanel');
+  panel.style.display = 'block';
+  const count = list.length;
+  document.getElementById('wrongNoteCount').textContent = count > 0 ? `누적 오답 ${count}문제` : '오답이 없어요 🎉';
+  document.getElementById('btnStartWrongReview').style.display = count > 0 ? 'inline-block' : 'none';
+  document.getElementById('btnClearWrong').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function startWrongReview() {
+  const list = lsLoad();
+  if (!list.length) return;
+  currentCards = list.map(q => ALL_CARDS.find(c => c.q === q.q) || q).filter(Boolean);
+  resetState();
+  document.getElementById('wrongNotePanel').style.display = 'none';
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeFlash').classList.toggle('active', mode === 'flash');
+  document.getElementById('modeBlank').classList.toggle('active', mode === 'blank');
+  document.getElementById('flashMode').style.display = mode === 'flash' ? 'block' : 'none';
+  document.getElementById('blankMode').style.display = mode === 'blank' ? 'block' : 'none';
+  resetState(); renderCard();
+}
+
+function resetState() {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  answeredSet = new Set(); wrongSet = new Set();
+  updateScoreBadges();
+}
+
+function renderCard() {
+  if (!currentCards.length) return;
+  if (currentMode === 'flash') renderFlash();
+  else renderBlank();
+  updateProgress();
+}
+
+function renderFlash() {
+  const card = currentCards[currentIndex];
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('cardPart').textContent = card.part;
+  document.getElementById('cardPartBack').textContent = card.part;
+  document.getElementById('cardQuestion').textContent = card.q;
+  document.getElementById('cardAnswer').innerHTML = card.a.replace(/\n/g,'<br>');
+  document.getElementById('flashActionArea').style.display = 'flex';
+  document.getElementById('flashNextArea').style.display = 'none';
+}
+
+function markCard(isCorrect) {
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('flashActionArea').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'flex';
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (isCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+}
+
+function renderBlank() {
+  const card = currentCards[currentIndex];
+  if (card.pool) {
+    const poolShuffled = shuffle([...card.pool]);
+    const blanks = poolShuffled.slice(0, card.pickCount || 3);
+    const blanksSet = new Set(blanks);
+    blankKeywords = blanks;
+    currentAnswerText = card.pool.map(item => blanksSet.has(item) ? `{${item}}` : item).join(' / ');
+  } else {
+    blankKeywords = card.keywords.slice();
+    currentAnswerText = card.answerText;
+  }
+  blankFilled = new Array(blankKeywords.length).fill(false);
+  blankResults = new Array(blankKeywords.length).fill(null);
+  blankCurrentIdx = 0; blankCardCorrect = true;
+  document.getElementById('blankPart').textContent = card.part;
+  document.getElementById('blankQuestion').textContent = card.q;
+  document.getElementById('blankNextArea').style.display = 'none';
+  renderTokens(); renderChoices();
+}
+
+function renderTokens() {
+  const container = document.getElementById('answerTokens');
+  container.innerHTML = '';
+  const parts = currentAnswerText.split(/(\{[^}]+\})/);
+  let kwIdx = 0;
+  parts.forEach(part => {
+    if (part.startsWith('{') && part.endsWith('}')) {
+      const kw = part.slice(1,-1);
+      const idx = kwIdx++;
+      const span = document.createElement('span');
+      if (blankFilled[idx]) {
+        span.textContent = kw;
+        span.className = 'token ' + (blankResults[idx] === 'wrong' ? 'token-wrong' : 'token-correct');
+      } else if (idx === blankCurrentIdx) {
+        span.className = 'token token-blank active';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      } else {
+        span.className = 'token token-blank';
+        span.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+      }
+      container.appendChild(span);
+    } else if (part.trim()) {
+      part.split('\n').forEach((line, i) => {
+        if (i > 0) container.appendChild(document.createElement('br'));
+        if (line) {
+          const span = document.createElement('span');
+          span.className = 'token token-sep';
+          span.textContent = line;
+          container.appendChild(span);
+        }
+      });
+    }
+  });
+}
+
+function renderChoices() {
+  const card = currentCards[currentIndex];
+  const container = document.getElementById('choicesArea');
+  container.innerHTML = '';
+  if (blankCurrentIdx >= blankKeywords.length) return;
+  const correct = blankKeywords[blankCurrentIdx];
+  const seen = new Set([correct]);
+  const wrongs = [];
+  if (card.pool) {
+    const blanksSet = new Set(blankKeywords);
+    for (const k of shuffle(card.pool.filter(item => !blanksSet.has(item)))) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3 && card.wrongs && card.wrongs.length > 0) {
+    for (const k of shuffle([...card.wrongs])) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  if (wrongs.length < 3) {
+    const cardOthers = shuffle((card.keywords || []).filter(k => !seen.has(k)));
+    for (const k of cardOthers) {
+      if (!seen.has(k)) { seen.add(k); wrongs.push(k); }
+      if (wrongs.length === 3) break;
+    }
+  }
+  shuffle([correct, ...wrongs]).forEach(kw => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = kw;
+    btn.onclick = () => selectChoice(kw, correct, btn);
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(selected, correct, btnEl) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    btnEl.classList.add('flash-correct');
+    blankFilled[blankCurrentIdx] = true;
+    blankResults[blankCurrentIdx] = 'correct';
+    blankCurrentIdx++;
+    setTimeout(() => {
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 400);
+  } else {
+    blankCardCorrect = false;
+    btnEl.classList.add('flash-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      if (b.textContent === correct) b.classList.add('flash-correct');
+    });
+    setTimeout(() => {
+      blankFilled[blankCurrentIdx] = true;
+      blankResults[blankCurrentIdx] = 'wrong';
+      blankCurrentIdx++;
+      if (blankCurrentIdx >= blankKeywords.length) finishBlankCard();
+      else { renderTokens(); renderChoices(); }
+    }, 1000);
+  }
+}
+
+function finishBlankCard() {
+  if (!answeredSet.has(currentIndex)) {
+    answeredSet.add(currentIndex);
+    const card = currentCards[currentIndex];
+    if (blankCardCorrect) { correctCount++; lsRemoveWrong(card.q); }
+    else { wrongCount++; wrongSet.add(currentIndex); lsAddWrong(card); }
+    updateScoreBadges();
+  }
+  renderTokens();
+  document.getElementById('choicesArea').innerHTML = '';
+  document.getElementById('blankNextArea').style.display = 'flex';
+}
+
+function nextCard() {
+  if (currentIndex < currentCards.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    if (answeredSet.size >= currentCards.length) showComplete();
+    else { currentIndex = 0; renderCard(); }
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function shuffleCards() {
+  shuffle(currentCards);
+  resetState();
+  renderCard();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateProgress() {
+  const total = currentCards.length;
+  const pct = total ? ((currentIndex+1)/total*100).toFixed(0) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressCount').textContent = `${currentIndex+1} / ${total}`;
+  document.getElementById('progressLabel').textContent = currentCards[currentIndex]?.part || '';
+}
+
+function updateScoreBadges() {
+  document.getElementById('correctCount').textContent = correctCount;
+  document.getElementById('wrongCount').textContent = wrongCount;
+}
+
+function showComplete() {
+  document.getElementById('mainCardArea').style.display = 'none';
+  document.getElementById('completeScreen').classList.add('show');
+  document.getElementById('finalCorrect').textContent = correctCount;
+  document.getElementById('finalWrong').textContent = wrongCount;
+  const pct = Math.round(correctCount/currentCards.length*100);
+  document.getElementById('completeSub').textContent = `정답률 ${pct}% · 총 ${currentCards.length}문제`;
+  document.getElementById('btnWrongOnly').style.display = wrongSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function restartAll() { loadCategory(currentCategory); }
+
+function reviewWrong() {
+  if (!wrongSet.size) return;
+  currentCards = [...wrongSet].map(i => currentCards[i]);
+  resetState();
+  document.getElementById('completeScreen').classList.remove('show');
+  document.getElementById('mainCardArea').style.display = 'block';
+  renderCard();
+}
+
+init();
+</script>
+</body>
+</html>
